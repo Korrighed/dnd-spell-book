@@ -4,12 +4,12 @@ Grimoire de sorts Donjons & Dragons (5e) exploré en 3D. Le projet répond à la
 
 ## Concept
 
-Un grand grimoire 3D que l'on feuillette : chaque page présente un sort. Depuis ce grimoire principal, on peut aussi récupérer des grimoires plus petits, propres à chaque classe.
+Un grand grimoire 3D que l'on feuillette : chaque page présente un sort. Un seul grimoire — pas de livre séparé par classe, la classe n'est qu'un filtre parmi d'autres.
 
 - Navigation : on tourne les pages pour parcourir les sorts.
-- V1 : recherche/filtre par nom.
-- Ensuite : filtres par classe, niveau, école de magie.
-- Contenu des sorts affiché en français.
+- Filtres, dans l'ordre de développement (détail dans [docs/SPECS.md](docs/SPECS.md)) : recherche par nom → niveau de sort → classe.
+- Grimoire personnel : on sauvegarde ses sorts choisis dans un livre à soi, stocké localement dans le navigateur.
+- Contenu affichable en français, en anglais, ou les deux à la fois.
 
 ## Stack
 
@@ -27,4 +27,5 @@ npm run dev
 ## Documents du projet
 
 - [Consigne du projet](docs/CONSIGNE.md)
-- [Spécifications — source de données](docs/SPECS.md)
+- [Spécifications — grimoire, filtrage, source de données](docs/SPECS.md)
+- [Charte graphique — palette, typographie, logo](docs/DESIGN.md)
