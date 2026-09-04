@@ -27,7 +27,9 @@ export async function fetchSpellList(): Promise<SpellListItem[]> {
   ])
 
   if (!enRes.ok || !frRes.ok) {
-    throw new Error('Impossible de charger la liste des sorts depuis l\'API.')
+    throw new Error(
+      'Impossible de charger la liste des sorts depuis l\'API. (Unable to load the spell list from the API.)',
+    )
   }
 
   const [en, fr] = (await Promise.all([enRes.json(), frRes.json()])) as [

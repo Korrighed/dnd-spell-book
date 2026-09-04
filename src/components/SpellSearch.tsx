@@ -7,7 +7,7 @@ export function SpellSearch({ value, onChange }: SpellSearchProps) {
   return (
     <input
       type="search"
-      placeholder="Rechercher un sort (FR ou EN)..."
+      placeholder="Rechercher un sort... (Search a spell...)"
       value={value}
       onChange={(event) => onChange(event.target.value)}
     />

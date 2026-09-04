@@ -24,20 +24,20 @@ function App() {
 
   return (
     <main id="grimoire">
-      <h1>Grimoire des sorts</h1>
+      <h1>Grimoire des sorts (Spell book)</h1>
 
       <div className="filters">
         <SpellSearch value={search} onChange={setSearch} />
         <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
       </div>
 
-      {loading && <p>Chargement des sorts...</p>}
+      {loading && <p>Chargement des sorts... (Loading spells...)</p>}
       {error && <p role="alert">{error}</p>}
 
       {!loading && !error && (
         <>
           <p>
-            {filteredSpells.length} / {spells.length} sorts
+            {filteredSpells.length} / {spells.length} sorts (spells)
           </p>
           <SpellList spells={filteredSpells} />
         </>
