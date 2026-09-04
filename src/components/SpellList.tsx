@@ -12,7 +12,7 @@ export function SpellList({ spells }: SpellListProps) {
         <li key={spell.index}>
           <span className="level">Niv. {spell.level}</span>
           <span className="name-fr">{spell.nameFr}</span>
-          <span className="name-en">({spell.name})</span>
+          <span className="name-en">{spell.name}</span>
         </li>
       ))}
     </ul>
