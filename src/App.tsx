@@ -1,121 +1,115 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useMemo, useState } from 'react'
+import { useSpellList } from './hooks/useSpellList'
+import { useClassList } from './hooks/useClassList'
+import { useClassSpellIndices } from './hooks/useClassSpellIndices'
+import { useSchoolList } from './hooks/useSchoolList'
+import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
+import { useSpellDetail } from './hooks/useSpellDetail'
+import { SpellSearch } from './components/SpellSearch'
+import { SpellLevelFilter } from './components/SpellLevelFilter'
+import { SpellClassFilter } from './components/SpellClassFilter'
+import { SpellSchoolFilter } from './components/SpellSchoolFilter'
+import { SpellList } from './components/SpellList'
+import { SpellDetail } from './components/SpellDetail'
+import { normalizeForSearch } from './utils/text'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { spells, loading, error } = useSpellList()
+  const { classes, error: classListError } = useClassList()
+  const { schools, error: schoolListError } = useSchoolList()
+  const [search, setSearch] = useState('')
+  const [levelFilter, setLevelFilter] = useState<number | null>(null)
+  const [classFilter, setClassFilter] = useState<string | null>(null)
+  const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
+  const {
+    detail: selectedSpell,
+    loading: detailLoading,
+    error: detailError,
+  } = useSpellDetail(selectedIndex)
+  const {
+    indices: classSpellIndices,
+    loading: classSpellsLoading,
+    error: classSpellsError,
+  } = useClassSpellIndices(classFilter)
+  const {
+    indices: schoolSpellIndices,
+    loading: schoolSpellsLoading,
+    error: schoolSpellsError,
+  } = useSchoolSpellIndices(schoolFilter)
+
+  const filteredSpells = useMemo(() => {
+    const query = normalizeForSearch(search.trim())
+    return spells.filter((spell) => {
+      const matchesQuery =
+        !query ||
+        normalizeForSearch(spell.name).includes(query) ||
+        normalizeForSearch(spell.nameFr).includes(query)
+      const matchesLevel = levelFilter === null || spell.level === levelFilter
+      const matchesClass = classFilter === null || (classSpellIndices?.has(spell.index) ?? false)
+      const matchesSchool =
+        schoolFilter === null || (schoolSpellIndices?.has(spell.index) ?? false)
+      return matchesQuery && matchesLevel && matchesClass && matchesSchool
+    })
+  }, [
+    spells,
+    search,
+    levelFilter,
+    classFilter,
+    classSpellIndices,
+    schoolFilter,
+    schoolSpellIndices,
+  ])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
+    <main id="grimoire">
+      <h1>
+        Grimoire des sorts <em>Spell book</em>
+      </h1>
+
+      <div className="filters">
+        <SpellSearch value={search} onChange={setSearch} />
+        <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
+        <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
+        <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
+      </div>
+
+      {classListError && <p role="alert">{classListError}</p>}
+      {schoolListError && <p role="alert">{schoolListError}</p>}
+      {classSpellsLoading && (
+        <p>
+          Chargement des sorts de la classe... <em>Loading class spells...</em>
+        </p>
+      )}
+      {classSpellsError && <p role="alert">{classSpellsError}</p>}
+      {schoolSpellsLoading && (
+        <p>
+          Chargement des sorts de l'ecole... <em>Loading school spells...</em>
+        </p>
+      )}
+      {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
+
+      {loading && (
+        <p>
+          Chargement des sorts... <em>Loading spells...</em>
+        </p>
+      )}
+      {error && <p role="alert">{error}</p>}
+
+      {!loading && !error && (
+        <>
           <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+            {filteredSpells.length} / {spells.length} sorts <em>spells</em>
           </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+          <SpellList spells={filteredSpells} onSelect={setSelectedIndex} />
+        </>
+      )}
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
+      {detailError && <p role="alert">{detailError}</p>}
+      {selectedSpell && <SpellDetail detail={selectedSpell} />}
+    </main>
   )
 }
 
