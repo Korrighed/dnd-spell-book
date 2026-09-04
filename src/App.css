@@ -3,11 +3,20 @@
   text-align: left;
 }
 
-#grimoire input[type='search'] {
-  display: block;
-  width: 100%;
-  max-width: 400px;
+#grimoire .filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin: 16px 0;
+}
+
+#grimoire input[type='search'],
+#grimoire select {
   padding: 8px 12px;
   font-size: 16px;
+}
+
+#grimoire input[type='search'] {
+  flex: 1 1 300px;
+  max-width: 400px;
 }
