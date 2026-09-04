@@ -59,6 +59,11 @@ L'[API 5e-bits](https://www.dnd5eapi.co/) ([documentation](https://5e-bits.githu
 
 Conséquence : certains sorts peuvent être en retard sur les errata officiels ou contenir des approximations de traduction (`fr-FR`). Chaque sort renvoyé par l'API inclut un champ `updated_at` (date de dernière modification de l'entrée côté API) — à afficher sur la fiche de chaque sort dans l'UI comme date de rédaction/mise à jour, pour que l'utilisateur sache à quand remonte la donnée.
 
+### Édition et périmètre
+
+- Édition couverte : **2014** uniquement. `GET /api` redirige vers `/api/2014/` ; `/api/2024/` renvoie 404 (vérifié le 2026-09-04) — pas de support de la révision 2024 des règles sur cette API.
+- 319 sorts au total, ce qui correspond au nombre connu de sorts du SRD 2014 — **pas un défaut de l'API**. Le SRD ne contient que le contenu D&D publié sous licence ouverte : les sorts parus uniquement dans des suppléments propriétaires (Xanathar's Guide to Everything, Tasha's Cauldron of Everything, Sword Coast Adventurer's Guide, etc.) sont absents, quelle que soit l'édition visée.
+
 ## API
 
 REST + GraphQL, gratuite, sans authentification ni rate limiting connu.
@@ -96,5 +101,5 @@ Vérifié sur `acid-arrow` et `fireball` en `fr-FR` :
 | `updated_at` | Date de dernière modification de l'entrée côté API — à afficher comme date de rédaction du sort |
 
 ---
-Dernière vérification de ces specs contre l'API : 2026-08-25.
+Dernière vérification de ces specs contre l'API : 2026-09-04.
 Dernière mise à jour des décisions produit (grimoire/filtrage/roadmap) : 2026-08-28.
