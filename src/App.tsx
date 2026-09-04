@@ -4,11 +4,13 @@ import { useClassList } from './hooks/useClassList'
 import { useClassSpellIndices } from './hooks/useClassSpellIndices'
 import { useSchoolList } from './hooks/useSchoolList'
 import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
+import { useSpellDetail } from './hooks/useSpellDetail'
 import { SpellSearch } from './components/SpellSearch'
 import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
 import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
+import { SpellDetail } from './components/SpellDetail'
 import { normalizeForSearch } from './utils/text'
 import './App.css'
 
@@ -20,6 +22,12 @@ function App() {
   const [levelFilter, setLevelFilter] = useState<number | null>(null)
   const [classFilter, setClassFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
+  const {
+    detail: selectedSpell,
+    loading: detailLoading,
+    error: detailError,
+  } = useSpellDetail(selectedIndex)
   const {
     indices: classSpellIndices,
     loading: classSpellsLoading,
@@ -94,9 +102,13 @@ function App() {
           <p>
             {filteredSpells.length} / {spells.length} sorts <em>spells</em>
           </p>
-          <SpellList spells={filteredSpells} />
+          <SpellList spells={filteredSpells} onSelect={setSelectedIndex} />
         </>
       )}
+
+      {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
+      {detailError && <p role="alert">{detailError}</p>}
+      {selectedSpell && <SpellDetail detail={selectedSpell} />}
     </main>
   )
 }

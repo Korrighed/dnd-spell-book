@@ -5,10 +5,20 @@
 }
 
 .spell-list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.spell-list li button {
   display: flex;
+  width: 100%;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .spell-list .level {
