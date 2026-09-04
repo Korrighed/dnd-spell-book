@@ -1,6 +1,7 @@
 import { fetchClassSpellIndices } from '../api/classes'
-import { useIndexedSpellSet } from './useIndexedSpellSet'
+import { useKeyedFetch } from './useKeyedFetch'
 
 export function useClassSpellIndices(classIndex: string | null) {
-  return useIndexedSpellSet(classIndex, fetchClassSpellIndices)
+  const { data, loading, error } = useKeyedFetch(classIndex, fetchClassSpellIndices)
+  return { indices: data, loading, error }
 }

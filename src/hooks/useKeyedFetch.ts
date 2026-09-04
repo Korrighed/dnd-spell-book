@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 
-interface UseIndexedSpellSetResult {
-  indices: Set<string> | null
+interface UseKeyedFetchResult<T> {
+  data: T | null
   loading: boolean
   error: string | null
 }
 
-export function useIndexedSpellSet(
+export function useKeyedFetch<T>(
   key: string | null,
-  fetcher: (key: string) => Promise<Set<string>>,
-): UseIndexedSpellSetResult {
-  const [cache, setCache] = useState<Record<string, Set<string>>>({})
+  fetcher: (key: string) => Promise<T>,
+): UseKeyedFetchResult<T> {
+  const [cache, setCache] = useState<Record<string, T>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -31,9 +31,9 @@ export function useIndexedSpellSet(
     }
   }, [key, cache, errors, fetcher])
 
-  const indices = key === null ? null : (cache[key] ?? null)
+  const data = key === null ? null : (cache[key] ?? null)
   const error = key === null ? null : (errors[key] ?? null)
-  const loading = key !== null && indices === null && error === null
+  const loading = key !== null && data === null && error === null
 
-  return { indices, loading, error }
+  return { data, loading, error }
 }

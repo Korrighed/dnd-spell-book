@@ -1,6 +1,7 @@
 import { fetchSchoolSpellIndices } from '../api/schools'
-import { useIndexedSpellSet } from './useIndexedSpellSet'
+import { useKeyedFetch } from './useKeyedFetch'
 
 export function useSchoolSpellIndices(schoolIndex: string | null) {
-  return useIndexedSpellSet(schoolIndex, fetchSchoolSpellIndices)
+  const { data, loading, error } = useKeyedFetch(schoolIndex, fetchSchoolSpellIndices)
+  return { indices: data, loading, error }
 }
