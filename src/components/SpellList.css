@@ -1,0 +1,22 @@
+.spell-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.spell-list li {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.spell-list .level {
+  color: var(--text);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.spell-list .name-en {
+  color: var(--text);
+}
