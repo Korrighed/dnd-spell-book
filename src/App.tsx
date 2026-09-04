@@ -9,6 +9,7 @@ import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
 import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
+import { normalizeForSearch } from './utils/text'
 import './App.css'
 
 function App() {
@@ -31,12 +32,12 @@ function App() {
   } = useSchoolSpellIndices(schoolFilter)
 
   const filteredSpells = useMemo(() => {
-    const query = search.trim().toLowerCase()
+    const query = normalizeForSearch(search.trim())
     return spells.filter((spell) => {
       const matchesQuery =
         !query ||
-        spell.name.toLowerCase().includes(query) ||
-        spell.nameFr.toLowerCase().includes(query)
+        normalizeForSearch(spell.name).includes(query) ||
+        normalizeForSearch(spell.nameFr).includes(query)
       const matchesLevel = levelFilter === null || spell.level === levelFilter
       const matchesClass = classFilter === null || (classSpellIndices?.has(spell.index) ?? false)
       const matchesSchool =
