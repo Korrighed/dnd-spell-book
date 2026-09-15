@@ -64,6 +64,18 @@ export function usePersonalSpellbook() {
     writeSpellbook(spells)
   }, [spells])
 
+  useEffect(() => {
+    // L'evenement `storage` n'est emis que dans les AUTRES onglets, jamais dans celui
+    // qui ecrit. Relire le stockage ici ne peut donc pas boucler avec l'effet d'ecriture.
+    function handleStorage(event: StorageEvent) {
+      if (event.key !== null && event.key !== STORAGE_KEY) return
+      setSpells(readSpellbook())
+    }
+
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
+
   const add = useCallback((index: string) => {
     setSpells((prev) => {
       if (prev.some((spell) => spell.index === index)) return prev
