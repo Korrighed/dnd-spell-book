@@ -7,6 +7,8 @@ interface SpellDetailProps {
   detail: SpellDetailData
   language: LanguageMode
   onLanguageChange: (mode: LanguageMode) => void
+  inSpellbook: boolean
+  onToggleSpellbook: (index: string) => void
 }
 
 function firstDamageValue(atSlotLevel: Record<string, string> | null): string | null {
@@ -23,13 +25,28 @@ function damageTypeLabel(texts: SpellTexts, typeIndex: string): string {
   return typeIndex.charAt(0).toUpperCase() + typeIndex.slice(1)
 }
 
-export function SpellDetail({ detail, language, onLanguageChange }: SpellDetailProps) {
+export function SpellDetail({
+  detail,
+  language,
+  onLanguageChange,
+  inSpellbook,
+  onToggleSpellbook,
+}: SpellDetailProps) {
   const { mechanics, en, fr } = detail
   const damageValue = mechanics.damage ? firstDamageValue(mechanics.damage.atSlotLevel) : null
 
   return (
     <section className="spell-detail">
       <LanguageToggle value={language} onChange={onLanguageChange} />
+
+      <button
+        type="button"
+        className="spellbook-toggle"
+        aria-pressed={inSpellbook}
+        onClick={() => onToggleSpellbook(mechanics.index)}
+      >
+        {inSpellbook ? 'Retirer du grimoire personnel' : 'Ajouter au grimoire personnel'}
+      </button>
 
       <h2>
         <Bilingual mode={language} fr={fr.name} en={en.name} />

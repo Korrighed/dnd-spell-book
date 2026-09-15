@@ -5,12 +5,14 @@ import { useClassSpellIndices } from './hooks/useClassSpellIndices'
 import { useSchoolList } from './hooks/useSchoolList'
 import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
 import { useSpellDetail } from './hooks/useSpellDetail'
+import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
 import { SpellSearch } from './components/SpellSearch'
 import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
 import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
+import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
 import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
 import './App.css'
@@ -25,6 +27,12 @@ function App() {
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
   const [language, setLanguage] = useState<LanguageMode>('fr')
+  const {
+    spells: personalSpells,
+    indices: personalIndices,
+    remove: removeFromSpellbook,
+    toggle: toggleSpellbook,
+  } = usePersonalSpellbook()
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -97,6 +105,14 @@ function App() {
       )}
       {error && <p role="alert">{error}</p>}
 
+      <PersonalSpellbookPanel
+        spells={personalSpells}
+        allSpells={spells}
+        selectedIndex={selectedIndex}
+        onSelectSpell={setSelectedIndex}
+        onRemoveSpell={removeFromSpellbook}
+      />
+
       {!loading && !error && (
         <>
           <p>
@@ -109,7 +125,13 @@ function App() {
       {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
       {detailError && <p role="alert">{detailError}</p>}
       {selectedSpell && (
-        <SpellDetail detail={selectedSpell} language={language} onLanguageChange={setLanguage} />
+        <SpellDetail
+          detail={selectedSpell}
+          language={language}
+          onLanguageChange={setLanguage}
+          inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
+          onToggleSpellbook={toggleSpellbook}
+        />
       )}
     </main>
   )
