@@ -1,37 +1,53 @@
 import type { SpellDetail as SpellDetailData } from '../api/spellDetail'
+import type { LanguageMode } from '../types/language'
+import { Bilingual, BilingualParagraphs } from './Bilingual'
+import { LanguageToggle } from './LanguageToggle'
 
 interface SpellDetailProps {
   detail: SpellDetailData
+  language: LanguageMode
+  onLanguageChange: (mode: LanguageMode) => void
 }
 
-export function SpellDetail({ detail }: SpellDetailProps) {
+function baseDamageValue(atSlotLevel: Record<string, string> | null): string | null {
+  if (!atSlotLevel) return null
+  return Object.values(atSlotLevel)[0] ?? null
+}
+
+export function SpellDetail({ detail, language, onLanguageChange }: SpellDetailProps) {
+  const damageValue = detail.damage ? baseDamageValue(detail.damage.atSlotLevel) : null
+
   return (
     <section className="spell-detail">
+      <LanguageToggle value={language} onChange={onLanguageChange} />
+
       <h2>
-        {detail.nameFr} <em>{detail.name}</em>
+        <Bilingual mode={language} fr={detail.nameFr} en={detail.name} />
       </h2>
 
       <p>
-        Niveau {detail.level} — {detail.schoolFr} <em>{detail.school}</em>
+        Niveau {detail.level} — <Bilingual mode={language} fr={detail.schoolFr} en={detail.school} />
       </p>
       <p>
-        Classes : {detail.classesFr.join(', ')} <em>({detail.classes.join(', ')})</em>
+        Classes :{' '}
+        <Bilingual mode={language} fr={detail.classesFr.join(', ')} en={detail.classes.join(', ')} />
       </p>
       <p>
-        Temps d'incantation : {detail.castingTimeFr} <em>{detail.castingTime}</em>
+        Temps d'incantation :{' '}
+        <Bilingual mode={language} fr={detail.castingTimeFr} en={detail.castingTime} />
       </p>
       <p>
-        Portee : {detail.rangeFr} <em>{detail.range}</em>
+        Portee : <Bilingual mode={language} fr={detail.rangeFr} en={detail.range} />
       </p>
       <p>
-        Duree : {detail.durationFr} <em>{detail.duration}</em>
+        Duree : <Bilingual mode={language} fr={detail.durationFr} en={detail.duration} />
       </p>
       <p>
         Composants : {detail.components.join(', ')}
         {detail.material && (
           <>
             {' '}
-            — {detail.materialFr} <em>{detail.material}</em>
+            — <Bilingual mode={language} fr={detail.materialFr ?? ''} en={detail.material} />
           </>
         )}
       </p>
@@ -42,49 +58,35 @@ export function SpellDetail({ detail }: SpellDetailProps) {
 
       {detail.damage && (
         <p>
-          Degats : {detail.damage.typeNameFr} <em>{detail.damage.typeName}</em>
-          {detail.damage.atSlotLevel && (
-            <> — {Object.entries(detail.damage.atSlotLevel).map(([lvl, dice]) => `niv.${lvl}: ${dice}`).join(', ')}</>
-          )}
+          Degats : {damageValue}{' '}
+          <Bilingual mode={language} fr={detail.damage.typeNameFr} en={detail.damage.typeName} />
         </p>
       )}
 
       {detail.dc && (
         <p>
-          Jet de sauvegarde : {detail.dc.typeNameFr} <em>{detail.dc.typeName}</em> ({detail.dc.success})
+          Jet de sauvegarde :{' '}
+          <Bilingual mode={language} fr={detail.dc.typeNameFr} en={detail.dc.typeName} /> (
+          {detail.dc.success})
         </p>
       )}
 
       {detail.areaOfEffect && (
         <p>
-          Zone d'effet : {detail.areaOfEffect.type}, {detail.areaOfEffect.sizeMeters} m{' '}
-          <em>({detail.areaOfEffect.sizeFeet} ft)</em>
+          Zone d'effet : {detail.areaOfEffect.type}, {detail.areaOfEffect.sizeMeters} m (
+          {detail.areaOfEffect.sizeFeet} ft)
         </p>
       )}
 
       <div>
         <h3>Description</h3>
-        {detail.descFr.map((paragraph, i) => (
-          <p key={i}>{paragraph}</p>
-        ))}
-        {detail.desc.map((paragraph, i) => (
-          <p key={i}>
-            <em>{paragraph}</em>
-          </p>
-        ))}
+        <BilingualParagraphs mode={language} fr={detail.descFr} en={detail.desc} />
       </div>
 
       {detail.higherLevelFr.length > 0 && (
         <div>
           <h3>Aux niveaux superieurs</h3>
-          {detail.higherLevelFr.map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
-          {detail.higherLevel.map((paragraph, i) => (
-            <p key={i}>
-              <em>{paragraph}</em>
-            </p>
-          ))}
+          <BilingualParagraphs mode={language} fr={detail.higherLevelFr} en={detail.higherLevel} />
         </div>
       )}
 

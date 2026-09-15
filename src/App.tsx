@@ -12,6 +12,7 @@ import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
 import { normalizeForSearch } from './utils/text'
+import type { LanguageMode } from './types/language'
 import './App.css'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
   const [classFilter, setClassFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
+  const [language, setLanguage] = useState<LanguageMode>('fr')
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -108,7 +110,9 @@ function App() {
 
       {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
       {detailError && <p role="alert">{detailError}</p>}
-      {selectedSpell && <SpellDetail detail={selectedSpell} />}
+      {selectedSpell && (
+        <SpellDetail detail={selectedSpell} language={language} onLanguageChange={setLanguage} />
+      )}
     </main>
   )
 }
