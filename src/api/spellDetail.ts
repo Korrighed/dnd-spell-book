@@ -145,9 +145,14 @@ function parseDamage(raw: RawSpell): SpellMechanics['damage'] {
   }
 }
 
-async function fetchRaw(index: string, lang?: string): Promise<RawSpell> {
-  const query = lang ? `?lang=${lang}` : ''
-  const res = await fetch(`${BASE_URL}/spells/${index}${query}`)
+/**
+ * La langue est toujours explicite, anglais compris : sans parametre `lang`, l'API
+ * repond selon l'en-tete `Accept-Language`. Depuis un navigateur configure en francais,
+ * l'endpoint nu renvoyait donc du francais des deux cotes, et le basculement FR/EN
+ * affichait deux fois le meme texte.
+ */
+async function fetchRaw(index: string, lang: 'en' | 'fr-FR'): Promise<RawSpell> {
+  const res = await fetch(`${BASE_URL}/spells/${index}?lang=${lang}`)
 
   if (!res.ok) {
     throw new Error('Impossible de charger le detail du sort. (Unable to load the spell detail.)')
@@ -157,7 +162,7 @@ async function fetchRaw(index: string, lang?: string): Promise<RawSpell> {
 }
 
 export async function fetchSpellDetail(index: string): Promise<SpellDetail> {
-  const [en, fr] = await Promise.all([fetchRaw(index), fetchRaw(index, 'fr-FR')])
+  const [en, fr] = await Promise.all([fetchRaw(index, 'en'), fetchRaw(index, 'fr-FR')])
 
   return {
     // Les degats ne sont exposes que par le payload fr-FR, d'ou cette seule lecture croisee.

@@ -1,5 +1,14 @@
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
+/**
+ * L'API repond dans la langue de l'en-tete `Accept-Language` quand aucun `lang`
+ * n'est passe. Depuis un navigateur configure en francais, l'endpoint nu renvoie
+ * donc du francais et la colonne anglaise se retrouve dupliquee. La langue doit
+ * toujours etre explicite, anglais compris.
+ */
+const EN = '?lang=en'
+const FR = '?lang=fr-FR'
+
 export interface SpellListItem {
   index: string
   name: string
@@ -22,8 +31,8 @@ interface RawSpellListResponse {
 
 export async function fetchSpellList(): Promise<SpellListItem[]> {
   const [enRes, frRes] = await Promise.all([
-    fetch(`${BASE_URL}/spells`),
-    fetch(`${BASE_URL}/spells?lang=fr-FR`),
+    fetch(`${BASE_URL}/spells${EN}`),
+    fetch(`${BASE_URL}/spells${FR}`),
   ])
 
   if (!enRes.ok || !frRes.ok) {

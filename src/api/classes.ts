@@ -1,5 +1,9 @@
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
+/** Langue explicite obligatoire : sans `lang`, l'API suit l'en-tete `Accept-Language`. */
+const EN = '?lang=en'
+const FR = '?lang=fr-FR'
+
 export interface ClassListItem {
   index: string
   name: string
@@ -20,8 +24,8 @@ interface RawClassListResponse {
 
 export async function fetchClassList(): Promise<ClassListItem[]> {
   const [enRes, frRes] = await Promise.all([
-    fetch(`${BASE_URL}/classes`),
-    fetch(`${BASE_URL}/classes?lang=fr-FR`),
+    fetch(`${BASE_URL}/classes${EN}`),
+    fetch(`${BASE_URL}/classes${FR}`),
   ])
 
   if (!enRes.ok || !frRes.ok) {
