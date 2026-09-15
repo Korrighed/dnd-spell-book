@@ -11,7 +11,7 @@ import { SpellClassFilter } from './components/SpellClassFilter'
 import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
-import { normalizeForSearch } from './utils/text'
+import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
 import './App.css'
 
@@ -42,12 +42,10 @@ function App() {
   } = useSchoolSpellIndices(schoolFilter)
 
   const filteredSpells = useMemo(() => {
-    const query = normalizeForSearch(search.trim())
+    const query = search.trim()
     return spells.filter((spell) => {
       const matchesQuery =
-        !query ||
-        normalizeForSearch(spell.name).includes(query) ||
-        normalizeForSearch(spell.nameFr).includes(query)
+        !query || matchesSearch(spell.name, query) || matchesSearch(spell.nameFr, query)
       const matchesLevel = levelFilter === null || spell.level === levelFilter
       const matchesClass = classFilter === null || (classSpellIndices?.has(spell.index) ?? false)
       const matchesSchool =
