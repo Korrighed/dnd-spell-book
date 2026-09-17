@@ -28,6 +28,7 @@ function App() {
   const [levelFilter, setLevelFilter] = useState<number | null>(null)
   const [classFilter, setClassFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
+  const [hideOutOfProfile, setHideOutOfProfile] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
   const [language, setLanguage] = useState<LanguageMode>('fr')
   const {
@@ -70,7 +71,10 @@ function App() {
       const matchesClass = classFilter === null || (classSpellIndices?.has(spell.index) ?? false)
       const matchesSchool =
         schoolFilter === null || (schoolSpellIndices?.has(spell.index) ?? false)
-      return matchesQuery && matchesLevel && matchesClass && matchesSchool
+      // Masquage optionnel, limite a la liste complete : le grimoire personnel grise seulement.
+      const matchesProfile =
+        !hideOutOfProfile || isAccessible === null || isAccessible(spell.index, spell.level)
+      return matchesQuery && matchesLevel && matchesClass && matchesSchool && matchesProfile
     })
   }, [
     spells,
@@ -80,6 +84,8 @@ function App() {
     classSpellIndices,
     schoolFilter,
     schoolSpellIndices,
+    hideOutOfProfile,
+    isAccessible,
   ])
 
   return (
@@ -93,6 +99,16 @@ function App() {
         <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
         <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
         <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
+        {profile && (
+          <label>
+            <input
+              type="checkbox"
+              checked={hideOutOfProfile}
+              onChange={(event) => setHideOutOfProfile(event.target.checked)}
+            />{' '}
+            Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
+          </label>
+        )}
       </div>
 
       {classListError && <p role="alert">{classListError}</p>}
