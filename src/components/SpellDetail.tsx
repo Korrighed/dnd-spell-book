@@ -9,6 +9,8 @@ interface SpellDetailProps {
   onLanguageChange: (mode: LanguageMode) => void
   inSpellbook: boolean
   onToggleSpellbook: (index: string) => void
+  /** Sort hors du profil du lanceur : fiche lisible, signalee et grisee. */
+  outOfProfile: boolean
 }
 
 function firstDamageValue(atSlotLevel: Record<string, string> | null): string | null {
@@ -31,12 +33,20 @@ export function SpellDetail({
   onLanguageChange,
   inSpellbook,
   onToggleSpellbook,
+  outOfProfile,
 }: SpellDetailProps) {
   const { mechanics, en, fr } = detail
   const damageValue = mechanics.damage ? firstDamageValue(mechanics.damage.atSlotLevel) : null
 
   return (
-    <section className="spell-detail">
+    <section className={outOfProfile ? 'spell-detail out-of-profile' : 'spell-detail'}>
+      {outOfProfile && (
+        <p role="note">
+          Ce sort ne correspond pas a votre profil de lanceur.{' '}
+          <em>This spell is outside your spellcaster profile.</em>
+        </p>
+      )}
+
       <LanguageToggle value={language} onChange={onLanguageChange} />
 
       <button

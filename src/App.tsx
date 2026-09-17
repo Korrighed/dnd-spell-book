@@ -40,6 +40,7 @@ function App() {
   } = usePersonalSpellbook()
   const { spellcastingClasses, error: spellcastingClassesError } = useSpellcastingClasses(classes)
   const {
+    isAccessible,
     maxSpellLevel,
     loading: accessLoading,
     error: accessError,
@@ -132,6 +133,7 @@ function App() {
             onChange={setProfile}
           />
         }
+        isAccessible={isAccessible}
       />
 
       {!loading && !error && (
@@ -139,7 +141,11 @@ function App() {
           <p>
             {filteredSpells.length} / {spells.length} sorts <em>spells</em>
           </p>
-          <SpellList spells={filteredSpells} onSelect={setSelectedIndex} />
+          <SpellList
+            spells={filteredSpells}
+            onSelect={setSelectedIndex}
+            isAccessible={isAccessible}
+          />
         </>
       )}
 
@@ -152,6 +158,10 @@ function App() {
           onLanguageChange={setLanguage}
           inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
           onToggleSpellbook={toggleSpellbook}
+          outOfProfile={
+            isAccessible !== null &&
+            !isAccessible(selectedSpell.mechanics.index, selectedSpell.mechanics.level)
+          }
         />
       )}
     </main>

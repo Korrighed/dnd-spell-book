@@ -109,3 +109,15 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Sorts hors du profil du lanceur : Slate Gray reserve par la charte. */
+/* li. et section. passent devant .spell-list .level, charge apres ce fichier. */
+li.out-of-profile,
+li.out-of-profile *,
+section.out-of-profile {
+  color: #617891;
+}
+
+.out-of-profile-label {
+  font-size: 0.85em;
+}
