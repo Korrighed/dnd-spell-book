@@ -6,6 +6,8 @@ import { useSchoolList } from './hooks/useSchoolList'
 import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
 import { useSpellDetail } from './hooks/useSpellDetail'
 import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
+import { useSpellAccess } from './hooks/useSpellAccess'
+import { useSpellcastingClasses } from './hooks/useSpellcastingClasses'
 import { SpellSearch } from './components/SpellSearch'
 import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
@@ -13,6 +15,7 @@ import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
 import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
+import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
 import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
 import './App.css'
@@ -32,7 +35,15 @@ function App() {
     indices: personalIndices,
     remove: removeFromSpellbook,
     toggle: toggleSpellbook,
+    profile,
+    setProfile,
   } = usePersonalSpellbook()
+  const { spellcastingClasses, error: spellcastingClassesError } = useSpellcastingClasses(classes)
+  const {
+    maxSpellLevel,
+    loading: accessLoading,
+    error: accessError,
+  } = useSpellAccess(profile)
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -111,6 +122,16 @@ function App() {
         selectedIndex={selectedIndex}
         onSelectSpell={setSelectedIndex}
         onRemoveSpell={removeFromSpellbook}
+        profileForm={
+          <SpellcasterProfileForm
+            classes={spellcastingClasses}
+            profile={profile}
+            maxSpellLevel={maxSpellLevel}
+            loading={accessLoading}
+            error={accessError ?? spellcastingClassesError}
+            onChange={setProfile}
+          />
+        }
       />
 
       {!loading && !error && (
