@@ -73,3 +73,76 @@ export async function fetchClassSpellIndices(classIndex: string): Promise<Set<st
   const data = (await res.json()) as RawClassSpellsResponse
   return new Set(data.results.map((spell) => spell.index))
 }
+
+interface RawClassDetail {
+  index: string
+  spellcasting?: unknown
+}
+
+/**
+ * Garde les classes qui lancent des sorts. L'API n'expose le bloc `spellcasting`
+ * que sur ces classes : barbare, guerrier, moine et roublard en sont depourvus.
+ */
+export async function fetchSpellcastingClassIndices(
+  classIndices: string[],
+): Promise<Set<string>> {
+  const details = await Promise.all(
+    classIndices.map(async (classIndex) => {
+      const res = await fetch(`${BASE_URL}/classes/${classIndex}${EN}`)
+      if (!res.ok) {
+        throw new Error(
+          'Impossible de determiner les classes de lanceurs de sorts. (Unable to load spellcasting classes.)',
+        )
+      }
+      return (await res.json()) as RawClassDetail
+    }),
+  )
+
+  return new Set(details.filter((cls) => cls.spellcasting).map((cls) => cls.index))
+}
+
+export interface ClassLevelSpellcasting {
+  cantripsKnown: number
+  /** Plus haut niveau de sort accessible, 0 si aucun emplacement. */
+  maxSpellLevel: number
+}
+
+interface RawClassLevel {
+  spellcasting?: Record<string, number>
+  class_specific?: Record<string, number>
+}
+
+/** Plus haut N tel que `${prefix}N` est non nul. */
+function highestNonZeroLevel(fields: Record<string, number> | undefined, prefix: string): number {
+  if (!fields) return 0
+  let highest = 0
+  for (const [key, value] of Object.entries(fields)) {
+    if (!key.startsWith(prefix) || !value) continue
+    const level = Number(key.slice(prefix.length))
+    if (level > highest) highest = level
+  }
+  return highest
+}
+
+/** Cle `classIndex/niveau`, pour passer par `useKeyedFetch`. */
+export async function fetchClassLevelSpellcasting(key: string): Promise<ClassLevelSpellcasting> {
+  const [classIndex, characterLevel] = key.split('/')
+  const res = await fetch(`${BASE_URL}/classes/${classIndex}/levels/${characterLevel}${EN}`)
+
+  if (!res.ok) {
+    throw new Error(
+      'Impossible de charger les emplacements de sorts de ce niveau. (Unable to load spell slots for this level.)',
+    )
+  }
+
+  const data = (await res.json()) as RawClassLevel
+
+  // L'occultiste accede aux sorts de niveau 6 a 9 par l'arcane mystique,
+  // expose hors du bloc `spellcasting`.
+  const maxSpellLevel = Math.max(
+    highestNonZeroLevel(data.spellcasting, 'spell_slots_level_'),
+    highestNonZeroLevel(data.class_specific, 'mystic_arcanum_level_'),
+  )
+
+  return { cantripsKnown: data.spellcasting?.cantrips_known ?? 0, maxSpellLevel }
+}
