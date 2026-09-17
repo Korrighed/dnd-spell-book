@@ -6,6 +6,7 @@
 
 .spell-list li {
   border-bottom: 1px solid var(--border);
+  color: var(--text-h);
 }
 
 .spell-list li button {
@@ -22,12 +23,10 @@
 }
 
 .spell-list .level {
-  color: var(--text);
   width: 60px;
   flex-shrink: 0;
 }
 
 .spell-list .name-en {
-  color: var(--text);
   font-style: italic;
 }

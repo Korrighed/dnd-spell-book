@@ -23,6 +23,7 @@
 }
 
 .personal-spellbook li {
+  color: var(--text-h);
   display: flex;
   align-items: center;
   gap: 8px;
