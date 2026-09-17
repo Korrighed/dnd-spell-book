@@ -9,6 +9,7 @@ export type SpellAccessCheck = (index: string, level: number) => boolean
 interface UseSpellAccessResult {
   /** `null` sans profil ou tant que les donnees manquent : rien n'est grise. */
   isAccessible: SpellAccessCheck | null
+  /** `null` sans niveau precise ou pendant le chargement. */
   maxSpellLevel: number | null
   loading: boolean
   error: string | null
@@ -25,16 +26,21 @@ export function useSpellAccess(profile: SpellcasterProfile | null): UseSpellAcce
     loading: slotsLoading,
     error: slotsError,
   } = useKeyedFetch(
-    profile ? `${profile.classIndex}/${profile.characterLevel}` : null,
+    // Sans niveau precise, pas d'appel : toute la liste de la classe est accessible.
+    profile && profile.characterLevel !== null
+      ? `${profile.classIndex}/${profile.characterLevel}`
+      : null,
     fetchClassLevelSpellcasting,
   )
 
-  const ready = classSpellIndices !== null && slots !== null
+  const levelKnown = profile?.characterLevel == null || slots !== null
+  const ready = classSpellIndices !== null && levelKnown
 
   const check = useCallback<SpellAccessCheck>(
     (index, level) => {
-      if (!classSpellIndices || !slots) return true
+      if (!classSpellIndices) return true
       if (!classSpellIndices.has(index)) return false
+      if (!slots) return true
       if (level === 0) return slots.cantripsKnown > 0
       return level <= slots.maxSpellLevel
     },

@@ -8,7 +8,8 @@ export interface PersonalSpell {
 /** Personnage de reference : sert a deduire les sorts accessibles. */
 export interface SpellcasterProfile {
   classIndex: string
-  characterLevel: number
+  /** `null` : niveau non precise, equivalent au niveau max (tous les sorts de la classe). */
+  characterLevel: number | null
 }
 
 interface SpellbookState {
@@ -37,8 +38,9 @@ function isPersonalSpell(value: unknown): value is PersonalSpell {
 function isSpellcasterProfile(value: unknown): value is SpellcasterProfile {
   if (typeof value !== 'object' || value === null) return false
   const candidate = value as Record<string, unknown>
+  if (typeof candidate.classIndex !== 'string') return false
+  if (candidate.characterLevel === null) return true
   return (
-    typeof candidate.classIndex === 'string' &&
     Number.isInteger(candidate.characterLevel) &&
     (candidate.characterLevel as number) >= MIN_CHARACTER_LEVEL &&
     (candidate.characterLevel as number) <= MAX_CHARACTER_LEVEL
