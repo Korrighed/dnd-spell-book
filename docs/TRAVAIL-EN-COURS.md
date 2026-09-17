@@ -1,10 +1,17 @@
 # Travail en cours — `feature/personal-spellbook`
 
-État au 2026-09-15. Ce document décrit ce qui est fait, ce qui reste, et les pièges rencontrés. À supprimer une fois la branche fusionnée dans `dev`.
+État au 2026-09-17. Ce document décrit ce qui est fait, ce qui reste, et les pièges rencontrés. À supprimer une fois la branche fusionnée dans `dev`.
 
 ## Position des branches
 
 ```
+497ff3d  feat(grimoire): ajoute l'option de masquer les sorts hors profil
+5d7e415  fix(grimoire): applique reellement le Slate Gray aux sorts hors profil
+fb2e71d  feat(grimoire): grise les sorts hors du profil du lanceur
+a952faf  feat(grimoire): ajoute la saisie du profil du lanceur de sorts
+cda09b9  feat(grimoire): deduit les sorts accessibles depuis le profil du lanceur
+2f20325  feat(grimoire): passe le stockage en v2 avec le profil du lanceur de sorts
+e6c43b1  docs(grimoire): note l'etat de la branche et la suite a implementer
 973cac6  feat(grimoire): synchronise le grimoire entre les onglets ouverts
 248b6f9  feat(grimoire): ajoute le grimoire personnel et son stockage local
 b0d47b4  Merge branch 'bugfix/force-api-language' into dev      ← dev
@@ -46,20 +53,47 @@ Onglet A périmé ajoute Soin   → stockage = [Boule de feu, Soin]   ← Éclai
 
 Validé manuellement sur ce scénario. Limite acceptée : deux écritures simultanées à la milliseconde près restent en dernier-écrit-gagne, `localStorage` n'ayant pas de transaction.
 
-## À faire ensuite — les pré-filtres du grimoire personnel
+## Fait — profil du lanceur de sorts (pré-filtres)
 
-C'est la suite immédiate. Décrite dans [SPECS.md](SPECS.md), sections *Pré-tri par niveau et classe* et *Grimoire personnel*.
+Décisions validées le 2026-09-17 :
 
-Le grimoire personnel doit porter ses propres pré-filtres : **niveau de sort max accessible** et **classe**. Attention, ce ne sont **pas** les filtres de vue déjà présents dans `App.tsx` (`levelFilter`, `classFilter`) — les SPECS séparent explicitement les deux. Ces derniers filtrent l'affichage du grand grimoire ; les pré-filtres, eux, appartiennent au grimoire personnel.
+- L'utilisateur saisit **classe + niveau de personnage**. Le système en déduit les sorts accessibles.
+- Les pré-filtres s'appliquent à la **liste complète** et au **grimoire personnel**.
+- Un sort hors profil est **grisé**, jamais retiré. Il reste consultable et peut être ajouté au grimoire, où il reste grisé.
+- Option « Masquer les sorts hors profil » : liste complète uniquement.
+- Les filtres de vue (`levelFilter`, `classFilter`) masquent toujours. Ils se cumulent avec le profil.
+- Interface minimale : les fonctions d'abord, le style ensuite.
 
-Ce qui reste à construire :
+| Fichier | Rôle |
+|---|---|
+| `src/hooks/usePersonalSpellbook.ts` | Stockage v2 : `spells` + `profile` |
+| `src/api/classes.ts` | `fetchClassLevelSpellcasting`, `fetchSpellcastingClassIndices` |
+| `src/hooks/useSpellAccess.ts` | `isAccessible(index, level)`, `null` sans profil |
+| `src/hooks/useSpellcastingClasses.ts` | Classes portant un bloc `spellcasting` |
+| `src/components/SpellcasterProfileForm.tsx` | Saisie du profil, dans le panneau du grimoire |
+| `src/components/OutOfProfileLabel.tsx` | Mention textuelle « (hors profil) » |
 
-1. **Stocker les pré-filtres** dans l'enveloppe `localStorage`, à côté de `spells`. Prévoir la migration depuis `version: 1`.
-2. **Déduire le niveau max accessible** depuis `GET /api/2014/classes/{class}/levels/{level}` : le plus haut `spell_slots_level_N` non nul du bloc `spellcasting`. Vérifié sur `wizard`/niveau 3 lors de la rédaction des SPECS.
-3. **Affichage grisé** des sorts hors pré-filtre. Règle impérative : un sort déjà enregistré **n'est jamais retiré** du grimoire quand il sort du pré-filtre. Sa fiche reste consultable et lisible, avec un aplat grisé et toutes les fonctions interactives désactivées.
-4. **Sans pré-filtre défini** → aucun grisé, tout s'affiche normalement.
+Format de stockage v2 (lecture tolérante de v0 et v1) :
 
-La couleur Slate Gray `#617891` est déjà réservée à cet usage dans la [charte](DESIGN.md#palette-de-couleurs) : *« sorts grisés hors filtre »*.
+```json
+{ "version": 2, "spells": [], "profile": { "classIndex": "wizard", "characterLevel": 6 } }
+```
+
+Règle d'accessibilité :
+
+- le sort figure dans `/classes/{class}/spells` ;
+- sort mineur : `cantrips_known > 0` ;
+- sinon : niveau ≤ max(plus haut `spell_slots_level_N` non nul, plus haut `mystic_arcanum_level_N` non nul).
+
+L'arcane mystique est dans `class_specific` : sans lui, un occultiste niveau 11 plafonnerait à 5 au lieu de 6.
+
+Validé dans le navigateur : Magicien 6 → max 3, Occultiste 11 → max 6 (50 sorts), 8 classes proposées, grisé, bandeau sur la fiche, masquage, retrait du profil.
+
+## Reste à faire
+
+- Style du formulaire de profil et du grisé (charte DESIGN.md).
+- Fonctions interactives de la fiche à désactiver hors profil : aucune pour l'instant. À brancher avec le futur sélecteur de niveau d'incantation.
+- Sous-classes lanceuses (Chevalier occulte, Escroc arcanique) : hors périmètre.
 
 ## Points ouverts, hors périmètre de cette branche
 
