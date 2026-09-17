@@ -21,9 +21,6 @@ import type { LanguageMode } from './types/language'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
-/** Origine de l'ouverture d'une fiche : conditionne son masquage. */
-type SelectionSource = 'list' | 'spellbook'
-
 function App() {
   const { spells, loading, error } = useSpellList()
   const { classes, error: classListError } = useClassList()
@@ -34,7 +31,6 @@ function App() {
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
   const [hideOutOfProfile, setHideOutOfProfile] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
-  const [selectionSource, setSelectionSource] = useState<SelectionSource>('list')
   const [language, setLanguage] = useState<LanguageMode>('fr')
   const {
     spells: personalSpells,
@@ -93,21 +89,10 @@ function App() {
     isAccessible,
   ])
 
-  function selectFrom(source: SelectionSource) {
-    return (index: string) => {
-      setSelectedIndex(index)
-      setSelectionSource(source)
-    }
-  }
-
   const selectedOutOfProfile =
     selectedSpell !== null &&
     isAccessible !== null &&
     !isAccessible(selectedSpell.mechanics.index, selectedSpell.mechanics.level)
-
-  // Un sort masque de la liste n'y est plus lisible. Ouvert depuis le grimoire personnel,
-  // il reste consultable : l'utilisateur l'a choisi explicitement.
-  const detailHidden = hideOutOfProfile && selectedOutOfProfile && selectionSource === 'list'
 
   return (
     <main id="grimoire">
@@ -175,7 +160,7 @@ function App() {
           spells={personalSpells}
           allSpells={spells}
           selectedIndex={selectedIndex}
-          onSelectSpell={selectFrom('spellbook')}
+          onSelectSpell={setSelectedIndex}
           onRemoveSpell={removeFromSpellbook}
           profileForm={
             <DevFrame
@@ -215,7 +200,7 @@ function App() {
           </p>
           <SpellList
             spells={filteredSpells}
-            onSelect={selectFrom('list')}
+            onSelect={setSelectedIndex}
             isAccessible={isAccessible}
           />
         </DevFrame>
@@ -223,7 +208,8 @@ function App() {
 
       {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
       {detailError && <p role="alert">{detailError}</p>}
-      {selectedSpell && !detailHidden && (
+      {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
+      {selectedSpell && (
         <DevFrame
           name="SpellDetail"
           uses={[
