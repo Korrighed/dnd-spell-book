@@ -18,6 +18,7 @@ import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
 import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
 import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
+import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
 /** Origine de l'ouverture d'une fiche : conditionne son masquage. */
@@ -115,19 +116,32 @@ function App() {
       </h1>
 
       <div className="filters">
-        <SpellSearch value={search} onChange={setSearch} />
-        <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
-        <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
-        <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
+        <DevFrame name="SpellSearch" uses={['state:search']}>
+          <SpellSearch value={search} onChange={setSearch} />
+        </DevFrame>
+        <DevFrame name="SpellLevelFilter" uses={['state:filtres']}>
+          <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
+        </DevFrame>
+        <DevFrame name="SpellClassFilter" uses={['state:filtres', 'useClassList']}>
+          <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
+        </DevFrame>
+        <DevFrame name="SpellSchoolFilter" uses={['state:filtres', 'useSchoolList']}>
+          <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
+        </DevFrame>
         {profile && (
-          <label>
-            <input
-              type="checkbox"
-              checked={hideOutOfProfile}
-              onChange={(event) => setHideOutOfProfile(event.target.checked)}
-            />{' '}
-            Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
-          </label>
+          <DevFrame
+            name="HideOutOfProfile (App)"
+            uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
+          >
+            <label>
+              <input
+                type="checkbox"
+                checked={hideOutOfProfile}
+                onChange={(event) => setHideOutOfProfile(event.target.checked)}
+              />{' '}
+              Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
+            </label>
+          </DevFrame>
         )}
       </div>
 
@@ -153,27 +167,49 @@ function App() {
       )}
       {error && <p role="alert">{error}</p>}
 
-      <PersonalSpellbookPanel
-        spells={personalSpells}
-        allSpells={spells}
-        selectedIndex={selectedIndex}
-        onSelectSpell={selectFrom('spellbook')}
-        onRemoveSpell={removeFromSpellbook}
-        profileForm={
-          <SpellcasterProfileForm
-            classes={spellcastingClasses}
-            profile={profile}
-            maxSpellLevel={maxSpellLevel}
-            loading={accessLoading}
-            error={accessError ?? spellcastingClassesError}
-            onChange={setProfile}
-          />
-        }
-        isAccessible={isAccessible}
-      />
+      <DevFrame
+        name="PersonalSpellbookPanel"
+        uses={['usePersonalSpellbook', 'useSpellList', 'useSpellAccess', 'state:selectedIndex']}
+      >
+        <PersonalSpellbookPanel
+          spells={personalSpells}
+          allSpells={spells}
+          selectedIndex={selectedIndex}
+          onSelectSpell={selectFrom('spellbook')}
+          onRemoveSpell={removeFromSpellbook}
+          profileForm={
+            <DevFrame
+              name="SpellcasterProfileForm"
+              uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useSpellAccess']}
+            >
+              <SpellcasterProfileForm
+                classes={spellcastingClasses}
+                profile={profile}
+                maxSpellLevel={maxSpellLevel}
+                loading={accessLoading}
+                error={accessError ?? spellcastingClassesError}
+                onChange={setProfile}
+              />
+            </DevFrame>
+          }
+          isAccessible={isAccessible}
+        />
+      </DevFrame>
 
       {!loading && !error && (
-        <>
+        <DevFrame
+          name="SpellList"
+          uses={[
+            'useSpellList',
+            'state:search',
+            'state:filtres',
+            'useClassSpellIndices',
+            'useSchoolSpellIndices',
+            'useSpellAccess',
+            'state:hideOutOfProfile',
+            'state:selectedIndex',
+          ]}
+        >
           <p>
             {filteredSpells.length} / {spells.length} sorts <em>spells</em>
           </p>
@@ -182,21 +218,34 @@ function App() {
             onSelect={selectFrom('list')}
             isAccessible={isAccessible}
           />
-        </>
+        </DevFrame>
       )}
 
       {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
       {detailError && <p role="alert">{detailError}</p>}
       {selectedSpell && !detailHidden && (
-        <SpellDetail
-          detail={selectedSpell}
-          language={language}
-          onLanguageChange={setLanguage}
-          inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
-          onToggleSpellbook={toggleSpellbook}
-          outOfProfile={selectedOutOfProfile}
-        />
+        <DevFrame
+          name="SpellDetail"
+          uses={[
+            'useSpellDetail',
+            'usePersonalSpellbook',
+            'useSpellAccess',
+            'state:language',
+            'state:selectedIndex',
+          ]}
+        >
+          <SpellDetail
+            detail={selectedSpell}
+            language={language}
+            onLanguageChange={setLanguage}
+            inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
+            onToggleSpellbook={toggleSpellbook}
+            outOfProfile={selectedOutOfProfile}
+          />
+        </DevFrame>
       )}
+
+      <DevFramesToggle />
     </main>
   )
 }
