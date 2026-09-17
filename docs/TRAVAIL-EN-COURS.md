@@ -5,6 +5,8 @@
 ## Position des branches
 
 ```
+49745ba  fix(grimoire): affiche toujours la fiche d'un sort, meme grise ou masque
+345b33d  docs(grimoire): consigne le parcours valide et la prochaine etape
 423a781  chore(dev): ajoute des cadres de developpement autour des composants
 d25cb2d  fix(grimoire): reserve le gris aux sorts hors profil
 c9340ef  fix(grimoire): cache la fiche d'un sort masque ouvert depuis la liste
@@ -65,7 +67,7 @@ Décisions validées le 2026-09-17 :
 - Les pré-filtres s'appliquent à la **liste complète** et au **grimoire personnel**.
 - Un sort hors profil est **grisé**, jamais retiré. Il reste consultable et peut être ajouté au grimoire, où il reste grisé.
 - Option « Masquer les sorts hors profil » : liste complète uniquement.
-- Case cochée : la fiche d'un sort hors profil ouvert depuis la liste est cachée. Ouvert depuis le grimoire perso, il reste lisible.
+- La fiche d'un sort s'affiche **toujours**, même grisé ou masqué de la liste. Le masquage de la fiche (`c9340ef`) a été retiré après test (`49745ba`).
 - Niveau facultatif : sans niveau, tous les sorts de la classe sont accessibles (« Niveau max »). Un × par menu, plus « Effacer ».
 - Retirer la classe efface le profil entier. Changer de classe conserve le niveau.
 - Texte normal en `--text-h` : le gris est réservé aux sorts hors profil.
@@ -103,9 +105,35 @@ Validé dans le navigateur : Magicien 6 → max 3, Occultiste 11 → max 6 (50 s
 
 ## Reste à faire
 
-- **Accès aux sorts hors liste de classe** : prochaine étape, règle à préciser (voir fin de session du 2026-09-17).
+- **Accès aux sorts hors liste de classe** : reporté à une session ultérieure. Réflexion en cours, voir ci-dessous.
 - Style du formulaire de profil et du grisé (charte DESIGN.md).
 - Mettre en avant « Masquer les sorts hors profil » : bascule entre navigation libre et sélection rapide.
+
+## Réflexion à reprendre — sorts interclasses
+
+Constat utilisateur : un personnage peut apprendre des sorts d'autres listes de classe. Le filtre actuel (liste de la classe seule) est trop strict pour la table.
+
+Ce que dit l'API (SRD 5.1, vérifié le 2026-09-17) :
+
+- La règle servie est la liste de classe. Texte dans `/classes/{class}` → `spellcasting.info` : *« from the wizard spell list »*.
+- Endpoints de règles disponibles : `/rules`, `/rule-sections`, `/features/{index}` (texte Markdown, FR avec `?lang=fr-FR`). Exploitables pour l'affichage, pas pour un calcul automatique.
+- Exceptions officielles exposées :
+  - sous-classes : champ `spells` avec prérequis de niveau (`life`, `fiend`, `land`, `devotion`) ;
+  - Secrets magiques du barde (`magical-secrets-1`) : texte seulement.
+- Hors SRD, donc absents : dons (Initié à la magie), autres sous-classes.
+- Sorts de soin repérables : champ `heal_at_slot_level`, 10 sorts. Requête GraphQL `POST /graphql/2014` : `aid`, `cure-wounds`, `false-life`, `heal`, `healing-word`, `mass-cure-wounds`, `mass-heal`, `mass-healing-word`, `prayer-of-healing`, `regenerate`. Approximatif : `lesser-restoration` et `revivify` n'y sont pas.
+
+Pistes évoquées :
+
+1. **Ajout manuel** d'un sort hors liste par l'utilisateur : jugé acceptable.
+2. **Règles maison** : nécessaires, car un joueur ne sait pas forcément qu'il peut apprendre des sorts d'une autre classe. Exemple cité : « un magicien peut apprendre tous les sorts sauf les sorts de soin ». Aucun endpoint ne fournit ces règles : à coder en local.
+
+Questions ouvertes :
+
+- Format des règles maison : fichier de configuration fixe, réglage dans l'interface, ou les deux.
+- Qui les définit : le MJ pour toute la table, ou chaque joueur.
+- Affichage d'un sort accessible par règle maison : normal, ou marqué différemment.
+- Prise en compte de la sous-classe dans le profil.
 - Fonctions interactives de la fiche à désactiver hors profil : aucune pour l'instant. À brancher avec le futur sélecteur de niveau d'incantation.
 - Sous-classes lanceuses (Chevalier occulte, Escroc arcanique) : hors périmètre.
 
