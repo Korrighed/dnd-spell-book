@@ -111,9 +111,10 @@ code {
 }
 
 /* Sorts hors du profil du lanceur : Slate Gray reserve par la charte. */
-/* li. et section. passent devant .spell-list .level, charge apres ce fichier. */
+/* Specificite (0,2,1) : passe devant .spell-list .level, charge apres ce fichier. */
 li.out-of-profile,
-li.out-of-profile *,
+li.out-of-profile .level,
+li.out-of-profile .name-en,
 section.out-of-profile {
   color: #617891;
 }
