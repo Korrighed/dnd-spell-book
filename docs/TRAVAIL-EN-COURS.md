@@ -5,6 +5,10 @@
 ## Position des branches
 
 ```
+423a781  chore(dev): ajoute des cadres de developpement autour des composants
+d25cb2d  fix(grimoire): reserve le gris aux sorts hors profil
+c9340ef  fix(grimoire): cache la fiche d'un sort masque ouvert depuis la liste
+94dce64  feat(grimoire): rend le niveau du profil facultatif et ajoute l'effacement
 497ff3d  feat(grimoire): ajoute l'option de masquer les sorts hors profil
 5d7e415  fix(grimoire): applique reellement le Slate Gray aux sorts hors profil
 fb2e71d  feat(grimoire): grise les sorts hors du profil du lanceur
@@ -61,8 +65,16 @@ Décisions validées le 2026-09-17 :
 - Les pré-filtres s'appliquent à la **liste complète** et au **grimoire personnel**.
 - Un sort hors profil est **grisé**, jamais retiré. Il reste consultable et peut être ajouté au grimoire, où il reste grisé.
 - Option « Masquer les sorts hors profil » : liste complète uniquement.
+- Case cochée : la fiche d'un sort hors profil ouvert depuis la liste est cachée. Ouvert depuis le grimoire perso, il reste lisible.
+- Niveau facultatif : sans niveau, tous les sorts de la classe sont accessibles (« Niveau max »). Un × par menu, plus « Effacer ».
+- Retirer la classe efface le profil entier. Changer de classe conserve le niveau.
+- Texte normal en `--text-h` : le gris est réservé aux sorts hors profil.
 - Les filtres de vue (`levelFilter`, `classFilter`) masquent toujours. Ils se cumulent avec le profil.
 - Interface minimale : les fonctions d'abord, le style ensuite.
+
+Parcours utilisateur validé le 2026-09-17 (13 étapes).
+
+Outil de dev : `src/dev/DevFrame.tsx` encadre les composants en `npm run dev`, avec leurs hooks et états. Liste des pastilles tenue à la main dans `App.tsx`.
 
 | Fichier | Rôle |
 |---|---|
@@ -91,7 +103,9 @@ Validé dans le navigateur : Magicien 6 → max 3, Occultiste 11 → max 6 (50 s
 
 ## Reste à faire
 
+- **Accès aux sorts hors liste de classe** : prochaine étape, règle à préciser (voir fin de session du 2026-09-17).
 - Style du formulaire de profil et du grisé (charte DESIGN.md).
+- Mettre en avant « Masquer les sorts hors profil » : bascule entre navigation libre et sélection rapide.
 - Fonctions interactives de la fiche à désactiver hors profil : aucune pour l'instant. À brancher avec le futur sélecteur de niveau d'incantation.
 - Sous-classes lanceuses (Chevalier occulte, Escroc arcanique) : hors périmètre.
 
