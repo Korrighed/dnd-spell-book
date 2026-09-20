@@ -22,7 +22,8 @@ export interface SpellcasterProfile {
 
 interface SpellbookState {
   spells: PersonalSpell[]
-  profile: SpellcasterProfile | null
+  /** Un bloc par classe du personnage (multiclasse) : voir SPECS/TRAVAIL-EN-COURS. */
+  profiles: SpellcasterProfile[]
 }
 
 interface StoredSpellbook extends SpellbookState {
@@ -30,12 +31,12 @@ interface StoredSpellbook extends SpellbookState {
 }
 
 const STORAGE_KEY = 'dnd-personal-spellbook'
-const STORAGE_VERSION = 2
+const STORAGE_VERSION = 3
 
 export const MIN_CHARACTER_LEVEL = 1
 export const MAX_CHARACTER_LEVEL = 20
 
-const EMPTY_SPELLBOOK: SpellbookState = { spells: [], profile: null }
+const EMPTY_SPELLBOOK: SpellbookState = { spells: [], profiles: [] }
 
 function isPersonalSpell(value: unknown): value is PersonalSpell {
   if (typeof value !== 'object' || value === null) return false
@@ -80,6 +81,13 @@ function normalizeProfile(stored: StoredProfileShape): SpellcasterProfile {
   }
 }
 
+/** v1/v2 portaient un seul profil ; v3 porte une liste (multiclasse). */
+interface LegacyEnvelope {
+  spells?: unknown
+  profile?: unknown
+  profiles?: unknown
+}
+
 function readSpellbook(): SpellbookState {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -88,15 +96,24 @@ function readSpellbook(): SpellbookState {
     const parsed: unknown = JSON.parse(stored)
 
     // Format v0 : tableau brut, ecrit par les premieres versions du hook.
-    if (Array.isArray(parsed)) return { spells: parsed.filter(isPersonalSpell), profile: null }
+    if (Array.isArray(parsed)) return { spells: parsed.filter(isPersonalSpell), profiles: [] }
 
-    // v1 : enveloppe sans profil. v2 : enveloppe avec profil. La lecture est commune,
-    // un profil absent ou invalide vaut simplement `null`.
     if (typeof parsed === 'object' && parsed !== null) {
-      const envelope = parsed as Partial<StoredSpellbook>
+      const envelope = parsed as LegacyEnvelope
+      const spells = Array.isArray(envelope.spells) ? envelope.spells.filter(isPersonalSpell) : []
+
+      // v3 : liste de profils.
+      if (Array.isArray(envelope.profiles)) {
+        return {
+          spells,
+          profiles: envelope.profiles.filter(isStoredProfile).map(normalizeProfile),
+        }
+      }
+
+      // v1 (pas de profil) / v2 (un seul profil) : un profil absent ou invalide vaut [].
       return {
-        spells: Array.isArray(envelope.spells) ? envelope.spells.filter(isPersonalSpell) : [],
-        profile: isStoredProfile(envelope.profile) ? normalizeProfile(envelope.profile) : null,
+        spells,
+        profiles: isStoredProfile(envelope.profile) ? [normalizeProfile(envelope.profile)] : [],
       }
     }
 
@@ -118,7 +135,7 @@ function writeSpellbook(state: SpellbookState) {
 export function usePersonalSpellbook() {
   const [state, setState] = useState<SpellbookState>(readSpellbook)
   const hydrated = useRef(false)
-  const { spells, profile } = state
+  const { spells, profiles } = state
 
   const indices = useMemo(() => new Set(spells.map((spell) => spell.index)), [spells])
 
@@ -163,11 +180,36 @@ export function usePersonalSpellbook() {
     })
   }, [])
 
-  const setProfile = useCallback((next: SpellcasterProfile | null) => {
-    setState((prev) => ({ ...prev, profile: next }))
+  const setProfileAt = useCallback((profileIndex: number, next: SpellcasterProfile) => {
+    setState((prev) => ({
+      ...prev,
+      profiles: prev.profiles.map((profile, i) => (i === profileIndex ? next : profile)),
+    }))
+  }, [])
+
+  const addProfile = useCallback((profile: SpellcasterProfile) => {
+    setState((prev) => ({ ...prev, profiles: [...prev.profiles, profile] }))
+  }, [])
+
+  const removeProfileAt = useCallback((profileIndex: number) => {
+    setState((prev) => ({
+      ...prev,
+      profiles: prev.profiles.filter((_, i) => i !== profileIndex),
+    }))
   }, [])
 
   const has = useCallback((index: string) => indices.has(index), [indices])
 
-  return { spells, indices, profile, add, remove, toggle, has, setProfile }
+  return {
+    spells,
+    indices,
+    profiles,
+    add,
+    remove,
+    toggle,
+    has,
+    setProfileAt,
+    addProfile,
+    removeProfileAt,
+  }
 }

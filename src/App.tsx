@@ -6,11 +6,8 @@ import { useSchoolList } from './hooks/useSchoolList'
 import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
 import { useSpellDetail } from './hooks/useSpellDetail'
 import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
-import { useSpellAccess } from './hooks/useSpellAccess'
+import { useMultiSpellAccess } from './hooks/useMultiSpellAccess'
 import { useSpellcastingClasses } from './hooks/useSpellcastingClasses'
-import { useClassSubclasses } from './hooks/useClassSubclasses'
-import { getSubclassUnlockLevel } from './data/subclassUnlockLevel'
-import type { SubclassFeatureOption } from './api/subclasses'
 import { SpellSearch } from './components/SpellSearch'
 import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
@@ -40,27 +37,13 @@ function App() {
     indices: personalIndices,
     remove: removeFromSpellbook,
     toggle: toggleSpellbook,
-    profile,
-    setProfile,
+    profiles,
+    setProfileAt,
+    addProfile,
+    removeProfileAt,
   } = usePersonalSpellbook()
   const { spellcastingClasses, error: spellcastingClassesError } = useSpellcastingClasses(classes)
-  const {
-    isAccessible,
-    maxSpellLevel,
-    loading: accessLoading,
-    error: accessError,
-    subclassSpellGrants,
-  } = useSpellAccess(profile)
-  const { subclasses, error: subclassesError } = useClassSubclasses(profile?.classIndex ?? null)
-  const subclassUnlockLevel = profile ? getSubclassUnlockLevel(profile.classIndex) : 3
-  const subclassFeatureOptions = useMemo(() => {
-    if (!subclassSpellGrants) return []
-    const seen = new Map<string, SubclassFeatureOption>()
-    for (const grant of subclassSpellGrants) {
-      if (grant.feature && !seen.has(grant.feature.index)) seen.set(grant.feature.index, grant.feature)
-    }
-    return [...seen.values()]
-  }, [subclassSpellGrants])
+  const { isAccessible } = useMultiSpellAccess(profiles)
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -127,7 +110,7 @@ function App() {
         <DevFrame name="SpellSchoolFilter" uses={['state:filtres', 'useSchoolList']}>
           <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
         </DevFrame>
-        {profile && (
+        {profiles.length > 0 && (
           <DevFrame
             name="HideOutOfProfile (App)"
             uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
@@ -177,22 +160,36 @@ function App() {
           onSelectSpell={setSelectedIndex}
           onRemoveSpell={removeFromSpellbook}
           profileForm={
-            <DevFrame
-              name="SpellcasterProfileForm"
-              uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useSpellAccess']}
-            >
-              <SpellcasterProfileForm
-                classes={spellcastingClasses}
-                subclasses={subclasses}
-                subclassUnlockLevel={subclassUnlockLevel}
-                subclassFeatureOptions={subclassFeatureOptions}
-                profile={profile}
-                maxSpellLevel={maxSpellLevel}
-                loading={accessLoading}
-                error={accessError ?? spellcastingClassesError ?? subclassesError}
-                onChange={setProfile}
-              />
-            </DevFrame>
+            <>
+              {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
+              {profiles.map((profile, index) => (
+                <DevFrame
+                  key={index}
+                  name={`SpellcasterProfileForm (classe ${index + 1})`}
+                  uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useSpellAccess']}
+                >
+                  <SpellcasterProfileForm
+                    classes={spellcastingClasses}
+                    profile={profile}
+                    onChange={(next) =>
+                      next ? setProfileAt(index, next) : removeProfileAt(index)
+                    }
+                  />
+                </DevFrame>
+              ))}
+              <DevFrame
+                name="SpellcasterProfileForm (ajouter une classe)"
+                uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useSpellAccess']}
+              >
+                <SpellcasterProfileForm
+                  classes={spellcastingClasses}
+                  profile={null}
+                  onChange={(next) => {
+                    if (next) addProfile(next)
+                  }}
+                />
+              </DevFrame>
+            </>
           }
           isAccessible={isAccessible}
         />

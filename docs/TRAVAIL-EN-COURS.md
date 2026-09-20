@@ -126,24 +126,28 @@ Décisions :
 
 Validé dans le navigateur le 2026-09-21 : Occultiste 1 + Fiélon → *Mains brûlantes* accessible (hors liste Occultiste) ; *Cécité/Surdité* hors profil jusqu'au niveau 3 ; Paladin niveau 2→3 fait apparaître/disparaître le dropdown sous-classe avec effacement correct ; Druide + Terre + terrain Littoral/Arctique filtre correctement *Cône de froid*.
 
-## Reste à faire
+## Fait — multiclasse
 
-- **Multiclasse** : reporté, voir ci-dessous.
-- Style du formulaire de profil et du grisé (charte DESIGN.md).
-- Mettre en avant « Masquer les sorts hors profil » : bascule entre navigation libre et sélection rapide.
+Implémenté le 2026-09-21. Constat utilisateur : en D&D un personnage peut avoir des niveaux dans plusieurs classes (ex. niveau de personnage 4 = Ensorceleur 3 + Magicien 1). Le profil ne portait qu'une seule classe.
 
-## À faire — multiclasse
+| Fichier | Rôle |
+|---|---|
+| `src/hooks/usePersonalSpellbook.ts` | `profile` unique → `profiles: SpellcasterProfile[]`. Stockage v3, migration v2 → `[profile]`. `setProfileAt`, `addProfile`, `removeProfileAt` |
+| `src/utils/spellAccess.ts` | `isSpellAccessibleForProfile` : regle d'accessibilite extraite en fonction pure, partagee entre un seul bloc et plusieurs |
+| `src/hooks/useMultiKeyedFetch.ts` | Variante de `useKeyedFetch` pour une liste de clefs (evite d'appeler un hook dans une boucle de longueur variable) |
+| `src/hooks/useMultiSpellAccess.ts` | Union sur tous les blocs, utilisee une fois dans `App.tsx` pour le filtrage et le grise |
+| `src/hooks/useSpellAccess.ts` | Inchange dans son usage (un seul bloc) ; `check` appelle desormais la fonction partagee au lieu de repeter la regle |
+| `src/components/SpellcasterProfileForm.tsx` | Devient autonome par bloc : charge lui-meme ses sous-classes et son accessibilite (`useClassSubclasses`, `useSpellAccess` en interne). Props reduites a `classes`, `profile`, `onChange` |
+| `src/App.tsx` | Affiche un bloc par entree de `profiles`, plus un bloc vide en fin de liste pour ajouter une classe |
 
-Constat utilisateur (2026-09-21) : en D&D, un personnage peut avoir des niveaux dans plusieurs classes (ex. niveau de personnage 4 = Ensorceleur 3 + Magicien 1). Le profil actuel ne porte qu'une seule classe.
+Décisions :
 
-Direction retenue :
+- **Un bloc classe/niveau/sous-classe/terrain par classe**, pas de calcul a partir d'un total de niveaux de personnage agrege. Aucun plafond ni validation croisee sur la somme des niveaux : rien n'empeche de mettre 20 dans deux classes a la fois, aucune regle de coherence codee (choix explicite de l'utilisateur).
+- **Accessibilite par bloc, sans agregation** : un sort est accessible s'il l'est pour **au moins un** des blocs (union). Un sort reserve au niveau 5 Magicien reste hors profil si le seul bloc Magicien est a 1, meme si un autre bloc a 20 niveaux dans une autre classe. Un niveau dans une classe ne debloque jamais un palier superieur dans une autre classe, ni via un total combine dans la meme classe. Choix explicite qui evite de reproduire la vraie table d'emplacements de sorts multiclasse du PHB (agregation fractionnaire par classe), jugee hors scope ici.
+- `onChange(null)` sur un bloc rempli retire ce bloc de la liste (au lieu de vider l'unique profil comme avant). Le bloc vide en fin de liste sert uniquement a en ajouter un nouveau.
+- Pas de plafond sur le nombre de classes : l'utilisateur a laisse le choix libre, tout en notant qu'en pratique les joueurs multiclassent rarement au-dela de deux classes (moins rentable).
 
-- **Dupliquer le bloc de sélection** (classe + niveau + sous-classe + terrain) plutôt que de calculer à partir d'un total de niveaux de personnage agrégé. Le profil devient une liste de blocs indépendants au lieu d'un bloc unique.
-- **Pas de plafond ni de validation croisée** sur la somme des niveaux : si le joueur met 20 dans deux classes à la fois, c'est accepté tel quel. Aucune règle de cohérence à coder.
-- **Accessibilité par bloc, sans agrégation** : chaque bloc classe/niveau garde exactement la logique actuelle (déjà en place pour `useSpellAccess`), un sort est accessible s'il l'est pour **au moins un** des blocs (union, pas de fusion des niveaux entre classes).
-- Réponse à la question posée : un sort réservé au niveau 5 Magicien, avec un profil qui n'a que 1 niveau de Magicien (même si un autre bloc a 20 niveaux dans une autre classe), **reste hors profil**. Chaque bloc est autonome, un niveau dans une classe ne debloque jamais un sort d'une autre classe ni un pallier superieur dans la meme classe via un total combine. C'est le choix explicite qui evite de reproduire la vraie table d'emplacements de sorts multiclasse du PHB (agregation fractionnaire par classe), jugee hors scope ici.
-
-Reste à trancher avant de coder : forme de stockage (`profile: SpellcasterProfile` unique → `profiles: SpellcasterProfile[]`, bump de version nécessaire cette fois puisque ce n'est plus additif) et UI d'ajout/retrait d'un bloc dans `SpellcasterProfileForm`.
+Validé par `npx tsc --noEmit`, `npm run lint` et `npm run build`. Test manuel en attente (parcours donné en session, pas encore rejoué depuis cette version).
 
 ## Réflexion à reprendre — sorts interclasses
 
@@ -157,7 +161,7 @@ Confirmé par appel direct à l'API :
 
 - `cure-wounds` → `classes: [Bard, Cleric, Druid, Paladin, Ranger]`.
 - Il apparaît bien dans `/classes/bard/spells` **et** `/classes/cleric/spells` (vérifié sur les deux).
-- `fireball` → `classes: [Sorcerer, Wizard]` seulement ; `hellish-rebuke` → `[Warlock]` seul (pas étendu aux sous-classes qui l'accordent, ex. Paladin Serment de Vengeance).
+- `fireball` → `classes: [Sorcerer, Wizard]` seulement ; `hellish-rebuke` → `[Warlock]` seul. Le champ `classes` d'un sort ne s'etend jamais aux sous-classes qui l'accordent hors liste : confirme plus bas avec `burning-hands`, qui reste `[Sorcerer, Wizard]` alors que le Fielon (sous-classe Occultiste) l'accorde des le niveau 1.
 
 `useSpellAccess` interroge déjà `/classes/{class}/spells` pour la classe du profil : un sort listant plusieurs classes apparaît dans la liste de chacune. Un profil Barde voit donc déjà `cure-wounds` comme accessible. **Rien à corriger ici.**
 

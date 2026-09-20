@@ -1,22 +1,19 @@
+import { useMemo } from 'react'
 import type { ClassListItem } from '../api/classes'
-import type { SubclassFeatureOption, SubclassListItem } from '../api/subclasses'
+import type { SubclassFeatureOption } from '../api/subclasses'
+import { getSubclassUnlockLevel } from '../data/subclassUnlockLevel'
 import {
   MAX_CHARACTER_LEVEL,
   MIN_CHARACTER_LEVEL,
   type SpellcasterProfile,
 } from '../hooks/usePersonalSpellbook'
+import { useClassSubclasses } from '../hooks/useClassSubclasses'
+import { useSpellAccess } from '../hooks/useSpellAccess'
 
 interface SpellcasterProfileFormProps {
   classes: ClassListItem[]
-  subclasses: SubclassListItem[]
-  /** Niveau auquel la classe du profil debloque sa sous-classe. Sans effet sans profil. */
-  subclassUnlockLevel: number
-  /** Options du sous-choix de la sous-classe (ex. terrain du Cercle de la Terre). Vide sinon. */
-  subclassFeatureOptions: SubclassFeatureOption[]
   profile: SpellcasterProfile | null
-  maxSpellLevel: number | null
-  loading: boolean
-  error: string | null
+  /** `null` : retire ce bloc (classe deselectionnee ou bouton Effacer). */
   onChange: (profile: SpellcasterProfile | null) => void
 }
 
@@ -25,18 +22,26 @@ const CHARACTER_LEVELS = Array.from(
   (_, offset) => MIN_CHARACTER_LEVEL + offset,
 )
 
-export function SpellcasterProfileForm({
-  classes,
-  subclasses,
-  subclassUnlockLevel,
-  subclassFeatureOptions,
-  profile,
-  maxSpellLevel,
-  loading,
-  error,
-  onChange,
-}: SpellcasterProfileFormProps) {
+/**
+ * Un bloc classe/niveau/sous-classe/terrain. Autonome : charge lui-meme ses
+ * sous-classes et ses sorts accessibles. App.tsx en affiche un par entree de
+ * `profiles`, plus un bloc vide pour ajouter une classe (multiclasse).
+ */
+export function SpellcasterProfileForm({ classes, profile, onChange }: SpellcasterProfileFormProps) {
+  const { subclasses } = useClassSubclasses(profile?.classIndex ?? null)
+  const { maxSpellLevel, loading, error, subclassSpellGrants } = useSpellAccess(profile)
+
+  const subclassFeatureOptions = useMemo(() => {
+    if (!subclassSpellGrants) return []
+    const seen = new Map<string, SubclassFeatureOption>()
+    for (const grant of subclassSpellGrants) {
+      if (grant.feature && !seen.has(grant.feature.index)) seen.set(grant.feature.index, grant.feature)
+    }
+    return [...seen.values()]
+  }, [subclassSpellGrants])
+
   const hasLevel = profile !== null && profile.characterLevel !== null
+  const subclassUnlockLevel = profile ? getSubclassUnlockLevel(profile.classIndex) : MAX_CHARACTER_LEVEL
   // Sans niveau precise, le profil est au niveau max : la sous-classe est forcement debloquee.
   const effectiveLevel = profile?.characterLevel ?? MAX_CHARACTER_LEVEL
   const subclassUnlocked = profile !== null && effectiveLevel >= subclassUnlockLevel
@@ -50,7 +55,7 @@ export function SpellcasterProfileForm({
           onChange={(event) => {
             const classIndex = event.target.value
             // Changer de classe conserve le niveau, mais efface la sous-classe :
-            // elle est propre a l'ancienne classe. Retirer la classe efface tout le profil.
+            // elle est propre a l'ancienne classe. Retirer la classe retire ce bloc.
             onChange(
               classIndex
                 ? {

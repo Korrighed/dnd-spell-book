@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { fetchClassLevelSpellcasting } from '../api/classes'
 import { fetchSubclassSpells, type SubclassSpellGrant } from '../api/subclasses'
+import { isSpellAccessibleForProfile } from '../utils/spellAccess'
 import type { SpellcasterProfile } from './usePersonalSpellbook'
 import { useClassSpellIndices } from './useClassSpellIndices'
 import { useKeyedFetch } from './useKeyedFetch'
@@ -47,29 +48,15 @@ export function useSpellAccess(profile: SpellcasterProfile | null): UseSpellAcce
 
   const check = useCallback<SpellAccessCheck>(
     (index, level) => {
-      if (!classSpellIndices) return true
-      const inClassList = classSpellIndices.has(index)
-      // Sans niveau precise, le profil est au niveau max : rien n'est ecarte par minLevel.
-      const effectiveLevel = profile?.characterLevel ?? Infinity
-      const grantedBySubclass = (subclassGrants ?? []).some(
-        (grant) =>
-          grant.spellIndex === index &&
-          grant.minLevel <= effectiveLevel &&
-          // Sous-choix non precise (ex. terrain non choisi) : on n'ecarte rien,
-          // meme regle de permissivite que le niveau facultatif.
-          (!grant.feature ||
-            !profile?.subclassFeatureIndex ||
-            grant.feature.index === profile.subclassFeatureIndex),
+      if (!profile) return true
+      return isSpellAccessibleForProfile(
+        profile,
+        { classSpellIndices, slots, subclassGrants },
+        index,
+        level,
       )
-      if (!inClassList && !grantedBySubclass) return false
-      // Sort connu uniquement via la sous-classe : accorde d'office, pas de
-      // limite par emplacement de sort de la classe.
-      if (grantedBySubclass && !inClassList) return true
-      if (!slots) return true
-      if (level === 0) return slots.cantripsKnown > 0
-      return level <= slots.maxSpellLevel
     },
-    [classSpellIndices, slots, subclassGrants, profile],
+    [profile, classSpellIndices, slots, subclassGrants],
   )
 
   return {
