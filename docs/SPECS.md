@@ -77,13 +77,13 @@ Dépôts de référence :
 
 ## Localisation française
 
-L'[API supporte le multilingue](https://5e-bits.github.io/docs/reference/multilingual) via le paramètre `?lang=fr-FR` (repli sur l'anglais si la traduction n'existe pas pour une ressource) : `GET /api/2014/spells/acid-arrow?lang=fr-FR`.
+L'[API supporte le multilingue](https://5e-bits.github.io/docs/reference/multilingual) via le paramètre `?lang=fr-FR` : `GET /api/2014/spells/acid-arrow?lang=fr-FR`. Sans ce paramètre, l'API répond selon l'en-tête `Accept-Language` du navigateur — pas de repli automatique sur l'anglais. Le paramètre doit donc toujours être explicite sur chaque appel, `?lang=en` compris.
 
 Vérifié sur `acid-arrow` et `fireball` en `fr-FR` :
 
 - `name`, `desc`, `school`, `classes`, `duration`, `casting_time`, `material` : traduits.
 - `range` : déjà converti et formaté en mètres par l'API (ex. `"45 mètres"`) — pas de conversion à faire côté front.
-- `area_of_effect.size` : reste une valeur numérique brute en pieds même en `fr-FR` (ex. `20` pour un rayon de 20 pieds) — nécessite une conversion pied→mètre côté front (`× 0.3048`), aussi bien pour l'affichage que pour dimensionner les objets dans la scène Three.js.
+- `area_of_effect.size` : reste une valeur numérique brute en pieds même en `fr-FR` (ex. `20` pour un rayon de 20 pieds) — nécessite une conversion pied→mètre côté front, aussi bien pour l'affichage que pour dimensionner les objets dans la scène Three.js. Utiliser le **ratio de jeu** `× 0.3` (1 case = 5 ft = 1,50 m), pas la conversion réelle `× 0.3048` : l'API applique elle-même ce ratio dans `range` (vérifié `30→9`, `60→18`, `120→36`), et la description française du sort exprime déjà les distances dans cette convention.
 
 ## Champs exploités par sort
 

@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { fetchClassLevelSpellcasting } from '../api/classes'
+import { fetchSubclassSpells, type SubclassSpellGrant } from '../api/subclasses'
 import type { SpellcasterProfile } from './usePersonalSpellbook'
 import { useClassSpellIndices } from './useClassSpellIndices'
 import { useKeyedFetch } from './useKeyedFetch'
@@ -13,6 +14,8 @@ interface UseSpellAccessResult {
   maxSpellLevel: number | null
   loading: boolean
   error: string | null
+  /** Sorts accordes par la sous-classe du profil, `null` sans sous-classe choisie. */
+  subclassSpellGrants: SubclassSpellGrant[] | null
 }
 
 export function useSpellAccess(profile: SpellcasterProfile | null): UseSpellAccessResult {
@@ -32,25 +35,48 @@ export function useSpellAccess(profile: SpellcasterProfile | null): UseSpellAcce
       : null,
     fetchClassLevelSpellcasting,
   )
+  const {
+    data: subclassGrants,
+    loading: subclassLoading,
+    error: subclassError,
+  } = useKeyedFetch(profile?.subclassIndex ?? null, fetchSubclassSpells)
 
   const levelKnown = profile?.characterLevel == null || slots !== null
-  const ready = classSpellIndices !== null && levelKnown
+  const subclassKnown = !profile?.subclassIndex || subclassGrants !== null
+  const ready = classSpellIndices !== null && levelKnown && subclassKnown
 
   const check = useCallback<SpellAccessCheck>(
     (index, level) => {
       if (!classSpellIndices) return true
-      if (!classSpellIndices.has(index)) return false
+      const inClassList = classSpellIndices.has(index)
+      // Sans niveau precise, le profil est au niveau max : rien n'est ecarte par minLevel.
+      const effectiveLevel = profile?.characterLevel ?? Infinity
+      const grantedBySubclass = (subclassGrants ?? []).some(
+        (grant) =>
+          grant.spellIndex === index &&
+          grant.minLevel <= effectiveLevel &&
+          // Sous-choix non precise (ex. terrain non choisi) : on n'ecarte rien,
+          // meme regle de permissivite que le niveau facultatif.
+          (!grant.feature ||
+            !profile?.subclassFeatureIndex ||
+            grant.feature.index === profile.subclassFeatureIndex),
+      )
+      if (!inClassList && !grantedBySubclass) return false
+      // Sort connu uniquement via la sous-classe : accorde d'office, pas de
+      // limite par emplacement de sort de la classe.
+      if (grantedBySubclass && !inClassList) return true
       if (!slots) return true
       if (level === 0) return slots.cantripsKnown > 0
       return level <= slots.maxSpellLevel
     },
-    [classSpellIndices, slots],
+    [classSpellIndices, slots, subclassGrants, profile],
   )
 
   return {
     isAccessible: ready ? check : null,
     maxSpellLevel: slots?.maxSpellLevel ?? null,
-    loading: spellsLoading || slotsLoading,
-    error: spellsError ?? slotsError,
+    loading: spellsLoading || slotsLoading || subclassLoading,
+    error: spellsError ?? slotsError ?? subclassError,
+    subclassSpellGrants: subclassGrants,
   }
 }

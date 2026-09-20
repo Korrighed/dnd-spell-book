@@ -10,6 +10,14 @@ export interface SpellcasterProfile {
   classIndex: string
   /** `null` : niveau non precise, equivalent au niveau max (tous les sorts de la classe). */
   characterLevel: number | null
+  /** `null` : sous-classe non precisee, ou pas encore debloquee au niveau actuel. */
+  subclassIndex: string | null
+  /**
+   * Sous-choix a l'interieur de la sous-classe (ex. terrain du Cercle de la
+   * Terre). `null` : sans effet pour les sous-classes qui n'en ont pas, ou
+   * pas encore choisi.
+   */
+  subclassFeatureIndex: string | null
 }
 
 interface SpellbookState {
@@ -35,16 +43,41 @@ function isPersonalSpell(value: unknown): value is PersonalSpell {
   return typeof candidate.index === 'string' && typeof candidate.addedAt === 'string'
 }
 
-function isSpellcasterProfile(value: unknown): value is SpellcasterProfile {
+/** Forme tolerante : `subclassIndex`/`subclassFeatureIndex` absents sur les profils v2 anterieurs. */
+interface StoredProfileShape {
+  classIndex: string
+  characterLevel: number | null
+  subclassIndex?: string | null
+  subclassFeatureIndex?: string | null
+}
+
+function isStoredProfile(value: unknown): value is StoredProfileShape {
   if (typeof value !== 'object' || value === null) return false
   const candidate = value as Record<string, unknown>
   if (typeof candidate.classIndex !== 'string') return false
-  if (candidate.characterLevel === null) return true
-  return (
-    Number.isInteger(candidate.characterLevel) &&
-    (candidate.characterLevel as number) >= MIN_CHARACTER_LEVEL &&
-    (candidate.characterLevel as number) <= MAX_CHARACTER_LEVEL
-  )
+  if (candidate.characterLevel !== null) {
+    if (
+      !Number.isInteger(candidate.characterLevel) ||
+      (candidate.characterLevel as number) < MIN_CHARACTER_LEVEL ||
+      (candidate.characterLevel as number) > MAX_CHARACTER_LEVEL
+    ) {
+      return false
+    }
+  }
+  if (candidate.subclassIndex != null && typeof candidate.subclassIndex !== 'string') return false
+  if (candidate.subclassFeatureIndex != null && typeof candidate.subclassFeatureIndex !== 'string') {
+    return false
+  }
+  return true
+}
+
+function normalizeProfile(stored: StoredProfileShape): SpellcasterProfile {
+  return {
+    classIndex: stored.classIndex,
+    characterLevel: stored.characterLevel,
+    subclassIndex: stored.subclassIndex ?? null,
+    subclassFeatureIndex: stored.subclassFeatureIndex ?? null,
+  }
 }
 
 function readSpellbook(): SpellbookState {
@@ -63,7 +96,7 @@ function readSpellbook(): SpellbookState {
       const envelope = parsed as Partial<StoredSpellbook>
       return {
         spells: Array.isArray(envelope.spells) ? envelope.spells.filter(isPersonalSpell) : [],
-        profile: isSpellcasterProfile(envelope.profile) ? envelope.profile : null,
+        profile: isStoredProfile(envelope.profile) ? normalizeProfile(envelope.profile) : null,
       }
     }
 

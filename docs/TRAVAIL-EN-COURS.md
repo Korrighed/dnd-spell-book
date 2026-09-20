@@ -103,15 +103,65 @@ L'arcane mystique est dans `class_specific` : sans lui, un occultiste niveau 11 
 
 Validé dans le navigateur : Magicien 6 → max 3, Occultiste 11 → max 6 (50 sorts), 8 classes proposées, grisé, bandeau sur la fiche, masquage, retrait du profil.
 
+## Fait — sorts accordés par sous-classe
+
+Implémenté le 2026-09-21, en reponse au point ouvert ci-dessous.
+
+| Fichier | Rôle |
+|---|---|
+| `src/api/subclasses.ts` | `fetchClassSubclasses`, `fetchSubclassSpells` (grants + prérequis niveau/terrain) |
+| `src/data/subclassUnlockLevel.ts` | Niveau de déblocage de la spécialisation, par classe |
+| `src/hooks/useClassSubclasses.ts` | Liste des sous-classes d'une classe |
+| `src/hooks/useSpellAccess.ts` | Fusionne les sorts de la sous-classe avec ceux de la classe |
+| `src/components/SpellcasterProfileForm.tsx` | Dropdown sous-classe (conditionnel au niveau) + dropdown terrain (Druide) |
+| `src/hooks/usePersonalSpellbook.ts` | Profil v2 étendu : `subclassIndex`, `subclassFeatureIndex` (lecture tolérante, pas de bump de version) |
+
+Décisions :
+
+- Niveau de déblocage de la sous-classe **vérifié par classe**, pas uniformément 3 : Clerc/Ensorceleur/Occultiste = 1, Druide/Magicien = 2, les 7 autres = 3 (`/classes/{class}/levels/{1,2,3}`).
+- Repasser sous le seuil efface `subclassIndex`/`subclassFeatureIndex` (le personnage ne l'a plus). Changer de classe fait de même.
+- Sous-choix (terrain du Cercle de la Terre du Druide) : dropdown supplémentaire, non précisé par défaut = **permissif**, même règle que le niveau facultatif (rien n'est écarté tant que non choisi).
+- Sort connu uniquement via la sous-classe (absent de la liste de base) : accordé d'office, pas limité par les emplacements de sort de la classe.
+- Le SRD n'expose qu'une seule sous-classe par classe (licence) : le dropdown n'a qu'une option utile pour l'instant, mais rien dans le code ne suppose une liste à un seul élément.
+
+Validé dans le navigateur le 2026-09-21 : Occultiste 1 + Fiélon → *Mains brûlantes* accessible (hors liste Occultiste) ; *Cécité/Surdité* hors profil jusqu'au niveau 3 ; Paladin niveau 2→3 fait apparaître/disparaître le dropdown sous-classe avec effacement correct ; Druide + Terre + terrain Littoral/Arctique filtre correctement *Cône de froid*.
+
 ## Reste à faire
 
-- **Accès aux sorts hors liste de classe** : reporté à une session ultérieure. Réflexion en cours, voir ci-dessous.
+- **Multiclasse** : reporté, voir ci-dessous.
 - Style du formulaire de profil et du grisé (charte DESIGN.md).
 - Mettre en avant « Masquer les sorts hors profil » : bascule entre navigation libre et sélection rapide.
+
+## À faire — multiclasse
+
+Constat utilisateur (2026-09-21) : en D&D, un personnage peut avoir des niveaux dans plusieurs classes (ex. niveau de personnage 4 = Ensorceleur 3 + Magicien 1). Le profil actuel ne porte qu'une seule classe.
+
+Direction retenue :
+
+- **Dupliquer le bloc de sélection** (classe + niveau + sous-classe + terrain) plutôt que de calculer à partir d'un total de niveaux de personnage agrégé. Le profil devient une liste de blocs indépendants au lieu d'un bloc unique.
+- **Pas de plafond ni de validation croisée** sur la somme des niveaux : si le joueur met 20 dans deux classes à la fois, c'est accepté tel quel. Aucune règle de cohérence à coder.
+- **Accessibilité par bloc, sans agrégation** : chaque bloc classe/niveau garde exactement la logique actuelle (déjà en place pour `useSpellAccess`), un sort est accessible s'il l'est pour **au moins un** des blocs (union, pas de fusion des niveaux entre classes).
+- Réponse à la question posée : un sort réservé au niveau 5 Magicien, avec un profil qui n'a que 1 niveau de Magicien (même si un autre bloc a 20 niveaux dans une autre classe), **reste hors profil**. Chaque bloc est autonome, un niveau dans une classe ne debloque jamais un sort d'une autre classe ni un pallier superieur dans la meme classe via un total combine. C'est le choix explicite qui evite de reproduire la vraie table d'emplacements de sorts multiclasse du PHB (agregation fractionnaire par classe), jugee hors scope ici.
+
+Reste à trancher avant de coder : forme de stockage (`profile: SpellcasterProfile` unique → `profiles: SpellcasterProfile[]`, bump de version nécessaire cette fois puisque ce n'est plus additif) et UI d'ajout/retrait d'un bloc dans `SpellcasterProfileForm`.
 
 ## Réflexion à reprendre — sorts interclasses
 
 Constat utilisateur : un personnage peut apprendre des sorts d'autres listes de classe. Le filtre actuel (liste de la classe seule) est trop strict pour la table.
+
+### Vérifié le 2026-09-21 — le cas multi-classes n'est pas un problème
+
+Hypothèse testée : sur la fiche officielle, un sort listant plusieurs classes entre parenthèses (ex. « Soins, Barde/Clerc/Druide/Paladin/Rôdeur ») doit être accessible à chacune d'elles.
+
+Confirmé par appel direct à l'API :
+
+- `cure-wounds` → `classes: [Bard, Cleric, Druid, Paladin, Ranger]`.
+- Il apparaît bien dans `/classes/bard/spells` **et** `/classes/cleric/spells` (vérifié sur les deux).
+- `fireball` → `classes: [Sorcerer, Wizard]` seulement ; `hellish-rebuke` → `[Warlock]` seul (pas étendu aux sous-classes qui l'accordent, ex. Paladin Serment de Vengeance).
+
+`useSpellAccess` interroge déjà `/classes/{class}/spells` pour la classe du profil : un sort listant plusieurs classes apparaît dans la liste de chacune. Un profil Barde voit donc déjà `cure-wounds` comme accessible. **Rien à corriger ici.**
+
+Le vrai point ouvert reste les sorts accordés **par une sous-classe** en plus de la liste de base (ex. `hellish-rebuke` pour un Paladin via son serment) — cf. section sous-classes ci-dessous.
 
 Ce que dit l'API (SRD 5.1, vérifié le 2026-09-17) :
 
@@ -144,13 +194,6 @@ Questions ouvertes :
 - **Le nom du type de dégâts n'existe qu'en français** dans l'API. En mode anglais on affiche l'index technique capitalisé (`fire` → `Fire`). L'alternative serait un appel à `/damage-types/{index}`.
 - **Un `stash` obsolète traîne** dans le dépôt : un brouillon du grimoire antérieur à cette branche, entièrement remplacé par `248b6f9`. À supprimer.
 
-## Deux corrections à porter dans SPECS.md
+## Corrections portées dans SPECS.md
 
-Mesurées contre l'API pendant cette branche, elles contredisent la section *Localisation française* des SPECS :
-
-| SPECS actuelles | Constat |
-|---|---|
-| conversion pied→mètre `× 0.3048` | L'API applique le **ratio de jeu** `× 0.3` (1 case = 5 ft = 1,50 m). Vérifié : `30→9`, `60→18`, `120→36`. Avec `0.3048` on affiche `6,1 m` là où la description française du même sort dit `6 mètres` |
-| « repli sur l'anglais si la traduction n'existe pas » | Sans paramètre `lang`, l'API répond selon l'en-tête `Accept-Language` du navigateur. Depuis un navigateur français, l'endpoint nu renvoie donc du **français**. La langue doit toujours être explicite, `?lang=en` compris |
-
-Ces deux points sont déjà corrigés dans le code, sur `dev`. Seule la documentation reste à mettre à jour.
+Les deux écarts entre le code (déjà corrigé, sur `dev`) et la section *Localisation française* des SPECS sont reportés dans le document : ratio de jeu `× 0.3` au lieu de `× 0.3048`, et paramètre `?lang=` toujours explicite (pas de repli automatique sur l'anglais).

@@ -8,6 +8,9 @@ import { useSpellDetail } from './hooks/useSpellDetail'
 import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
 import { useSpellAccess } from './hooks/useSpellAccess'
 import { useSpellcastingClasses } from './hooks/useSpellcastingClasses'
+import { useClassSubclasses } from './hooks/useClassSubclasses'
+import { getSubclassUnlockLevel } from './data/subclassUnlockLevel'
+import type { SubclassFeatureOption } from './api/subclasses'
 import { SpellSearch } from './components/SpellSearch'
 import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
@@ -46,7 +49,18 @@ function App() {
     maxSpellLevel,
     loading: accessLoading,
     error: accessError,
+    subclassSpellGrants,
   } = useSpellAccess(profile)
+  const { subclasses, error: subclassesError } = useClassSubclasses(profile?.classIndex ?? null)
+  const subclassUnlockLevel = profile ? getSubclassUnlockLevel(profile.classIndex) : 3
+  const subclassFeatureOptions = useMemo(() => {
+    if (!subclassSpellGrants) return []
+    const seen = new Map<string, SubclassFeatureOption>()
+    for (const grant of subclassSpellGrants) {
+      if (grant.feature && !seen.has(grant.feature.index)) seen.set(grant.feature.index, grant.feature)
+    }
+    return [...seen.values()]
+  }, [subclassSpellGrants])
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -169,10 +183,13 @@ function App() {
             >
               <SpellcasterProfileForm
                 classes={spellcastingClasses}
+                subclasses={subclasses}
+                subclassUnlockLevel={subclassUnlockLevel}
+                subclassFeatureOptions={subclassFeatureOptions}
                 profile={profile}
                 maxSpellLevel={maxSpellLevel}
                 loading={accessLoading}
-                error={accessError ?? spellcastingClassesError}
+                error={accessError ?? spellcastingClassesError ?? subclassesError}
                 onChange={setProfile}
               />
             </DevFrame>
