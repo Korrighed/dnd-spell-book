@@ -8,6 +8,7 @@ import {
   type SpellcasterProfile,
 } from '../hooks/usePersonalSpellbook'
 import { useClassSubclasses } from '../hooks/useClassSubclasses'
+import './SpellcasterProfileForm.css'
 import { useSpellAccess } from '../hooks/useSpellAccess'
 
 interface SpellcasterProfileFormProps {

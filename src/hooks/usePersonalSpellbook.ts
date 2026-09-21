@@ -20,23 +20,66 @@ export interface SpellcasterProfile {
   subclassFeatureIndex: string | null
 }
 
-interface SpellbookState {
+/** Un grimoire personnel = un personnage : ses sorts et ses classes (multiclasse) lui sont propres. */
+export interface Character {
+  id: string
+  name: string
   spells: PersonalSpell[]
-  /** Un bloc par classe du personnage (multiclasse) : voir SPECS/TRAVAIL-EN-COURS. */
   profiles: SpellcasterProfile[]
 }
 
-interface StoredSpellbook extends SpellbookState {
+interface RootState {
+  characters: Character[]
+  activeCharacterId: string
+}
+
+interface StoredRootState extends RootState {
   version: number
 }
 
 const STORAGE_KEY = 'dnd-personal-spellbook'
-const STORAGE_VERSION = 3
+const STORAGE_VERSION = 4
+const DEFAULT_CHARACTER_NAME = 'Personnage 1'
+
+/**
+ * Le personnage actif est propre A CET ONGLET : sessionStorage n'est jamais
+ * partage entre onglets/fenetres (contrairement a localStorage), ce qui
+ * permet d'ouvrir un personnage different dans chaque fenetre pour comparer.
+ * Les DONNEES des personnages (`characters`), elles, restent dans le
+ * localStorage partage : une modification faite dans un onglet doit se
+ * retrouver dans l'autre si on y regarde le meme personnage.
+ */
+const ACTIVE_TAB_KEY = 'dnd-personal-spellbook:active-tab'
+
+function readActiveCharacterIdForThisTab(characters: Character[], fallback: string): string {
+  try {
+    const stored = sessionStorage.getItem(ACTIVE_TAB_KEY)
+    if (stored && characters.some((character) => character.id === stored)) return stored
+  } catch {
+    // sessionStorage indisponible (navigation privee stricte, etc.) : on retombe sur le defaut.
+  }
+  return characters.some((character) => character.id === fallback) ? fallback : characters[0].id
+}
+
+function writeActiveCharacterIdForThisTab(id: string) {
+  try {
+    sessionStorage.setItem(ACTIVE_TAB_KEY, id)
+  } catch {
+    // Rien de grave : la selection ne survivra juste pas a un rechargement de cet onglet.
+  }
+}
 
 export const MIN_CHARACTER_LEVEL = 1
 export const MAX_CHARACTER_LEVEL = 20
 
-const EMPTY_SPELLBOOK: SpellbookState = { spells: [], profiles: [] }
+function createCharacter(name: string): Character {
+  return { id: crypto.randomUUID(), name, spells: [], profiles: [] }
+}
+
+function createDefaultState(): RootState {
+  const character = createCharacter(DEFAULT_CHARACTER_NAME)
+  return { characters: [character], activeCharacterId: character.id }
+}
 
 function isPersonalSpell(value: unknown): value is PersonalSpell {
   if (typeof value !== 'object' || value === null) return false
@@ -81,61 +124,120 @@ function normalizeProfile(stored: StoredProfileShape): SpellcasterProfile {
   }
 }
 
-/** v1/v2 portaient un seul profil ; v3 porte une liste (multiclasse). */
+function parseProfiles(value: unknown): SpellcasterProfile[] {
+  return Array.isArray(value) ? value.filter(isStoredProfile).map(normalizeProfile) : []
+}
+
+function parseSpells(value: unknown): PersonalSpell[] {
+  return Array.isArray(value) ? value.filter(isPersonalSpell) : []
+}
+
+/** Forme tolerante d'un personnage stocke en v4. */
+interface StoredCharacterShape {
+  id?: unknown
+  name?: unknown
+  spells?: unknown
+  profiles?: unknown
+}
+
+function isStoredCharacter(
+  value: unknown,
+): value is StoredCharacterShape & { id: string; name: string } {
+  if (typeof value !== 'object' || value === null) return false
+  const candidate = value as Record<string, unknown>
+  return typeof candidate.id === 'string' && typeof candidate.name === 'string'
+}
+
+function normalizeCharacter(stored: StoredCharacterShape & { id: string; name: string }): Character {
+  return {
+    id: stored.id,
+    name: stored.name,
+    spells: parseSpells(stored.spells),
+    profiles: parseProfiles(stored.profiles),
+  }
+}
+
+/** v1 (pas de profil) / v2 (un profil) / v3 (une liste de profils) : un seul personnage implicite. */
 interface LegacyEnvelope {
   spells?: unknown
   profile?: unknown
   profiles?: unknown
+  characters?: unknown
+  activeCharacterId?: unknown
 }
 
-function readSpellbook(): SpellbookState {
+function readSpellbook(): RootState {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) return EMPTY_SPELLBOOK
+    if (!stored) return createDefaultState()
 
     const parsed: unknown = JSON.parse(stored)
 
-    // Format v0 : tableau brut, ecrit par les premieres versions du hook.
-    if (Array.isArray(parsed)) return { spells: parsed.filter(isPersonalSpell), profiles: [] }
-
-    if (typeof parsed === 'object' && parsed !== null) {
-      const envelope = parsed as LegacyEnvelope
-      const spells = Array.isArray(envelope.spells) ? envelope.spells.filter(isPersonalSpell) : []
-
-      // v3 : liste de profils.
-      if (Array.isArray(envelope.profiles)) {
-        return {
-          spells,
-          profiles: envelope.profiles.filter(isStoredProfile).map(normalizeProfile),
-        }
-      }
-
-      // v1 (pas de profil) / v2 (un seul profil) : un profil absent ou invalide vaut [].
-      return {
-        spells,
-        profiles: isStoredProfile(envelope.profile) ? [normalizeProfile(envelope.profile)] : [],
-      }
+    // Format v0 : tableau brut de sorts, ecrit par les premieres versions du hook.
+    if (Array.isArray(parsed)) {
+      const character = createCharacter(DEFAULT_CHARACTER_NAME)
+      character.spells = parseSpells(parsed)
+      return { characters: [character], activeCharacterId: character.id }
     }
 
-    return EMPTY_SPELLBOOK
+    if (typeof parsed !== 'object' || parsed === null) return createDefaultState()
+
+    const envelope = parsed as LegacyEnvelope
+
+    // v4 : plusieurs personnages.
+    if (Array.isArray(envelope.characters)) {
+      const characters = envelope.characters.filter(isStoredCharacter).map(normalizeCharacter)
+      if (characters.length === 0) return createDefaultState()
+      const activeCharacterId =
+        typeof envelope.activeCharacterId === 'string' &&
+        characters.some((character) => character.id === envelope.activeCharacterId)
+          ? envelope.activeCharacterId
+          : characters[0].id
+      return { characters, activeCharacterId }
+    }
+
+    // v1/v2/v3.
+    const character: Character = {
+      id: crypto.randomUUID(),
+      name: DEFAULT_CHARACTER_NAME,
+      spells: parseSpells(envelope.spells),
+      profiles: Array.isArray(envelope.profiles)
+        ? parseProfiles(envelope.profiles)
+        : isStoredProfile(envelope.profile)
+          ? [normalizeProfile(envelope.profile)]
+          : [],
+    }
+    return { characters: [character], activeCharacterId: character.id }
   } catch {
-    return EMPTY_SPELLBOOK
+    return createDefaultState()
   }
 }
 
-function writeSpellbook(state: SpellbookState) {
+function writeSpellbook(state: RootState) {
   try {
-    const envelope: StoredSpellbook = { version: STORAGE_VERSION, ...state }
+    const envelope: StoredRootState = { version: STORAGE_VERSION, ...state }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(envelope))
   } catch {
     console.error('Impossible de sauvegarder le grimoire personnel.')
   }
 }
 
+function initState(): RootState {
+  const stored = readSpellbook()
+  return {
+    characters: stored.characters,
+    activeCharacterId: readActiveCharacterIdForThisTab(stored.characters, stored.activeCharacterId),
+  }
+}
+
 export function usePersonalSpellbook() {
-  const [state, setState] = useState<SpellbookState>(readSpellbook)
+  const [state, setState] = useState<RootState>(initState)
   const hydrated = useRef(false)
-  const { spells, profiles } = state
+
+  const activeCharacter =
+    state.characters.find((character) => character.id === state.activeCharacterId) ??
+    state.characters[0]
+  const { spells, profiles } = activeCharacter
 
   const indices = useMemo(() => new Set(spells.map((spell) => spell.index)), [spells])
 
@@ -146,59 +248,148 @@ export function usePersonalSpellbook() {
       return
     }
     writeSpellbook(state)
+    writeActiveCharacterIdForThisTab(state.activeCharacterId)
   }, [state])
 
   useEffect(() => {
     // L'evenement `storage` n'est emis que dans les AUTRES onglets, jamais dans celui
     // qui ecrit. Relire le stockage ici ne peut donc pas boucler avec l'effet d'ecriture.
+    // Seules les DONNEES des personnages sont reprises : le personnage actif reste
+    // propre a cet onglet, sinon deux fenetres ouvertes sur deux personnages
+    // differents se forceraient mutuellement a afficher le meme.
     function handleStorage(event: StorageEvent) {
       if (event.key !== null && event.key !== STORAGE_KEY) return
-      setState(readSpellbook())
+      const fresh = readSpellbook()
+      setState((prev) => ({
+        characters: fresh.characters,
+        activeCharacterId: fresh.characters.some(
+          (character) => character.id === prev.activeCharacterId,
+        )
+          ? prev.activeCharacterId
+          : fresh.activeCharacterId,
+      }))
     }
 
     window.addEventListener('storage', handleStorage)
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  const add = useCallback((index: string) => {
-    setState((prev) => {
-      if (prev.spells.some((spell) => spell.index === index)) return prev
-      return { ...prev, spells: [...prev.spells, { index, addedAt: new Date().toISOString() }] }
-    })
-  }, [])
-
-  const remove = useCallback((index: string) => {
-    setState((prev) => ({ ...prev, spells: prev.spells.filter((spell) => spell.index !== index) }))
-  }, [])
-
-  const toggle = useCallback((index: string) => {
-    setState((prev) => {
-      if (prev.spells.some((spell) => spell.index === index)) {
-        return { ...prev, spells: prev.spells.filter((spell) => spell.index !== index) }
-      }
-      return { ...prev, spells: [...prev.spells, { index, addedAt: new Date().toISOString() }] }
-    })
-  }, [])
-
-  const setProfileAt = useCallback((profileIndex: number, next: SpellcasterProfile) => {
+  /** Applique une mise a jour au personnage actif uniquement, jamais aux autres. */
+  const updateActiveCharacter = useCallback((updater: (character: Character) => Character) => {
     setState((prev) => ({
       ...prev,
-      profiles: prev.profiles.map((profile, i) => (i === profileIndex ? next : profile)),
+      characters: prev.characters.map((character) =>
+        character.id === prev.activeCharacterId ? updater(character) : character,
+      ),
     }))
   }, [])
 
-  const addProfile = useCallback((profile: SpellcasterProfile) => {
-    setState((prev) => ({ ...prev, profiles: [...prev.profiles, profile] }))
-  }, [])
+  const add = useCallback(
+    (index: string) => {
+      updateActiveCharacter((character) => {
+        if (character.spells.some((spell) => spell.index === index)) return character
+        return {
+          ...character,
+          spells: [...character.spells, { index, addedAt: new Date().toISOString() }],
+        }
+      })
+    },
+    [updateActiveCharacter],
+  )
 
-  const removeProfileAt = useCallback((profileIndex: number) => {
-    setState((prev) => ({
-      ...prev,
-      profiles: prev.profiles.filter((_, i) => i !== profileIndex),
-    }))
-  }, [])
+  const remove = useCallback(
+    (index: string) => {
+      updateActiveCharacter((character) => ({
+        ...character,
+        spells: character.spells.filter((spell) => spell.index !== index),
+      }))
+    },
+    [updateActiveCharacter],
+  )
+
+  const toggle = useCallback(
+    (index: string) => {
+      updateActiveCharacter((character) => {
+        if (character.spells.some((spell) => spell.index === index)) {
+          return { ...character, spells: character.spells.filter((spell) => spell.index !== index) }
+        }
+        return {
+          ...character,
+          spells: [...character.spells, { index, addedAt: new Date().toISOString() }],
+        }
+      })
+    },
+    [updateActiveCharacter],
+  )
+
+  const setProfileAt = useCallback(
+    (profileIndex: number, next: SpellcasterProfile) => {
+      updateActiveCharacter((character) => ({
+        ...character,
+        profiles: character.profiles.map((profile, i) => (i === profileIndex ? next : profile)),
+      }))
+    },
+    [updateActiveCharacter],
+  )
+
+  const addProfile = useCallback(
+    (profile: SpellcasterProfile) => {
+      updateActiveCharacter((character) => ({
+        ...character,
+        profiles: [...character.profiles, profile],
+      }))
+    },
+    [updateActiveCharacter],
+  )
+
+  const removeProfileAt = useCallback(
+    (profileIndex: number) => {
+      updateActiveCharacter((character) => ({
+        ...character,
+        profiles: character.profiles.filter((_, i) => i !== profileIndex),
+      }))
+    },
+    [updateActiveCharacter],
+  )
 
   const has = useCallback((index: string) => indices.has(index), [indices])
+
+  const setActiveCharacterId = useCallback((id: string) => {
+    setState((prev) =>
+      prev.characters.some((character) => character.id === id)
+        ? { ...prev, activeCharacterId: id }
+        : prev,
+    )
+  }, [])
+
+  const addCharacter = useCallback((name: string) => {
+    setState((prev) => {
+      const character = createCharacter(name)
+      return { characters: [...prev.characters, character], activeCharacterId: character.id }
+    })
+  }, [])
+
+  const removeCharacter = useCallback((id: string) => {
+    setState((prev) => {
+      const remaining = prev.characters.filter((character) => character.id !== id)
+      // Toujours au moins un personnage : en retirer le dernier en recree un vide.
+      if (remaining.length === 0) {
+        return createDefaultState()
+      }
+      const activeCharacterId =
+        prev.activeCharacterId === id ? remaining[0].id : prev.activeCharacterId
+      return { characters: remaining, activeCharacterId }
+    })
+  }, [])
+
+  const renameCharacter = useCallback((id: string, name: string) => {
+    setState((prev) => ({
+      ...prev,
+      characters: prev.characters.map((character) =>
+        character.id === id ? { ...character, name } : character,
+      ),
+    }))
+  }, [])
 
   return {
     spells,
@@ -211,5 +402,11 @@ export function usePersonalSpellbook() {
     setProfileAt,
     addProfile,
     removeProfileAt,
+    characters: state.characters.map(({ id, name }) => ({ id, name })),
+    activeCharacterId: activeCharacter.id,
+    setActiveCharacterId,
+    addCharacter,
+    removeCharacter,
+    renameCharacter,
   }
 }

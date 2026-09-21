@@ -1,0 +1,35 @@
+.spellcaster-profile {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.spellcaster-profile select,
+.spellcaster-profile input {
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 6px;
+}
+
+.spellcaster-profile button {
+  font: inherit;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.spellcaster-profile button:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.spellcaster-profile button:disabled {
+  color: var(--text);
+  cursor: not-allowed;
+  opacity: 0.5;
+}

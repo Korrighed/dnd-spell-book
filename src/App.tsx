@@ -16,6 +16,7 @@ import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
 import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
 import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
+import { CharacterSelector } from './components/CharacterSelector'
 import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
@@ -41,6 +42,12 @@ function App() {
     setProfileAt,
     addProfile,
     removeProfileAt,
+    characters,
+    activeCharacterId,
+    setActiveCharacterId,
+    addCharacter,
+    removeCharacter,
+    renameCharacter,
   } = usePersonalSpellbook()
   const { spellcastingClasses, error: spellcastingClassesError } = useSpellcastingClasses(classes)
   const { isAccessible } = useMultiSpellAccess(profiles)
@@ -161,6 +168,16 @@ function App() {
           onRemoveSpell={removeFromSpellbook}
           profileForm={
             <>
+              <DevFrame name="CharacterSelector" uses={['usePersonalSpellbook']}>
+                <CharacterSelector
+                  characters={characters}
+                  activeCharacterId={activeCharacterId}
+                  onSelect={setActiveCharacterId}
+                  onAdd={addCharacter}
+                  onRemove={removeCharacter}
+                  onRename={renameCharacter}
+                />
+              </DevFrame>
               {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
               {profiles.map((profile, index) => (
                 <DevFrame

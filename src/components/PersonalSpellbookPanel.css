@@ -38,7 +38,9 @@
   font-weight: 600;
 }
 
-.personal-spellbook button {
+/* Scope au seul <ul> des sorts sauvegardes : ne doit pas deteindre sur les
+   boutons du formulaire de profil ou du selecteur de personnage. */
+.personal-spellbook ul button {
   background: none;
   border: none;
   font: inherit;
