@@ -5,6 +5,7 @@ import { useClassSpellIndices } from './hooks/useClassSpellIndices'
 import { useSchoolList } from './hooks/useSchoolList'
 import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
 import { useSpellDetail } from './hooks/useSpellDetail'
+import { useSpellSummaries } from './hooks/useSpellSummaries'
 import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
 import { useMultiSpellAccess } from './hooks/useMultiSpellAccess'
 import { useSpellcastingClasses } from './hooks/useSpellcastingClasses'
@@ -24,6 +25,7 @@ import './App.css'
 
 function App() {
   const { spells, loading, error } = useSpellList()
+  const spellSummaries = useSpellSummaries(spells)
   const { classes, error: classListError } = useClassList()
   const { schools, error: schoolListError } = useSchoolList()
   const [search, setSearch] = useState('')
@@ -232,6 +234,7 @@ function App() {
             'useMultiSpellAccess',
             'state:hideOutOfProfile',
             'state:selectedIndex',
+            'useSpellSummaries',
           ]}
         >
           <p>
@@ -241,6 +244,7 @@ function App() {
             spells={filteredSpells}
             onSelect={setSelectedIndex}
             isAccessible={isAccessible}
+            summaries={spellSummaries}
           />
         </DevFrame>
       )}
