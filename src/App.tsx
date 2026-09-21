@@ -5,14 +5,21 @@ import { useClassSpellIndices } from './hooks/useClassSpellIndices'
 import { useSchoolList } from './hooks/useSchoolList'
 import { useSchoolSpellIndices } from './hooks/useSchoolSpellIndices'
 import { useSpellDetail } from './hooks/useSpellDetail'
+import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
+import { useMultiSpellAccess } from './hooks/useMultiSpellAccess'
+import { useSpellcastingClasses } from './hooks/useSpellcastingClasses'
 import { SpellSearch } from './components/SpellSearch'
 import { SpellLevelFilter } from './components/SpellLevelFilter'
 import { SpellClassFilter } from './components/SpellClassFilter'
 import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
-import { normalizeForSearch } from './utils/text'
+import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
+import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
+import { CharacterSelector } from './components/CharacterSelector'
+import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
+import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
 function App() {
@@ -23,8 +30,27 @@ function App() {
   const [levelFilter, setLevelFilter] = useState<number | null>(null)
   const [classFilter, setClassFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
+  const [hideOutOfProfile, setHideOutOfProfile] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
   const [language, setLanguage] = useState<LanguageMode>('fr')
+  const {
+    spells: personalSpells,
+    indices: personalIndices,
+    remove: removeFromSpellbook,
+    toggle: toggleSpellbook,
+    profiles,
+    setProfileById,
+    addProfile,
+    removeProfileById,
+    characters,
+    activeCharacterId,
+    setActiveCharacterId,
+    addCharacter,
+    removeCharacter,
+    renameCharacter,
+  } = usePersonalSpellbook()
+  const { spellcastingClasses, error: spellcastingClassesError } = useSpellcastingClasses(classes)
+  const { isAccessible, perProfile } = useMultiSpellAccess(profiles)
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -42,17 +68,18 @@ function App() {
   } = useSchoolSpellIndices(schoolFilter)
 
   const filteredSpells = useMemo(() => {
-    const query = normalizeForSearch(search.trim())
+    const query = search.trim()
     return spells.filter((spell) => {
       const matchesQuery =
-        !query ||
-        normalizeForSearch(spell.name).includes(query) ||
-        normalizeForSearch(spell.nameFr).includes(query)
+        !query || matchesSearch(spell.name, query) || matchesSearch(spell.nameFr, query)
       const matchesLevel = levelFilter === null || spell.level === levelFilter
       const matchesClass = classFilter === null || (classSpellIndices?.has(spell.index) ?? false)
       const matchesSchool =
         schoolFilter === null || (schoolSpellIndices?.has(spell.index) ?? false)
-      return matchesQuery && matchesLevel && matchesClass && matchesSchool
+      // Masquage optionnel, limite a la liste complete : le grimoire personnel grise seulement.
+      const matchesProfile =
+        !hideOutOfProfile || isAccessible === null || isAccessible(spell.index, spell.level)
+      return matchesQuery && matchesLevel && matchesClass && matchesSchool && matchesProfile
     })
   }, [
     spells,
@@ -62,7 +89,14 @@ function App() {
     classSpellIndices,
     schoolFilter,
     schoolSpellIndices,
+    hideOutOfProfile,
+    isAccessible,
   ])
+
+  const selectedOutOfProfile =
+    selectedSpell !== null &&
+    isAccessible !== null &&
+    !isAccessible(selectedSpell.mechanics.index, selectedSpell.mechanics.level)
 
   return (
     <main id="grimoire">
@@ -71,10 +105,33 @@ function App() {
       </h1>
 
       <div className="filters">
-        <SpellSearch value={search} onChange={setSearch} />
-        <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
-        <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
-        <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
+        <DevFrame name="SpellSearch" uses={['state:search']}>
+          <SpellSearch value={search} onChange={setSearch} />
+        </DevFrame>
+        <DevFrame name="SpellLevelFilter" uses={['state:filtres']}>
+          <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
+        </DevFrame>
+        <DevFrame name="SpellClassFilter" uses={['state:filtres', 'useClassList']}>
+          <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
+        </DevFrame>
+        <DevFrame name="SpellSchoolFilter" uses={['state:filtres', 'useSchoolList']}>
+          <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
+        </DevFrame>
+        {profiles.length > 0 && (
+          <DevFrame
+            name="HideOutOfProfile (App)"
+            uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
+          >
+            <label>
+              <input
+                type="checkbox"
+                checked={hideOutOfProfile}
+                onChange={(event) => setHideOutOfProfile(event.target.checked)}
+              />{' '}
+              Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
+            </label>
+          </DevFrame>
+        )}
       </div>
 
       {classListError && <p role="alert">{classListError}</p>}
@@ -99,20 +156,121 @@ function App() {
       )}
       {error && <p role="alert">{error}</p>}
 
+      <DevFrame
+        name="PersonalSpellbookPanel"
+        uses={['usePersonalSpellbook', 'useSpellList', 'useMultiSpellAccess', 'state:selectedIndex']}
+      >
+        <PersonalSpellbookPanel
+          spells={personalSpells}
+          allSpells={spells}
+          selectedIndex={selectedIndex}
+          onSelectSpell={setSelectedIndex}
+          onRemoveSpell={removeFromSpellbook}
+          profileForm={
+            <>
+              <DevFrame name="CharacterSelector" uses={['usePersonalSpellbook']}>
+                <CharacterSelector
+                  characters={characters}
+                  activeCharacterId={activeCharacterId}
+                  onSelect={setActiveCharacterId}
+                  onAdd={addCharacter}
+                  onRemove={removeCharacter}
+                  onRename={renameCharacter}
+                />
+              </DevFrame>
+              {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
+              {profiles.map((profile, index) => (
+                <DevFrame
+                  key={profile.id}
+                  name={`SpellcasterProfileForm (classe ${index + 1})`}
+                  uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useMultiSpellAccess']}
+                >
+                  <SpellcasterProfileForm
+                    classes={spellcastingClasses}
+                    profile={profile}
+                    maxSpellLevel={perProfile[index].maxSpellLevel}
+                    subclassSpellGrants={perProfile[index].subclassSpellGrants}
+                    loading={perProfile[index].loading}
+                    error={perProfile[index].error}
+                    onChange={(next) =>
+                      next ? setProfileById(profile.id, next) : removeProfileById(profile.id)
+                    }
+                  />
+                </DevFrame>
+              ))}
+              <DevFrame
+                name="SpellcasterProfileForm (ajouter une classe)"
+                uses={['usePersonalSpellbook', 'useSpellcastingClasses']}
+              >
+                <SpellcasterProfileForm
+                  classes={spellcastingClasses}
+                  profile={null}
+                  maxSpellLevel={null}
+                  subclassSpellGrants={null}
+                  loading={false}
+                  error={null}
+                  onChange={(next) => {
+                    if (next) addProfile(next)
+                  }}
+                />
+              </DevFrame>
+            </>
+          }
+          isAccessible={isAccessible}
+        />
+      </DevFrame>
+
       {!loading && !error && (
-        <>
+        <DevFrame
+          name="SpellList"
+          uses={[
+            'useSpellList',
+            'state:search',
+            'state:filtres',
+            'useClassSpellIndices',
+            'useSchoolSpellIndices',
+            'useMultiSpellAccess',
+            'state:hideOutOfProfile',
+            'state:selectedIndex',
+          ]}
+        >
           <p>
             {filteredSpells.length} / {spells.length} sorts <em>spells</em>
           </p>
-          <SpellList spells={filteredSpells} onSelect={setSelectedIndex} />
-        </>
+          <SpellList
+            spells={filteredSpells}
+            onSelect={setSelectedIndex}
+            isAccessible={isAccessible}
+          />
+        </DevFrame>
       )}
 
       {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
       {detailError && <p role="alert">{detailError}</p>}
+      {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
       {selectedSpell && (
-        <SpellDetail detail={selectedSpell} language={language} onLanguageChange={setLanguage} />
+        <DevFrame
+          name="SpellDetail"
+          uses={[
+            'useSpellDetail',
+            'usePersonalSpellbook',
+            'useMultiSpellAccess',
+            'state:language',
+            'state:selectedIndex',
+          ]}
+        >
+          <SpellDetail
+            detail={selectedSpell}
+            language={language}
+            onLanguageChange={setLanguage}
+            inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
+            onToggleSpellbook={toggleSpellbook}
+            outOfProfile={selectedOutOfProfile}
+          />
+        </DevFrame>
       )}
+
+      <DevFramesToggle />
     </main>
   )
 }

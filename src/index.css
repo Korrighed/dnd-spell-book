@@ -109,3 +109,21 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Texte normal en --text-h : le gris est reserve aux sorts hors profil. */
+.spell-detail {
+  color: var(--text-h);
+}
+
+/* Sorts hors du profil du lanceur : Slate Gray reserve par la charte. Les enfants heritent.
+   Selecteurs prefixes : .spell-list li (0,1,1) est charge apres ce fichier et gagnerait a egalite. */
+.spell-list li.out-of-profile,
+.personal-spellbook li.out-of-profile,
+.spell-detail.out-of-profile,
+.spell-detail.out-of-profile h2 {
+  color: #617891;
+}
+
+.out-of-profile-label {
+  font-size: 0.85em;
+}

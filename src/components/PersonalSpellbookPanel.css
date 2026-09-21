@@ -1,0 +1,74 @@
+.personal-spellbook {
+  margin: 24px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+}
+
+.personal-spellbook h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  color: var(--text-h);
+}
+
+.personal-spellbook h2 em {
+  color: var(--text);
+  font-weight: normal;
+}
+
+.personal-spellbook ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.personal-spellbook li {
+  color: var(--text-h);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.personal-spellbook li:last-child {
+  border-bottom: none;
+}
+
+.personal-spellbook li.selected {
+  font-weight: 600;
+}
+
+/* Scope au seul <ul> des sorts sauvegardes : ne doit pas deteindre sur les
+   boutons du formulaire de profil ou du selecteur de personnage. */
+.personal-spellbook ul button {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.personal-spellbook .open {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  padding: 6px 0;
+  text-align: left;
+}
+
+.personal-spellbook .level {
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.personal-spellbook .name-en {
+  font-style: italic;
+}
+
+.personal-spellbook .remove {
+  flex-shrink: 0;
+  padding: 0 8px;
+  color: var(--accent);
+  font-size: 1.2em;
+  line-height: 1;
+}
