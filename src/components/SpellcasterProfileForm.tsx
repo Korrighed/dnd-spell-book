@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { ClassListItem } from '../api/classes'
-import type { SubclassFeatureOption } from '../api/subclasses'
+import type { SubclassFeatureOption, SubclassSpellGrant } from '../api/subclasses'
 import { getSubclassUnlockLevel } from '../data/subclassUnlockLevel'
 import {
   MAX_CHARACTER_LEVEL,
@@ -9,11 +9,15 @@ import {
 } from '../hooks/usePersonalSpellbook'
 import { useClassSubclasses } from '../hooks/useClassSubclasses'
 import './SpellcasterProfileForm.css'
-import { useSpellAccess } from '../hooks/useSpellAccess'
 
 interface SpellcasterProfileFormProps {
   classes: ClassListItem[]
   profile: SpellcasterProfile | null
+  /** Derive de useMultiSpellAccess cote App : evite un second fetch par bloc. */
+  maxSpellLevel: number | null
+  subclassSpellGrants: SubclassSpellGrant[] | null
+  loading: boolean
+  error: string | null
   /** `null` : retire ce bloc (classe deselectionnee ou bouton Effacer). */
   onChange: (profile: SpellcasterProfile | null) => void
 }
@@ -24,13 +28,27 @@ const CHARACTER_LEVELS = Array.from(
 )
 
 /**
- * Un bloc classe/niveau/sous-classe/terrain. Autonome : charge lui-meme ses
- * sous-classes et ses sorts accessibles. App.tsx en affiche un par entree de
- * `profiles`, plus un bloc vide pour ajouter une classe (multiclasse).
+ * Un bloc classe/niveau/sous-classe/terrain. App.tsx en affiche un par entree
+ * de `profiles`, plus un bloc vide pour ajouter une classe (multiclasse).
+ * Charge lui-meme sa liste de sous-classes (donnee propre a ce bloc, non
+ * partagee), mais recoit l'accessibilite calculee en amont : useMultiSpellAccess
+ * fetche deja ces memes donnees pour le filtrage global, un second appel ici
+ * dupliquerait les requetes et pourrait diverger en cas d'echec partiel.
  */
-export function SpellcasterProfileForm({ classes, profile, onChange }: SpellcasterProfileFormProps) {
-  const { subclasses } = useClassSubclasses(profile?.classIndex ?? null)
-  const { maxSpellLevel, loading, error, subclassSpellGrants } = useSpellAccess(profile)
+export function SpellcasterProfileForm({
+  classes,
+  profile,
+  maxSpellLevel,
+  subclassSpellGrants,
+  loading,
+  error,
+  onChange,
+}: SpellcasterProfileFormProps) {
+  const {
+    subclasses,
+    loading: subclassesLoading,
+    error: subclassesError,
+  } = useClassSubclasses(profile?.classIndex ?? null)
 
   const subclassFeatureOptions = useMemo(() => {
     if (!subclassSpellGrants) return []
@@ -47,8 +65,13 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
   const effectiveLevel = profile?.characterLevel ?? MAX_CHARACTER_LEVEL
   const subclassUnlocked = profile !== null && effectiveLevel >= subclassUnlockLevel
 
+  // Distingue les boutons (aria-label) d'un bloc a l'autre en multiclasse : sans
+  // ca, un lecteur d'ecran rencontre plusieurs boutons au meme intitule.
+  const blockLabel = classes.find((cls) => cls.index === profile?.classIndex)?.nameFr ?? 'nouvelle classe'
+
   return (
-    <div className="spellcaster-profile">
+    <fieldset className="spellcaster-profile">
+      <legend>{profile ? blockLabel : 'Nouvelle classe'}</legend>
       <label>
         Classe <em>Class</em>{' '}
         <select
@@ -57,9 +80,12 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
             const classIndex = event.target.value
             // Changer de classe conserve le niveau, mais efface la sous-classe :
             // elle est propre a l'ancienne classe. Retirer la classe retire ce bloc.
+            // `id` : conserve celui du bloc existant ; pour un nouveau bloc (profile
+            // null), la valeur est ignoree, addProfile assigne le vrai id.
             onChange(
               classIndex
                 ? {
+                    id: profile?.id ?? '',
                     classIndex,
                     characterLevel: profile?.characterLevel ?? null,
                     subclassIndex: null,
@@ -79,7 +105,7 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
       </label>
       <button
         type="button"
-        aria-label="Deselectionner la classe"
+        aria-label={`Deselectionner la classe (${blockLabel})`}
         disabled={!profile}
         onClick={() => onChange(null)}
       >
@@ -115,13 +141,21 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
       </label>
       <button
         type="button"
-        aria-label="Deselectionner le niveau"
+        aria-label={`Deselectionner le niveau (${blockLabel})`}
         disabled={!hasLevel}
         onClick={() => profile && onChange({ ...profile, characterLevel: null })}
       >
         &times;
       </button>{' '}
-      {subclassUnlocked && subclasses.length > 0 && (
+      {/*
+        Le bloc reste visible tant que le profil a deja une sous-classe choisie,
+        meme si la liste fraiche echoue ou est encore en chargement : sinon le
+        dropdown ET son bouton de retrait disparaissent, alors que les sorts
+        qu'elle accorde restent appliques en arriere-plan (rien pour les voir
+        ni les retirer). L'option courante est alors affichee par son index
+        brut, faute de mieux (nom localise indisponible sans la liste).
+      */}
+      {subclassUnlocked && (subclasses.length > 0 || profile?.subclassIndex) && (
         <>
           <label>
             Sous-classe <em>Subclass</em>{' '}
@@ -135,16 +169,20 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
               }}
             >
               <option value="">Aucune sous-classe (No subclass)</option>
-              {subclasses.map((sub) => (
-                <option key={sub.index} value={sub.index}>
-                  {sub.nameFr} ({sub.name})
-                </option>
-              ))}
+              {subclasses.length > 0
+                ? subclasses.map((sub) => (
+                    <option key={sub.index} value={sub.index}>
+                      {sub.nameFr} ({sub.name})
+                    </option>
+                  ))
+                : profile?.subclassIndex && (
+                    <option value={profile.subclassIndex}>{profile.subclassIndex}</option>
+                  )}
             </select>
           </label>
           <button
             type="button"
-            aria-label="Deselectionner la sous-classe"
+            aria-label={`Deselectionner la sous-classe (${blockLabel})`}
             disabled={!profile?.subclassIndex}
             onClick={() =>
               profile && onChange({ ...profile, subclassIndex: null, subclassFeatureIndex: null })
@@ -152,6 +190,16 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
           >
             &times;
           </button>{' '}
+          {subclasses.length === 0 && (
+            <p role="alert">
+              {subclassesError
+                ? `Liste des sous-classes indisponible (${subclassesError})`
+                : subclassesLoading
+                  ? 'Chargement de la liste des sous-classes...'
+                  : 'Sous-classe enregistree introuvable dans la liste actuelle.'}{' '}
+              <em>Subclass list unavailable</em>
+            </p>
+          )}
         </>
       )}
       {profile?.subclassIndex && subclassFeatureOptions.length > 0 && (
@@ -174,7 +222,7 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
           </label>
           <button
             type="button"
-            aria-label="Deselectionner le terrain"
+            aria-label={`Deselectionner le terrain (${blockLabel})`}
             disabled={!profile.subclassFeatureIndex}
             onClick={() => onChange({ ...profile, subclassFeatureIndex: null })}
           >
@@ -192,6 +240,6 @@ export function SpellcasterProfileForm({ classes, profile, onChange }: Spellcast
           Niveau de sort max : {hasLevel ? maxSpellLevel : 'tous'} <em>Max spell level</em>
         </p>
       )}
-    </div>
+    </fieldset>
   )
 }

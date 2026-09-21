@@ -9,10 +9,12 @@ export interface SpellAccessData {
   subclassGrants: SubclassSpellGrant[] | null
 }
 
+export type SpellAccessCheck = (index: string, level: number) => boolean
+
 /**
- * Regle d'accessibilite d'un sort pour UN profil (une classe). Partagee entre
- * useSpellAccess (un seul bloc) et useMultiSpellAccess (union sur plusieurs
- * blocs, multiclasse) pour ne jamais la dupliquer.
+ * Regle d'accessibilite d'un sort pour UN profil (une classe). Utilisee par
+ * useMultiSpellAccess (union sur plusieurs blocs, multiclasse) pour ne jamais
+ * dupliquer la regle.
  */
 export function isSpellAccessibleForProfile(
   profile: SpellcasterProfile,

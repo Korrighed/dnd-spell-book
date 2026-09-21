@@ -1,6 +1,16 @@
 .spellcaster-profile {
+  /* <fieldset> pour grouper les champs sous un nom accessible (<legend>) ;
+     reinitialise son rendu natif (bordure/marge de groupe) pour garder le style plat existant. */
+  margin: 0;
+  border: none;
   padding: 8px 0;
   border-bottom: 1px solid var(--border);
+}
+
+.spellcaster-profile legend {
+  padding: 0;
+  font-size: 0.85em;
+  color: var(--text);
 }
 
 .spellcaster-profile select,

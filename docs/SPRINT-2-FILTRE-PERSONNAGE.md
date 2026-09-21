@@ -46,17 +46,38 @@ Clef `localStorage` unique : `dnd-personal-spellbook`, format v4 (lecture tolér
 
 | Fichier | Rôle |
 |---|---|
-| `src/hooks/usePersonalSpellbook.ts` | Stockage v4 : personnages, profils, sorts sauvegardés, isolation par onglet |
-| `src/hooks/useSpellAccess.ts` | Accessibilité pour un seul bloc classe/sous-classe |
-| `src/hooks/useMultiSpellAccess.ts` | Union sur plusieurs blocs (multiclasse) |
+| `src/hooks/usePersonalSpellbook.ts` | Stockage v4 : personnages, profils (identifiés par `id`), sorts sauvegardés, isolation par onglet |
+| `src/hooks/useMultiSpellAccess.ts` | Union sur plusieurs blocs (multiclasse), expose aussi `perProfile` (donnée par bloc, un seul fetch partagé) |
 | `src/hooks/useMultiKeyedFetch.ts` | Fetch/cache pour une liste de clefs (évite les hooks en boucle) |
-| `src/utils/spellAccess.ts` | Règle d'accessibilité, fonction pure partagée entre les deux hooks ci-dessus |
+| `src/utils/spellAccess.ts` | Règle d'accessibilité (fonction pure) et type `SpellAccessCheck` partagés |
 | `src/api/subclasses.ts` | Sous-classes d'une classe et sorts qu'elles accordent |
 | `src/data/subclassUnlockLevel.ts` | Niveau de déblocage de la sous-classe, par classe |
 | `src/components/SpellcasterProfileForm.tsx` | Un bloc classe/niveau/sous-classe/terrain, autonome |
 | `src/components/CharacterSelector.tsx` | Sélection, création, suppression, renommage de personnage |
 | `src/components/PersonalSpellbookPanel.tsx` | Liste des sorts sauvegardés du personnage actif |
 | `src/App.tsx` | Compose l'ensemble |
+
+## Fait — revue de code et corrections
+
+Revue du diff `dev..feature/spell-detail-layout` par trois angles (architecture, frontend, robustesse) le 2026-09-21. Corrections retenues et appliquées :
+
+- **Boucle d'écriture infinie entre onglets** : chaque onglet réécrivait son propre `activeCharacterId` dans le `localStorage` partagé en réaction à l'écriture de l'autre, ce qui redéclenchait un event `storage` en retour, indéfiniment, dès que deux onglets avaient des personnages actifs différents. Corrigé par un flag (`skipNextPersist`) qui empêche de réécrire le stockage quand la mise à jour vient d'un autre onglet.
+- **`crypto.randomUUID()` absent → écran blanc** : sans repli, l'app entière plantait au démarrage hors contexte sécurisé (HTTPS/localhost) ou sur très vieux navigateur. `generateId()` retombe sur un id manuel si `crypto.randomUUID` n'existe pas.
+- **Fetch dupliqué entre bloc et vue globale** : `SpellcasterProfileForm` ne fait plus son propre fetch (ancien `useSpellAccess`, supprimé, devenu inutile) ; il reçoit `maxSpellLevel`/`subclassSpellGrants`/`loading`/`error` calculés une seule fois par `useMultiSpellAccess` (champ `perProfile`, un élément par profil).
+- **Cascade de fetchs redondants** dans `useMultiKeyedFetch` (résoudre une clef relançait un fetch pour toutes les clefs encore en attente) : corrigé avec un `Set` des clefs en vol.
+- **Profils adressés par position (`index`) au lieu d'un id stable** : un event `storage` peut remplacer le tableau `profiles` sous le formulaire, un `onChange` déclenché ensuite écrivait alors sur le mauvais bloc. `SpellcasterProfile` porte maintenant un `id`, `setProfileAt`/`removeProfileAt` sont devenus `setProfileById`/`removeProfileById`.
+- **Sous-classe qui disparaît de l'UI sans se désactiver** : si le fetch de la liste des sous-classes échoue ou est encore en cours, le dropdown (et son bouton pour la retirer) restent maintenant visibles tant que le profil a une sous-classe enregistrée, avec un message d'erreur/chargement explicite.
+- **Suppression de personnage sans confirmation** : ajout d'une confirmation bloquante (`window.confirm`), seule action de l'app qui en a une — c'est aussi la seule irréversible sur des données entières (sorts + classes), contrairement au retrait d'un sort.
+- **Renommage écrit à chaque frappe** : passé en brouillon local, commité seulement au blur/Entrée, avec garde contre un nom vide.
+- **Boutons non distinctifs en multiclasse** : chaque bloc est un `<fieldset>` nommé (`<legend>`), les `aria-label` incluent le nom de la classe du bloc.
+- **`SPECS.md` périmé** sur l'existence d'une entité personnage et la désactivation des fonctions interactives hors profil : mis à jour pour refléter les décisions réelles.
+
+Décisions différées (rapportées mais non corrigées, avec la raison) :
+
+- **Versionnage du stockage devine la forme des données plutôt que lire `version`** : fonctionne jusqu'à v4 car chaque version a changé le conteneur de tête, mais fragile pour une v5 qui changerait la structure interne d'un personnage. Refonte (`switch` explicite sur `version`) jugée trop risquée à faire vite dans un fichier déjà dense en logique de migration, sans tests. À reprendre si une v5 est nécessaire.
+- **`useKeyedFetch`/`useMultiKeyedFetch` ne retentent jamais une clef en échec** : dette déjà connue et acceptée pour `useKeyedFetch` ; confirmée présente aussi dans `useMultiKeyedFetch`. Pas de correction : demande un mécanisme de retry (bouton ou minuterie) hors périmètre de cette revue.
+- **`localStorage.clear()` recrée un personnage par défaut qui écrase le clear** : examiné, jugé être le comportement correct pour une app qui doit continuer à fonctionner (pas de meilleure alternative sans un état "app cassée" explicite).
+- **Bascule silencieuse dans un autre onglet si le personnage qu'il affiche est supprimé ailleurs** : pas de notification (pas de système de toast dans l'app). Comportement de repli déjà correct (pas de crash, pas de perte de données), juste sans avertissement.
 
 ## Clos — sorts interclasses / règles maison
 

@@ -39,9 +39,9 @@ function App() {
     remove: removeFromSpellbook,
     toggle: toggleSpellbook,
     profiles,
-    setProfileAt,
+    setProfileById,
     addProfile,
-    removeProfileAt,
+    removeProfileById,
     characters,
     activeCharacterId,
     setActiveCharacterId,
@@ -50,7 +50,7 @@ function App() {
     renameCharacter,
   } = usePersonalSpellbook()
   const { spellcastingClasses, error: spellcastingClassesError } = useSpellcastingClasses(classes)
-  const { isAccessible } = useMultiSpellAccess(profiles)
+  const { isAccessible, perProfile } = useMultiSpellAccess(profiles)
   const {
     detail: selectedSpell,
     loading: detailLoading,
@@ -158,7 +158,7 @@ function App() {
 
       <DevFrame
         name="PersonalSpellbookPanel"
-        uses={['usePersonalSpellbook', 'useSpellList', 'useSpellAccess', 'state:selectedIndex']}
+        uses={['usePersonalSpellbook', 'useSpellList', 'useMultiSpellAccess', 'state:selectedIndex']}
       >
         <PersonalSpellbookPanel
           spells={personalSpells}
@@ -181,26 +181,34 @@ function App() {
               {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
               {profiles.map((profile, index) => (
                 <DevFrame
-                  key={index}
+                  key={profile.id}
                   name={`SpellcasterProfileForm (classe ${index + 1})`}
-                  uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useSpellAccess']}
+                  uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useMultiSpellAccess']}
                 >
                   <SpellcasterProfileForm
                     classes={spellcastingClasses}
                     profile={profile}
+                    maxSpellLevel={perProfile[index].maxSpellLevel}
+                    subclassSpellGrants={perProfile[index].subclassSpellGrants}
+                    loading={perProfile[index].loading}
+                    error={perProfile[index].error}
                     onChange={(next) =>
-                      next ? setProfileAt(index, next) : removeProfileAt(index)
+                      next ? setProfileById(profile.id, next) : removeProfileById(profile.id)
                     }
                   />
                 </DevFrame>
               ))}
               <DevFrame
                 name="SpellcasterProfileForm (ajouter une classe)"
-                uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useSpellAccess']}
+                uses={['usePersonalSpellbook', 'useSpellcastingClasses']}
               >
                 <SpellcasterProfileForm
                   classes={spellcastingClasses}
                   profile={null}
+                  maxSpellLevel={null}
+                  subclassSpellGrants={null}
+                  loading={false}
+                  error={null}
                   onChange={(next) => {
                     if (next) addProfile(next)
                   }}
@@ -221,7 +229,7 @@ function App() {
             'state:filtres',
             'useClassSpellIndices',
             'useSchoolSpellIndices',
-            'useSpellAccess',
+            'useMultiSpellAccess',
             'state:hideOutOfProfile',
             'state:selectedIndex',
           ]}
@@ -246,7 +254,7 @@ function App() {
           uses={[
             'useSpellDetail',
             'usePersonalSpellbook',
-            'useSpellAccess',
+            'useMultiSpellAccess',
             'state:language',
             'state:selectedIndex',
           ]}

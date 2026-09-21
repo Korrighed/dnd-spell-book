@@ -19,7 +19,7 @@ const SOURCE_COLORS: Record<string, string> = {
   useSchoolSpellIndices: '#911eb4',
   usePersonalSpellbook: '#f032e6',
   useSpellcastingClasses: '#bcf60c',
-  useSpellAccess: '#46f0f0',
+  useMultiSpellAccess: '#46f0f0',
   useSpellDetail: '#fabebe',
   'state:search': '#aaffc3',
   'state:filtres': '#ffe119',

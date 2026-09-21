@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { PersonalSpell } from '../hooks/usePersonalSpellbook'
 import type { SpellListItem } from '../api/spells'
-import type { SpellAccessCheck } from '../hooks/useSpellAccess'
+import type { SpellAccessCheck } from '../utils/spellAccess'
 import { OutOfProfileLabel } from './OutOfProfileLabel'
 import './PersonalSpellbookPanel.css'
 

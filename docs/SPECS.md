@@ -2,7 +2,7 @@
 
 ## Grimoire et filtrage
 
-Un seul grimoire pour tous les sorts. Pas de sous-grimoire par classe, pas de livre séparé par classe, pas d'entité "personnage". Les pré-filtres (niveau, classe) sont portés directement par le **grimoire personnel**, pas par un objet personnage à part.
+Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par classe, pas de livre séparé par classe. Depuis le Sprint 2 (voir `SPRINT-2-FILTRE-PERSONNAGE.md`), un grimoire personnel équivaut à un personnage (`id`, nom, sorts, profils de classe) ; plusieurs personnages peuvent être enregistrés, chacun avec son propre grimoire. Les pré-filtres (niveau, classe, sous-classe) sont portés par les profils du personnage actif.
 
 ### Pré-tri par niveau et classe
 
@@ -16,7 +16,7 @@ Un seul grimoire pour tous les sorts. Pas de sous-grimoire par classe, pas de li
 
 - Bouton "Ajouter au grimoire personnel" sur chaque fiche de sort.
 - Stockage local navigateur (JSON simple, `localStorage` ou `IndexedDB`) — structure de données choisie pour faciliter un bundling PWA facile plus tard (service worker, manifest), sans construire la coquille PWA dès maintenant.
-- **Sort filtré après coup, jamais supprimé** : si un sort déjà enregistré dans le grimoire personnel sort du pré-filtre (changement de niveau/classe appliqué après l'ajout du sort), il n'est jamais retiré du grimoire. Sa page reste consultable et son contenu lisible, mais avec un aplat grisé et toutes les fonctions interactives de la page désactivées (sélecteur de niveau d'incantation, futur bouton de lancer de dés, etc.).
+- **Sort filtré après coup, jamais supprimé** : si un sort déjà enregistré dans le grimoire personnel sort du pré-filtre (changement de niveau/classe appliqué après l'ajout du sort), il n'est jamais retiré du grimoire. Sa page reste consultable et son contenu lisible, avec un aplat grisé et une mention « hors profil ». Décision du Sprint 2 (contraire à l'intention d'origine ci-dessus) : les fonctions interactives de la fiche restent actives (ex. bouton grimoire), aucune n'est désactivée pour l'instant — à revoir si un futur sélecteur de niveau d'incantation ou lancer de dés est ajouté.
 
 ## Sélection du niveau d'incantation (indicatif)
 

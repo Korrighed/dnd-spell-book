@@ -7,6 +7,8 @@ export interface PersonalSpell {
 
 /** Personnage de reference : sert a deduire les sorts accessibles. */
 export interface SpellcasterProfile {
+  /** Identite stable du bloc, independante de sa position dans le tableau. */
+  id: string
   classIndex: string
   /** `null` : niveau non precise, equivalent au niveau max (tous les sorts de la classe). */
   characterLevel: number | null
@@ -72,8 +74,22 @@ function writeActiveCharacterIdForThisTab(id: string) {
 export const MIN_CHARACTER_LEVEL = 1
 export const MAX_CHARACTER_LEVEL = 20
 
+/**
+ * `crypto.randomUUID` n'existe pas hors contexte securise (HTTPS/localhost)
+ * ni sur les tres vieux navigateurs. Sans repli, l'exception remontait non
+ * rattrapee jusqu'a l'initialiseur de useState (le catch de readSpellbook
+ * rappelle createDefaultState, qui relance le meme throw hors du try) et
+ * l'app entiere restait en ecran blanc.
+ */
+function generateId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 function createCharacter(name: string): Character {
-  return { id: crypto.randomUUID(), name, spells: [], profiles: [] }
+  return { id: generateId(), name, spells: [], profiles: [] }
 }
 
 function createDefaultState(): RootState {
@@ -87,8 +103,13 @@ function isPersonalSpell(value: unknown): value is PersonalSpell {
   return typeof candidate.index === 'string' && typeof candidate.addedAt === 'string'
 }
 
-/** Forme tolerante : `subclassIndex`/`subclassFeatureIndex` absents sur les profils v2 anterieurs. */
+/**
+ * Forme tolerante : `subclassIndex`/`subclassFeatureIndex` absents sur les
+ * profils v2 anterieurs, `id` absent sur tous les profils avant l'ajout de
+ * l'identite stable (voir SpellcasterProfile).
+ */
 interface StoredProfileShape {
+  id?: unknown
   classIndex: string
   characterLevel: number | null
   subclassIndex?: string | null
@@ -117,6 +138,7 @@ function isStoredProfile(value: unknown): value is StoredProfileShape {
 
 function normalizeProfile(stored: StoredProfileShape): SpellcasterProfile {
   return {
+    id: typeof stored.id === 'string' ? stored.id : generateId(),
     classIndex: stored.classIndex,
     characterLevel: stored.characterLevel,
     subclassIndex: stored.subclassIndex ?? null,
@@ -198,7 +220,7 @@ function readSpellbook(): RootState {
 
     // v1/v2/v3.
     const character: Character = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       name: DEFAULT_CHARACTER_NAME,
       spells: parseSpells(envelope.spells),
       profiles: Array.isArray(envelope.profiles)
@@ -233,6 +255,15 @@ function initState(): RootState {
 export function usePersonalSpellbook() {
   const [state, setState] = useState<RootState>(initState)
   const hydrated = useRef(false)
+  /**
+   * Quand cet onglet reagit a un event `storage` venu d'un AUTRE onglet, il ne
+   * doit rien reecrire : sinon chaque onglet reimpose son propre
+   * `activeCharacterId` dans l'enveloppe partagee en reponse a l'ecriture de
+   * l'autre, ce qui redeclenche un nouvel event `storage` en retour, et ainsi
+   * de suite indefiniment des que deux onglets ont des personnages actifs
+   * differents (exactement le cas d'usage vise par l'isolation par onglet).
+   */
+  const skipNextPersist = useRef(false)
 
   const activeCharacter =
     state.characters.find((character) => character.id === state.activeCharacterId) ??
@@ -247,19 +278,28 @@ export function usePersonalSpellbook() {
       hydrated.current = true
       return
     }
+    // Etat recu d'un autre onglet via `storage` : deja coherent avec ce qui est
+    // stocke, ne rien reecrire (voir le commentaire sur skipNextPersist).
+    if (skipNextPersist.current) {
+      skipNextPersist.current = false
+      return
+    }
     writeSpellbook(state)
     writeActiveCharacterIdForThisTab(state.activeCharacterId)
   }, [state])
 
   useEffect(() => {
     // L'evenement `storage` n'est emis que dans les AUTRES onglets, jamais dans celui
-    // qui ecrit. Relire le stockage ici ne peut donc pas boucler avec l'effet d'ecriture.
+    // qui ecrit : recevoir cet event ne peut donc pas boucler avec l'ecriture de CET
+    // onglet. Mais la mise a jour d'etat qu'il declenche ici peut, elle, redeclencher
+    // l'effet d'ecriture ci-dessus si on ne la neutralise pas (skipNextPersist).
     // Seules les DONNEES des personnages sont reprises : le personnage actif reste
     // propre a cet onglet, sinon deux fenetres ouvertes sur deux personnages
     // differents se forceraient mutuellement a afficher le meme.
     function handleStorage(event: StorageEvent) {
       if (event.key !== null && event.key !== STORAGE_KEY) return
       const fresh = readSpellbook()
+      skipNextPersist.current = true
       setState((prev) => ({
         characters: fresh.characters,
         activeCharacterId: fresh.characters.some(
@@ -322,31 +362,34 @@ export function usePersonalSpellbook() {
     [updateActiveCharacter],
   )
 
-  const setProfileAt = useCallback(
-    (profileIndex: number, next: SpellcasterProfile) => {
+  const setProfileById = useCallback(
+    (id: string, next: SpellcasterProfile) => {
       updateActiveCharacter((character) => ({
         ...character,
-        profiles: character.profiles.map((profile, i) => (i === profileIndex ? next : profile)),
+        profiles: character.profiles.map((profile) => (profile.id === id ? next : profile)),
       }))
     },
     [updateActiveCharacter],
   )
 
   const addProfile = useCallback(
+    // L'id est assigne ici, pas par l'appelant : un evenement `storage` peut
+    // remplacer le tableau `profiles` entre-temps, adresser par position
+    // (l'ancien `setProfileAt`/`removeProfileAt`) ecrivait alors sur le mauvais bloc.
     (profile: SpellcasterProfile) => {
       updateActiveCharacter((character) => ({
         ...character,
-        profiles: [...character.profiles, profile],
+        profiles: [...character.profiles, { ...profile, id: generateId() }],
       }))
     },
     [updateActiveCharacter],
   )
 
-  const removeProfileAt = useCallback(
-    (profileIndex: number) => {
+  const removeProfileById = useCallback(
+    (id: string) => {
       updateActiveCharacter((character) => ({
         ...character,
-        profiles: character.profiles.filter((_, i) => i !== profileIndex),
+        profiles: character.profiles.filter((profile) => profile.id !== id),
       }))
     },
     [updateActiveCharacter],
@@ -399,9 +442,9 @@ export function usePersonalSpellbook() {
     remove,
     toggle,
     has,
-    setProfileAt,
+    setProfileById,
     addProfile,
-    removeProfileAt,
+    removeProfileById,
     characters: state.characters.map(({ id, name }) => ({ id, name })),
     activeCharacterId: activeCharacter.id,
     setActiveCharacterId,
