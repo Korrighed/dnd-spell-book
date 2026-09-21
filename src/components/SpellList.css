@@ -30,3 +30,22 @@
 .spell-list .name-en {
   font-style: italic;
 }
+
+.spell-list .extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+  color: var(--text);
+  font-size: 0.85em;
+}
+
+.spell-list .extra > span:not(:last-child)::after {
+  content: '·';
+  margin-left: 8px;
+  color: var(--border);
+}
+
+.spell-list .range-en {
+  font-style: italic;
+}
