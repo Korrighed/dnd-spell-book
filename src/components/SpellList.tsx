@@ -27,21 +27,30 @@ export function SpellList({ spells, onSelect, isAccessible, summaries }: SpellLi
         const outOfProfile = isAccessible !== null && !isAccessible(spell.index, spell.level)
         const summary = summaries[spell.index]
         const name = LANGUAGE === 'fr' ? spell.nameFr : spell.name
+        const damage = summary && (LANGUAGE === 'fr' ? summary.damageFr : summary.damageEn)
 
         return (
           <li key={spell.index} className={outOfProfile ? 'out-of-profile' : undefined}>
             <button type="button" onClick={() => onSelect(spell.index)}>
-              <span className="level">Niv. {spell.level}</span>
+              <span className="level">
+                {LANGUAGE === 'fr' ? 'Niv.' : 'Lvl'} {spell.level}
+              </span>
               <span className="name">{name}</span>
               <span className="extra">
                 {summary ? (
                   <>
-                    {summary.damage && <span className="damage">{summary.damage}</span>}
-                    {summary.saveAbility && <span className="save">JS {summary.saveAbility}</span>}
+                    {damage && <span className="damage">{damage}</span>}
+                    {summary.saveAbility && (
+                      <span className="save">
+                        {LANGUAGE === 'fr' ? 'JS' : 'Save'} {summary.saveAbility}
+                      </span>
+                    )}
                     <span className="range">
                       {LANGUAGE === 'fr' ? summary.rangeFr : summary.rangeEn}
                     </span>
-                    <span className="shape">{summary.shapeFr}</span>
+                    <span className="shape">
+                      {LANGUAGE === 'fr' ? summary.shapeFr : summary.shapeEn}
+                    </span>
                   </>
                 ) : (
                   <span className="loading">…</span>

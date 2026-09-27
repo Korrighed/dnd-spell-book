@@ -64,6 +64,10 @@
 
 body {
   margin: 0;
+  /* Le canvas du livre est etire (scaleX Leva) et deborde de #root : sans
+     ca, barre de defilement horizontale. clip plutot que hidden : coupe au
+     bord du viewport sans creer de conteneur de defilement. */
+  overflow-x: clip;
 }
 
 h1,

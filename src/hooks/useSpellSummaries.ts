@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchSpellSummary, type SpellSummary } from '../api/spellSummary'
 import type { SpellListItem } from '../api/spells'
 
-const STORAGE_KEY = 'dnd-spell-book:spell-summaries:v1'
+// v2 : ajout de damageEn / shapeEn (damage renomme damageFr). Les entrees v1
+// n'ont pas ces champs : nouvelle cle plutot que de les relire.
+const STORAGE_KEY = 'dnd-spell-book:spell-summaries:v2'
+const LEGACY_STORAGE_KEY = 'dnd-spell-book:spell-summaries:v1'
 /**
  * `fetchSpellSummary` fait 2 requetes (en + fr) par sort. Un catalogue complet
  * (~319 sorts) au premier chargement, meme en tache de fond, ne doit pas saturer
@@ -12,6 +15,7 @@ const CONCURRENCY = 4
 
 function loadCache(): Record<string, SpellSummary> {
   try {
+    localStorage.removeItem(LEGACY_STORAGE_KEY)
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? (JSON.parse(raw) as Record<string, SpellSummary>) : {}
   } catch {

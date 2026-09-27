@@ -6,7 +6,8 @@
    :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
    profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md). */
 #grimoire .spell-list li:not(.out-of-profile),
-#grimoire .spell-list .extra {
+#grimoire .spell-list .extra,
+#grimoire .spell-list-pagination button {
   color: #000;
 }
 
@@ -19,7 +20,8 @@
     position: absolute;
     top: var(--spell-list-top, 175px);
     right: var(--spell-list-right, 3%);
-    width: var(--spell-list-width, 100%);
+    /* 47% et pas 100% : voir SpellDetailPanel.css, meme raison. */
+    width: var(--spell-list-width, 47%);
     height: var(--spell-list-height, 100%);
     /* Plafond fixe : le contenu de la liste ne peut jamais l'agrandir
        au-dela, quel que soit le nombre de sorts affiches. */

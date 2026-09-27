@@ -100,14 +100,20 @@ function App() {
     isAccessible,
   ])
 
-  // Remise a la premiere page a chaque changement de la liste filtree
-  // (recherche, filtres, profil) : une page 5 peut ne plus exister apres coup.
+  // Remise a la premiere page a chaque changement du CONTENU de la liste
+  // filtree (recherche, filtres, profil) : une page 5 peut ne plus exister
+  // apres coup. Comparaison sur les index, pas sur la reference du tableau :
+  // filteredSpells est recalcule des qu'isAccessible change (fin de chargement
+  // d'un profil, niveau modifie), meme quand la liste affichee est identique.
   // Comparaison pendant le rendu plutot que dans un effet (regle
-  // react-hooks/set-state-in-effect) : setPage ici est immediatement suivi
-  // d'un nouveau rendu par React, sans passer par le DOM entre les deux.
-  const [prevFilteredSpells, setPrevFilteredSpells] = useState(filteredSpells)
-  if (filteredSpells !== prevFilteredSpells) {
-    setPrevFilteredSpells(filteredSpells)
+  // react-hooks/set-state-in-effect).
+  const filteredKey = useMemo(
+    () => filteredSpells.map((spell) => spell.index).join(','),
+    [filteredSpells],
+  )
+  const [prevFilteredKey, setPrevFilteredKey] = useState(filteredKey)
+  if (filteredKey !== prevFilteredKey) {
+    setPrevFilteredKey(filteredKey)
     setPage(0)
   }
 
@@ -175,13 +181,6 @@ function App() {
           </p>
         )}
         {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
-
-        {loading && (
-          <p>
-            Chargement des sorts... <em>Loading spells...</em>
-          </p>
-        )}
-        {error && <p role="alert">{error}</p>}
 
         <DevFrame
           name="PersonalSpellbookPanel"
@@ -278,8 +277,16 @@ function App() {
           </>
         }
         right={
-          !loading &&
-          !error && (
+          <>
+            {/* Sur la page elle-meme, pas dans le panneau replie : sinon un
+                echec de l'API laisse une page vide sans explication. */}
+            {loading && (
+              <p>
+                Chargement des sorts... <em>Loading spells...</em>
+              </p>
+            )}
+            {error && <p role="alert">{error}</p>}
+            {!loading && !error && (
             <DevFrame
               name="SpellList"
               uses={[
@@ -306,7 +313,8 @@ function App() {
               />
               <SpellListPagination page={page} totalPages={totalPages} onChange={setPage} />
             </DevFrame>
-          )
+            )}
+          </>
         }
       />
 

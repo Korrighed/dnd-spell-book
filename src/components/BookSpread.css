@@ -57,6 +57,11 @@
 
 .book-page {
   min-width: 0;
+  /* Noir par heritage pour tout ce qui n'a pas de color explicite (compteur
+     de sorts, "Page X / Y", messages de chargement/erreur). Les elements qui
+     fixent deja leur color (li, .spell-detail...) sont forces a part dans
+     SpellListPanel.css / SpellDetailPanel.css. */
+  color: #000;
   /* Pas de marge interne : le texte se place directement par rapport aux
      bords (et au plafond max-*) de .spell-detail-panel / .spell-list-panel. */
   padding: 0;

@@ -1,4 +1,4 @@
-import { Suspense, useEffect, type CSSProperties } from 'react'
+import { Suspense, useEffect, useMemo, type CSSProperties } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Bounds, Center, useBounds, useGLTF } from '@react-three/drei'
 import { Leva, useControls } from 'leva'
@@ -72,6 +72,11 @@ export function BookCanvas() {
     scaleY: { value: 1, min: 0.3, max: 3, step: 0.01 },
   })
 
+  // Tableau memoise : un nouveau tableau a chaque rendu relancerait le
+  // recadrage de la camera a chaque frappe dans la recherche (App re-rend
+  // BookCanvas), pas seulement quand un reglage Leva change.
+  const refitTrigger = useMemo(() => [x, y, z, margin], [x, y, z, margin])
+
   const stretchStyle = {
     width: '100%',
     height: '100%',
@@ -89,7 +94,7 @@ export function BookCanvas() {
           <directionalLight position={[5, 5, 5]} intensity={1.5} />
           <Suspense fallback={null}>
             <Bounds fit clip observe margin={margin}>
-              <RefitOnChange trigger={[x, y, z, margin]} />
+              <RefitOnChange trigger={refitTrigger} />
               <SpellbookModel rotationDeg={{ x, y, z }} />
             </Bounds>
           </Suspense>

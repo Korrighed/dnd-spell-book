@@ -20,7 +20,11 @@
     position: absolute;
     top: var(--spell-detail-top, 160px);
     left: var(--spell-detail-left, 3%);
-    width: var(--spell-detail-width, 100%);
+    /* 47% et pas 100% : a 100% (plafonne a 710px), les deux pages se
+       chevauchaient sous ~1590px de fenetre. 3% + 47% + 47% + 3% = 100% :
+       jamais de chevauchement, et au-dela de ~1510px de livre le plafond
+       710px reprend la main comme avant. */
+    width: var(--spell-detail-width, 47%);
     height: var(--spell-detail-height, 88%);
     /* Plafond fixe : le contenu de la fiche ne peut jamais l'agrandir
        au-dela, quelle que soit sa longueur. */
