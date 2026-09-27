@@ -27,10 +27,6 @@
   flex-shrink: 0;
 }
 
-.spell-list .name-en {
-  font-style: italic;
-}
-
 .spell-list .extra {
   display: flex;
   flex-wrap: wrap;
@@ -44,8 +40,4 @@
   content: '·';
   margin-left: 8px;
   color: var(--border);
-}
-
-.spell-list .range-en {
-  font-style: italic;
 }
