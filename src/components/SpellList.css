@@ -41,3 +41,18 @@
   margin-left: 8px;
   color: var(--border);
 }
+
+/* Mobile : seulement niveau, nom et portee (place limitee sur une page du
+   livre). Le reste reste dans la fiche du sort. */
+@media (max-width: 899px) {
+  .spell-list .damage,
+  .spell-list .save,
+  .spell-list .shape {
+    display: none;
+  }
+
+  /* La portee devient le dernier element visible : pas de separateur. */
+  .spell-list .extra > .range::after {
+    content: none;
+  }
+}
