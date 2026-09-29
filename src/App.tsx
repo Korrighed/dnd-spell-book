@@ -19,7 +19,7 @@ import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
 import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
 import { CharacterSelector } from './components/CharacterSelector'
 import { BookSpread } from './components/BookSpread'
-import { MOBILE_QUERY } from './hooks/useMediaQuery'
+import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery'
 import type { BookPage } from './hooks/useHorizontalSwipe'
 import { SpellListPagination } from './components/SpellListPagination'
 import { matchesSearch } from './utils/text'
@@ -27,7 +27,8 @@ import type { LanguageMode } from './types/language'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
-const SPELLS_PER_PAGE = 15
+const SPELLS_PER_PAGE_DESKTOP = 15
+const SPELLS_PER_PAGE_MOBILE = 8
 
 function App() {
   const { spells, loading, error } = useSpellList()
@@ -54,6 +55,8 @@ function App() {
     }
   }
   const [page, setPage] = useState(0)
+  const isMobile = useMediaQuery(MOBILE_QUERY)
+  const spellsPerPage = isMobile ? SPELLS_PER_PAGE_MOBILE : SPELLS_PER_PAGE_DESKTOP
   const [language, setLanguage] = useState<LanguageMode>('fr')
   const {
     spells: personalSpells,
@@ -132,10 +135,15 @@ function App() {
     setPage(0)
   }
 
-  const totalPages = Math.max(1, Math.ceil(filteredSpells.length / SPELLS_PER_PAGE))
+  const totalPages = Math.max(1, Math.ceil(filteredSpells.length / spellsPerPage))
+  // Le changement de gabarit d'ecran (spellsPerPage) peut rendre la page
+  // courante hors bornes (ex. page 4 avec 15/page, resize vers 8/page).
+  if (page >= totalPages) {
+    setPage(totalPages - 1)
+  }
   const pagedSpells = filteredSpells.slice(
-    page * SPELLS_PER_PAGE,
-    (page + 1) * SPELLS_PER_PAGE,
+    page * spellsPerPage,
+    (page + 1) * spellsPerPage,
   )
 
   const selectedOutOfProfile =
