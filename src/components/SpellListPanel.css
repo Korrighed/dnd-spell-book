@@ -15,26 +15,24 @@
    independantes de .book-spread-pages et de .spell-detail-panel : les
    changer ici ne bouge jamais la fiche, ni le canvas du livre (voir
    BookSpread.css). */
-@media (min-width: 900px) {
-  .spell-list-panel {
-    position: absolute;
-    top: var(--spell-list-top, 175px);
-    right: var(--spell-list-right, 3%);
-    /* 47% et pas 100% : voir SpellDetailPanel.css, meme raison. */
-    width: var(--spell-list-width, 47%);
-    height: var(--spell-list-height, 100%);
-    /* Plafond fixe : le contenu de la liste ne peut jamais l'agrandir
-       au-dela, quel que soit le nombre de sorts affiches. */
-    max-width: var(--spell-list-max-width, 710px);
-    max-height: var(--spell-list-max-height, 656px);
-  }
+.spell-list-panel {
+  position: absolute;
+  top: var(--spell-list-top, 175px);
+  right: var(--spell-list-right, 3%);
+  /* 47% et pas 100% : voir SpellDetailPanel.css, meme raison. */
+  width: var(--spell-list-width, 47%);
+  height: var(--spell-list-height, 100%);
+  /* Plafond fixe : le contenu de la liste ne peut jamais l'agrandir
+     au-dela, quel que soit le nombre de sorts affiches. */
+  max-width: var(--spell-list-max-width, 710px);
+  max-height: var(--spell-list-max-height, 656px);
+}
 
-  /* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
-     visible seulement avec le bouton "Afficher les cadres dev". Verte pour
-     la distinguer du canvas (rouge) et de la fiche (bleue). Montre la boite
-     REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
-  .dev-frames .spell-list-panel {
-    outline: 2px dashed limegreen;
-    outline-offset: -2px;
-  }
+/* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
+   visible seulement avec le bouton "Afficher les cadres dev". Verte pour
+   la distinguer du canvas (rouge) et de la fiche (bleue). Montre la boite
+   REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
+.dev-frames .spell-list-panel {
+  outline: 2px dashed limegreen;
+  outline-offset: -2px;
 }

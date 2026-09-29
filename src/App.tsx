@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSpellList } from './hooks/useSpellList'
 import { useClassList } from './hooks/useClassList'
 import { useClassSpellIndices } from './hooks/useClassSpellIndices'
@@ -19,6 +19,8 @@ import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
 import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
 import { CharacterSelector } from './components/CharacterSelector'
 import { BookSpread } from './components/BookSpread'
+import { MOBILE_QUERY } from './hooks/useMediaQuery'
+import type { BookPage } from './hooks/useHorizontalSwipe'
 import { SpellListPagination } from './components/SpellListPagination'
 import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
@@ -38,6 +40,19 @@ function App() {
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
   const [hideOutOfProfile, setHideOutOfProfile] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
+  // Mobile : page du livre visible (liste par defaut). Bascule automatique
+  // vers la fiche a la PREMIERE selection d'un sort seulement, pour montrer
+  // que l'autre page existe. Flag en memoire (pas sessionStorage) : un
+  // rechargement de la page rearme la bascule.
+  const [mobilePage, setMobilePage] = useState<BookPage>('right')
+  const hasAutoSwitchedPage = useRef(false)
+  const handleSelectSpell = (index: string) => {
+    setSelectedIndex(index)
+    if (!hasAutoSwitchedPage.current && window.matchMedia(MOBILE_QUERY).matches) {
+      hasAutoSwitchedPage.current = true
+      setMobilePage('left')
+    }
+  }
   const [page, setPage] = useState(0)
   const [language, setLanguage] = useState<LanguageMode>('fr')
   const {
@@ -190,7 +205,7 @@ function App() {
             spells={personalSpells}
             allSpells={spells}
             selectedIndex={selectedIndex}
-            onSelectSpell={setSelectedIndex}
+            onSelectSpell={handleSelectSpell}
             onRemoveSpell={removeFromSpellbook}
             profileForm={
               <>
@@ -248,6 +263,8 @@ function App() {
       </details>
 
       <BookSpread
+        mobilePage={mobilePage}
+        onMobilePageChange={setMobilePage}
         left={
           <>
             {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
@@ -307,7 +324,7 @@ function App() {
               </p>
               <SpellList
                 spells={pagedSpells}
-                onSelect={setSelectedIndex}
+                onSelect={handleSelectSpell}
                 isAccessible={isAccessible}
                 summaries={spellSummaries}
               />

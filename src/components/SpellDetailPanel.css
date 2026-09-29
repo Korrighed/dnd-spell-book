@@ -15,29 +15,27 @@
 /* Position et taille de la page de gauche (fiche de sort), independantes de
    .book-spread-pages et de .spell-list-panel : les changer ici ne bouge
    jamais la liste, ni le canvas du livre (voir BookSpread.css). */
-@media (min-width: 900px) {
-  .spell-detail-panel {
-    position: absolute;
-    top: var(--spell-detail-top, 160px);
-    left: var(--spell-detail-left, 3%);
-    /* 47% et pas 100% : a 100% (plafonne a 710px), les deux pages se
-       chevauchaient sous ~1590px de fenetre. 3% + 47% + 47% + 3% = 100% :
-       jamais de chevauchement, et au-dela de ~1510px de livre le plafond
-       710px reprend la main comme avant. */
-    width: var(--spell-detail-width, 47%);
-    height: var(--spell-detail-height, 88%);
-    /* Plafond fixe : le contenu de la fiche ne peut jamais l'agrandir
-       au-dela, quelle que soit sa longueur. */
-    max-width: var(--spell-detail-max-width, 710px);
-    max-height: var(--spell-detail-max-height, 647px);
-  }
+.spell-detail-panel {
+  position: absolute;
+  top: var(--spell-detail-top, 160px);
+  left: var(--spell-detail-left, 3%);
+  /* 47% et pas 100% : a 100% (plafonne a 710px), les deux pages se
+     chevauchaient sous ~1590px de fenetre. 3% + 47% + 47% + 3% = 100% :
+     jamais de chevauchement, et au-dela de ~1510px de livre le plafond
+     710px reprend la main comme avant. */
+  width: var(--spell-detail-width, 47%);
+  height: var(--spell-detail-height, 88%);
+  /* Plafond fixe : le contenu de la fiche ne peut jamais l'agrandir
+     au-dela, quelle que soit sa longueur. */
+  max-width: var(--spell-detail-max-width, 710px);
+  max-height: var(--spell-detail-max-height, 647px);
+}
 
-  /* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
-     visible seulement avec le bouton "Afficher les cadres dev". Bleu pour
-     la distinguer du canvas (rouge) et de la liste (verte). Montre la boite
-     REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
-  .dev-frames .spell-detail-panel {
-    outline: 2px dashed dodgerblue;
-    outline-offset: -2px;
-  }
+/* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
+   visible seulement avec le bouton "Afficher les cadres dev". Bleu pour
+   la distinguer du canvas (rouge) et de la liste (verte). Montre la boite
+   REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
+.dev-frames .spell-detail-panel {
+  outline: 2px dashed dodgerblue;
+  outline-offset: -2px;
 }
