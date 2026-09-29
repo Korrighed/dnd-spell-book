@@ -65,6 +65,7 @@ Principe de l'option C :
 - [ ] 12. **Vérification** : test réel sur mobile (ou émulation DevTools), portrait. Vérifier le swipe, le peek, la bascule unique, le scroll vertical dans les pages, le desktop inchangé.
 - [ ] 13. **Revue de code** puis corrections, comme au sprint 2.
 - [ ] 14. **Performance (en tout dernier, seulement si ralentissements constatés)** : le canvas rend plus de pixels que l'écran (bande large). Piste : plafonner le `dpr` du `Canvas` en mobile.
+- [ ] 15. **Desktop non responsive à la taille physique de l'écran** : constaté le 2026-09-30, écran 21" à 100 % correct, sur écran 15" au même zoom navigateur (100 %) le rendu est trop grand — il faut dézoomer à 90 % pour retrouver un résultat correct. Cause probable : positions/tailles en `px` fixes (pages, canvas, cadrage) qui ne tiennent pas compte de la taille physique de l'écran, seulement de la résolution CSS. Piste : convertir les valeurs `px` clés (`BookSpread.css`, `BookCanvas`, panneaux) en unités relatives (`%`, `vw`/`vh`, `rem`) pour que la mise en page s'adapte à la fenêtre plutôt qu'à des pixels absolus. À traiter après le réglage mobile (étapes 5-6).
 
 ## Points ouverts
 
