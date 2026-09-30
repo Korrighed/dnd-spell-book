@@ -9,11 +9,13 @@
   /* Declarees UNE SEULE FOIS ici : .book-spread-canvas en herite par simple
      var(--book-frame-*), sans valeur de repli dupliquee ailleurs (source du
      desalignement precedent : changer le repli d'une seule des deux regles
-     les desynchronisait). */
-  --book-frame-top: 115px;
+     les desynchronisait).
+     Reglages MOBILE (< 900px) : voir BookSpread.mobile.css, qui surcharge ces
+     memes variables custom sur ce meme selecteur .book-spread. */
+  --book-frame-top: 6.78vh;
   --book-frame-left: 0px;
   --book-frame-width: 100%;
-  --book-frame-height: 80vh;
+  --book-frame-height: 85vh;
 }
 
 .book-spread-canvas {
@@ -69,84 +71,9 @@
 }
 
 /* Desktop : bande neutre, meme boite que .book-spread (le canvas et les
-   pages s'y placent exactement comme avant). */
+   pages s'y placent exactement comme avant). Mobile : voir
+   BookSpread.mobile.css (largeur/transform de la bande glissante). */
 .book-spread-strip {
   position: relative;
   height: 100%;
-}
-
-/* Mobile : .book-spread devient une fenetre sur une bande plus large que
-   l'ecran. La bande glisse d'une moitie du livre a l'autre (translateX), le
-   canvas n'est jamais recadre. Voir docs/SPRINT-3-RENDU-3D-RESPONSIVE.md.
-   Largeur de bande DERIVEE du peek (part d'ecran occupee par le bord de
-   l'autre page) : bande = 200 - 2 x peek, en % de la fenetre. Ex. peek 10
-   -> bande 180 %, la page active occupe 90 % de l'ecran. */
-@media (max-width: 899px) {
-  /* ===== REGLAGES MOBILE =====
-     Toutes les valeurs a ajuster a la main en mobile sont ICI, sur
-     .book-spread (inspecteur : selectionner .book-spread, panneau Styles).
-     Les pages en heritent : SpellDetailPanel.css / SpellListPanel.css lisent
-     var(--spell-detail-*) / var(--spell-list-*), leurs valeurs desktop ne
-     servent que de repli. Valeurs de depart calees a l'oeil sur 390x844. */
-  .book-spread {
-    /* Bord visible de l'autre page, en % de l'ecran (sans unite). */
-    --mobile-peek: 10;
-    /* Duree du glissement d'une page a l'autre. */
-    --mobile-slide-duration: 700ms;
-
-    /* Boite du canvas (taille du livre 3D). Plus haut = livre plus grand
-       seulement si c'est la hauteur qui limite le cadrage ; sinon passer
-       par l'etirement vertical ci-dessous. */
-    --book-frame-top: 0px;
-    --book-frame-height: 80vh;
-    /* Etirement vertical du rendu 3D en mobile, multiplie celui de Leva
-       (scaleY). 1 = aucun. */
-    --mobile-book-scale-y: 1;
-
-    /* Page gauche : fiche de sort. */
-    --spell-detail-top: 107px;
-    --spell-detail-height: 460px;
-    --spell-detail-max-height: none;
-
-    /* Page droite : liste. */
-    --spell-list-top: 107px;
-    --spell-list-height: 460px;
-    --spell-list-max-height: none;
-    /* ===== fin des reglages ===== */
-
-    /* Derive du peek : bande = 200 - 2 x peek (% de la fenetre). */
-    --mobile-strip-width: calc(200 - 2 * var(--mobile-peek));
-    /* Suit la boite du canvas : l'agrandir pousse le contenu en dessous
-       au lieu de deborder dessus. */
-    height: calc(var(--book-frame-top) + var(--book-frame-height));
-    /* clip et pas hidden : coupe seulement en x. */
-    overflow-x: clip;
-    /* Le scroll vertical reste au navigateur, le geste horizontal revient
-       a useHorizontalSwipe. */
-    touch-action: pan-y;
-  }
-
-  .book-spread-strip {
-    width: calc(var(--mobile-strip-width) * 1%);
-    transition: transform var(--mobile-slide-duration) ease-in-out;
-  }
-
-  .book-spread-canvas canvas {
-    transform: scaleX(var(--book-canvas-scale-x, 1))
-      scaleY(calc(var(--book-canvas-scale-y, 1) * var(--mobile-book-scale-y)));
-  }
-
-  /* translateX en % de la bande elle-meme : decale de (bande - 100 %) de
-     fenetre, pour aligner le bord droit de la bande sur celui de l'ecran. */
-  .book-spread[data-mobile-page='right'] .book-spread-strip {
-    transform: translateX(
-      calc((100 - var(--mobile-strip-width)) / var(--mobile-strip-width) * 100%)
-    );
-  }
-}
-
-@media (max-width: 899px) and (prefers-reduced-motion: reduce) {
-  .book-spread-strip {
-    transition: none;
-  }
 }

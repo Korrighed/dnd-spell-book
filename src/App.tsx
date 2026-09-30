@@ -27,8 +27,8 @@ import type { LanguageMode } from './types/language'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
-const SPELLS_PER_PAGE_DESKTOP = 15
-const SPELLS_PER_PAGE_MOBILE = 8
+const SPELLS_PER_PAGE_DESKTOP = 13
+const SPELLS_PER_PAGE_MOBILE = 15
 
 function App() {
   const { spells, loading, error } = useSpellList()

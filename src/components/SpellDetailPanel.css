@@ -17,18 +17,18 @@
    jamais la liste, ni le canvas du livre (voir BookSpread.css). */
 .spell-detail-panel {
   position: absolute;
-  top: var(--spell-detail-top, 160px);
-  left: var(--spell-detail-left, 3%);
-  /* 47% et pas 100% : a 100% (plafonne a 710px), les deux pages se
-     chevauchaient sous ~1590px de fenetre. 3% + 47% + 47% + 3% = 100% :
-     jamais de chevauchement, et au-dela de ~1510px de livre le plafond
-     710px reprend la main comme avant. */
-  width: var(--spell-detail-width, 47%);
-  height: var(--spell-detail-height, 88%);
+  top: var(--spell-detail-top, 12.78vh);
+  left: var(--spell-detail-left, 8%);
+  /* Largeur derivee des marges pour eviter tout chevauchement avec
+     .spell-list-panel : left + width + width(liste) + right doit toujours
+     faire 100%. Ne jamais changer une largeur ou une marge ici sans
+     reajuster l'autre page en consequence. */
+  width: var(--spell-detail-width, 100%);
+  height: var(--spell-detail-height, 100%);
   /* Plafond fixe : le contenu de la fiche ne peut jamais l'agrandir
      au-dela, quelle que soit sa longueur. */
-  max-width: var(--spell-detail-max-width, 710px);
-  max-height: var(--spell-detail-max-height, 647px);
+  max-width: var(--spell-detail-max-width, 80.89vh);
+  max-height: var(--spell-detail-max-height, 73.89vh);
 }
 
 /* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :

@@ -3,6 +3,7 @@ import { BookCanvas } from './BookCanvas'
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery'
 import { useHorizontalSwipe, type BookPage } from '../hooks/useHorizontalSwipe'
 import './BookSpread.css'
+import './BookSpread.mobile.css'
 import './SpellDetailPanel.css'
 import './SpellListPanel.css'
 

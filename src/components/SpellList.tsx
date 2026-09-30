@@ -4,6 +4,7 @@ import type { SpellAccessCheck } from '../utils/spellAccess'
 import { detectBrowserLanguage } from '../utils/browserLanguage'
 import { OutOfProfileLabel } from './OutOfProfileLabel'
 import './SpellList.css'
+import './SpellList.mobile.css'
 
 interface SpellListProps {
   spells: SpellListItem[]

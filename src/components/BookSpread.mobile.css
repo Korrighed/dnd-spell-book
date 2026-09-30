@@ -1,0 +1,74 @@
+/* Mobile (< 900px) : .book-spread devient une fenetre sur une bande plus
+   large que l'ecran. La bande glisse d'une moitie du livre a l'autre
+   (translateX), le canvas n'est jamais recadre. Voir
+   docs/SPRINT-3-RENDU-3D-RESPONSIVE.md.
+   Largeur de bande DERIVEE du peek (part d'ecran occupee par le bord de
+   l'autre page) : bande = 200 - 2 x peek, en % de la fenetre. Ex. peek 10
+   -> bande 180 %, la page active occupe 90 % de l'ecran.
+   Fichier separe de BookSpread.css (desktop) : ces reglages sont retouches
+   frequemment a l'oeil dans l'inspecteur, un fichier dedie evite de les
+   confondre avec les regles desktop pendant la relecture. */
+@media (max-width: 899px) {
+  /* ===== REGLAGES MOBILE =====
+     Toutes les valeurs a ajuster a la main en mobile sont ICI, sur
+     .book-spread (inspecteur : selectionner .book-spread, panneau Styles).
+     Les pages en heritent : SpellDetailPanel.css / SpellListPanel.css lisent
+     var(--spell-detail-*) / var(--spell-list-*), leurs valeurs desktop ne
+     servent que de repli. Valeurs de depart calees a l'oeil sur 390x844. */
+  .book-spread {
+    /* Bord visible de l'autre page, en % de l'ecran (sans unite). */
+    --mobile-peek: 10;
+    /* Duree du glissement d'une page a l'autre. */
+    --mobile-slide-duration: 700ms;
+
+    /* Boite du canvas (taille du livre 3D). Plus haut = livre plus grand
+       seulement si c'est la hauteur qui limite le cadrage ; sinon passer
+       par l'etirement vertical ci-dessous. */
+    --book-frame-top: 9vh;
+    --book-frame-height: 80vh;
+
+    /* Page gauche : fiche de sort. */
+    --spell-detail-top: 13.68vh;
+    --spell-detail-left: 0.5vh;
+    --spell-detail-width: 72vw;
+    --spell-detail-max-height: 72vh;
+
+    /* Page droite : liste. */
+    --spell-list-top: 13.68vh;
+    --spell-list-height: 72.5vh;
+    --spell-list-max-height: none;
+    --spell-list-right: 1%;
+    --spell-list-width: 47.5%;
+    /* ===== fin des reglages ===== */
+
+    /* Derive du peek : bande = 200 - 2 x peek (% de la fenetre). */
+    --mobile-strip-width: calc(200 - 2 * var(--mobile-peek));
+    /* Suit la boite du canvas : l'agrandir pousse le contenu en dessous
+       au lieu de deborder dessus. */
+    height: calc(var(--book-frame-top) + var(--book-frame-height));
+    /* clip et pas hidden : coupe seulement en x. */
+    overflow-x: clip;
+    /* Le scroll vertical reste au navigateur, le geste horizontal revient
+       a useHorizontalSwipe. */
+    touch-action: pan-y;
+  }
+
+  .book-spread-strip {
+    width: calc(var(--mobile-strip-width) * 1%);
+    transition: transform var(--mobile-slide-duration) ease-in-out;
+  }
+
+  /* translateX en % de la bande elle-meme : decale de (bande - 100 %) de
+     fenetre, pour aligner le bord droit de la bande sur celui de l'ecran. */
+  .book-spread[data-mobile-page='right'] .book-spread-strip {
+    transform: translateX(
+      calc((100 - var(--mobile-strip-width)) / var(--mobile-strip-width) * 100%)
+    );
+  }
+}
+
+@media (max-width: 899px) and (prefers-reduced-motion: reduce) {
+  .book-spread-strip {
+    transition: none;
+  }
+}

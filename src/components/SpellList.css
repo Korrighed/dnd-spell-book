@@ -41,11 +41,3 @@
   margin-left: 8px;
   color: var(--border);
 }
-
-/* Mobile : seulement niveau et nom (place limitee sur une page du livre).
-   Le reste reste dans la fiche du sort. */
-@media (max-width: 899px) {
-  .spell-list .extra {
-    display: none;
-  }
-}
