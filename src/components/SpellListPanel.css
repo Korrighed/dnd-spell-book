@@ -1,0 +1,39 @@
+/* Texte noir force : .spell-list li (SpellList.css) fixe color:
+   var(--text-h), qui vire quasi blanc en dark mode - invisible sur les pages
+   blanches du modele 3D. #grimoire donne la specificite necessaire (color ne
+   passe pas par specificite d'ancetre, seulement par heritage, donc il faut
+   viser directement l'element qui a deja un color explicite).
+   :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
+   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md). */
+#grimoire .spell-list li:not(.out-of-profile),
+#grimoire .spell-list .extra,
+#grimoire .spell-list-pagination button {
+  color: #000;
+}
+
+/* Position et taille de la page de droite (recherche/filtres/liste),
+   independantes de .book-spread-pages et de .spell-detail-panel : les
+   changer ici ne bouge jamais la fiche, ni le canvas du livre (voir
+   BookSpread.css). */
+.spell-list-panel {
+  position: absolute;
+  top: var(--spell-list-top, 12vh);
+  right: var(--spell-list-right, 8%);
+  /* Largeur derivee des marges, voir SpellDetailPanel.css, meme raison :
+     right + width + width(fiche) + left doit toujours faire 100%. */
+  width: var(--spell-list-width, 100%);
+  height: var(--spell-list-height, 100%);
+  /* Plafond fixe : le contenu de la liste ne peut jamais l'agrandir
+     au-dela, quel que soit le nombre de sorts affiches. */
+  max-width: var(--spell-list-max-width, 80.89vh);
+  max-height: var(--spell-list-max-height, 73.9vh);
+}
+
+/* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
+   visible seulement avec le bouton "Afficher les cadres dev". Verte pour
+   la distinguer du canvas (rouge) et de la fiche (bleue). Montre la boite
+   REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
+.dev-frames .spell-list-panel {
+  outline: 2px dashed limegreen;
+  outline-offset: -2px;
+}

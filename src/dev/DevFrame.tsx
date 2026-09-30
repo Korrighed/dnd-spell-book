@@ -26,6 +26,7 @@ const SOURCE_COLORS: Record<string, string> = {
   'state:hideOutOfProfile': '#9a6324',
   'state:selectedIndex': '#ffffff',
   'state:language': '#808000',
+  'state:page': '#008080',
 }
 
 /** Couleur de cadre derivee du nom : chaque composant a la sienne. */

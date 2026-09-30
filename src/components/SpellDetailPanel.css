@@ -1,0 +1,41 @@
+/* Texte noir force : .spell-detail (index.css) fixe color: var(--text-h),
+   qui vire quasi blanc en dark mode - invisible sur les pages blanches du
+   modele 3D. #grimoire donne la specificite necessaire pour gagner sur cette
+   regle (color ne s'applique pas par specificite d'ancetre, seulement par
+   heritage - inutile de le poser sur .book-page, il faut viser directement
+   les elements qui ont deja un color explicite).
+   :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
+   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md). */
+#grimoire .spell-detail:not(.out-of-profile),
+#grimoire .spell-detail:not(.out-of-profile) h2,
+#grimoire .spell-detail .spellbook-toggle {
+  color: #000;
+}
+
+/* Position et taille de la page de gauche (fiche de sort), independantes de
+   .book-spread-pages et de .spell-list-panel : les changer ici ne bouge
+   jamais la liste, ni le canvas du livre (voir BookSpread.css). */
+.spell-detail-panel {
+  position: absolute;
+  top: var(--spell-detail-top, 12.78vh);
+  left: var(--spell-detail-left, 8%);
+  /* Largeur derivee des marges pour eviter tout chevauchement avec
+     .spell-list-panel : left + width + width(liste) + right doit toujours
+     faire 100%. Ne jamais changer une largeur ou une marge ici sans
+     reajuster l'autre page en consequence. */
+  width: var(--spell-detail-width, 100%);
+  height: var(--spell-detail-height, 100%);
+  /* Plafond fixe : le contenu de la fiche ne peut jamais l'agrandir
+     au-dela, quelle que soit sa longueur. */
+  max-width: var(--spell-detail-max-width, 80.89vh);
+  max-height: var(--spell-detail-max-height, 73.89vh);
+}
+
+/* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
+   visible seulement avec le bouton "Afficher les cadres dev". Bleu pour
+   la distinguer du canvas (rouge) et de la liste (verte). Montre la boite
+   REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
+.dev-frames .spell-detail-panel {
+  outline: 2px dashed dodgerblue;
+  outline-offset: -2px;
+}

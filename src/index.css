@@ -15,7 +15,7 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 15.3px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -26,7 +26,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 13.6px;
   }
 }
 
@@ -51,8 +51,8 @@
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 95vw;
+  max-width: 1600px;
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
@@ -64,6 +64,10 @@
 
 body {
   margin: 0;
+  /* Le canvas du livre est etire (scaleX Leva) et deborde de #root : sans
+     ca, barre de defilement horizontale. clip plutot que hidden : coupe au
+     bord du viewport sans creer de conteneur de defilement. */
+  overflow-x: clip;
 }
 
 h1,

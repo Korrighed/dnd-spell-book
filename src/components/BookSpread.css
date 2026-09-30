@@ -1,0 +1,79 @@
+.book-spread {
+  position: relative;
+  /* height (pas min-height) : .spell-detail-panel et .spell-list-panel
+     utilisent une hauteur en pourcentage (ex. 84%), qui ne se calcule QUE si
+     le parent a une hauteur explicite. Avec seulement min-height, le
+     pourcentage est ignore et la boite se dimensionne sur son contenu -
+     c'est ce qui causait le decalage avec un gros sort. */
+  height: 80vh;
+  /* Declarees UNE SEULE FOIS ici : .book-spread-canvas en herite par simple
+     var(--book-frame-*), sans valeur de repli dupliquee ailleurs (source du
+     desalignement precedent : changer le repli d'une seule des deux regles
+     les desynchronisait).
+     Reglages MOBILE (< 900px) : voir BookSpread.mobile.css, qui surcharge ces
+     memes variables custom sur ce meme selecteur .book-spread. */
+  --book-frame-top: 6.78vh;
+  --book-frame-left: 0px;
+  --book-frame-width: 100%;
+  --book-frame-height: 85vh;
+}
+
+.book-spread-canvas {
+  position: absolute;
+  top: var(--book-frame-top);
+  left: var(--book-frame-left);
+  width: var(--book-frame-width);
+  height: var(--book-frame-height);
+  z-index: 0;
+}
+
+.book-spread-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Etirement du RENDU 3D lui-meme, independant de la boite ci-dessus
+     (largeur/hauteur de la boite vs. echelle du dessin dedans) : pilote
+     par Leva (BookCanvas.tsx). 1 = pas d'etirement. */
+  transform: scaleX(var(--book-canvas-scale-x, 1)) scaleY(var(--book-canvas-scale-y, 1));
+  transform-origin: center;
+}
+
+/* Meme convention que DevFrame (src/dev/DevFrame.css) : visible seulement
+   quand le bouton "Afficher les cadres dev" est active. Rouge fixe, pas la
+   couleur par composant de DevFrame : le canvas n'en fait pas partie. */
+.dev-frames .book-spread-canvas {
+  outline: 2px dashed red;
+  outline-offset: -2px;
+}
+
+.book-spread-pages {
+  /* Pas positionne : les deux pages ne doivent rien heriter du cadre du
+     livre (--book-frame-*). Elles se placent a la main, dans
+     SpellDetailPanel.css / SpellListPanel.css, par rapport a
+     .book-spread-strip directement. */
+  position: static;
+  z-index: 1;
+}
+
+.book-page {
+  min-width: 0;
+  /* Noir par heritage pour tout ce qui n'a pas de color explicite (compteur
+     de sorts, "Page X / Y", messages de chargement/erreur). Les elements qui
+     fixent deja leur color (li, .spell-detail...) sont forces a part dans
+     SpellListPanel.css / SpellDetailPanel.css. */
+  color: #000;
+  /* Pas de marge interne : le texte se place directement par rapport aux
+     bords (et au plafond max-*) de .spell-detail-panel / .spell-list-panel. */
+  padding: 0;
+  /* Le contenu scrolle DANS la page plutot que de pousser sa hauteur : sans
+     ca, SpellDetail (contenu variable) sort du cadre pense pour le canvas. */
+  overflow-y: auto;
+}
+
+/* Desktop : bande neutre, meme boite que .book-spread (le canvas et les
+   pages s'y placent exactement comme avant). Mobile : voir
+   BookSpread.mobile.css (largeur/transform de la bande glissante). */
+.book-spread-strip {
+  position: relative;
+  height: 100%;
+}
