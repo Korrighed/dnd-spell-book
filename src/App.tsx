@@ -21,13 +21,12 @@ import { CharacterSelector } from './components/CharacterSelector'
 import { BookSpread } from './components/BookSpread'
 import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery'
 import type { BookPage } from './hooks/useHorizontalSwipe'
-import { SpellListPagination } from './components/SpellListPagination'
 import { matchesSearch } from './utils/text'
 import type { LanguageMode } from './types/language'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
-const SPELLS_PER_PAGE_DESKTOP = 13
+const SPELLS_PER_PAGE_DESKTOP = 14
 const SPELLS_PER_PAGE_MOBILE = 15
 
 function App() {
@@ -273,6 +272,9 @@ function App() {
       <BookSpread
         mobilePage={mobilePage}
         onMobilePageChange={setMobilePage}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
         left={
           <>
             {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
@@ -336,7 +338,6 @@ function App() {
                 isAccessible={isAccessible}
                 summaries={spellSummaries}
               />
-              <SpellListPagination page={page} totalPages={totalPages} onChange={setPage} />
             </DevFrame>
             )}
           </>
