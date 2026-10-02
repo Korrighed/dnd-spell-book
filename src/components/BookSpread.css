@@ -5,17 +5,19 @@
      le parent a une hauteur explicite. Avec seulement min-height, le
      pourcentage est ignore et la boite se dimensionne sur son contenu -
      c'est ce qui causait le decalage avec un gros sort. */
-  height: 80vh;
+  height: 628px;
   /* Declarees UNE SEULE FOIS ici : .book-spread-canvas en herite par simple
      var(--book-frame-*), sans valeur de repli dupliquee ailleurs (source du
      desalignement precedent : changer le repli d'une seule des deux regles
      les desynchronisait).
-     Reglages MOBILE (< 900px) : voir BookSpread.mobile.css, qui surcharge ces
-     memes variables custom sur ce meme selecteur .book-spread. */
-  --book-frame-top: 6.78vh;
+     Branche de test : px fixe (calibre a window.innerHeight = 785), au lieu
+     de vh, pour qu'un passage en plein ecran ne recalcule plus rien ici.
+     Contrepartie : ne s'adapte plus a un autre ecran/fenetre (voir
+     docs/SPRINT-3-RENDU-3D-RESPONSIVE.md, etape 15, pour le compromis). */
+  --book-frame-top: 50.22px;
   --book-frame-left: 0px;
-  --book-frame-width: 100%;
-  --book-frame-height: 85vh;
+  --book-frame-width: 1415px;
+  --book-frame-height: 631.25px;
 }
 
 .book-spread-canvas {
@@ -31,10 +33,15 @@
   display: block;
   width: 100%;
   height: 100%;
-  /* Etirement du RENDU 3D lui-meme, independant de la boite ci-dessus
-     (largeur/hauteur de la boite vs. echelle du dessin dedans) : pilote
-     par Leva (BookCanvas.tsx). 1 = pas d'etirement. */
-  transform: scaleX(var(--book-canvas-scale-x, 1)) scaleY(var(--book-canvas-scale-y, 1));
+  /* Etirement + decalage du RENDU 3D lui-meme, independant de la boite
+     ci-dessus (largeur/hauteur de la boite vs. echelle/position du dessin
+     dedans) : pilote par Leva (BookCanvas.tsx). 1 = pas d'etirement, 0 = pas
+     de decalage. translateX AVANT les scaleX/scaleY : le decalage reste un
+     nombre de px fixe, pas multiplie par l'etirement (ordre des fonctions
+     transform : la plus a gauche s'applique en dernier, dans l'espace deja
+     mis a l'echelle). */
+  transform: translateX(var(--book-canvas-offset-x, 0px))
+    scaleX(var(--book-canvas-scale-x, 1)) scaleY(var(--book-canvas-scale-y, 1));
   transform-origin: center;
 }
 

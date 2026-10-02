@@ -17,16 +17,16 @@
    BookSpread.css). */
 .spell-list-panel {
   position: absolute;
-  top: var(--spell-list-top, 12vh);
-  right: var(--spell-list-right, 8%);
+  top: var(--spell-list-top, 91px);
+  right: var(--spell-list-right, 55px);
   /* Largeur derivee des marges, voir SpellDetailPanel.css, meme raison :
      right + width + width(fiche) + left doit toujours faire 100%. */
-  width: var(--spell-list-width, 100%);
-  height: var(--spell-list-height, 100%);
+  width: var(--spell-list-width, 615px);
+  height: var(--spell-list-height, 555px);
   /* Plafond fixe : le contenu de la liste ne peut jamais l'agrandir
      au-dela, quel que soit le nombre de sorts affiches. */
-  max-width: var(--spell-list-max-width, 80.89vh);
-  max-height: var(--spell-list-max-height, 73.9vh);
+  /* max-width: var(--spell-list-max-width, 635px); */
+  /* max-height: var(--spell-list-max-height, 580px); */
 }
 
 /* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :

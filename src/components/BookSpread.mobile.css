@@ -14,7 +14,13 @@
      .book-spread (inspecteur : selectionner .book-spread, panneau Styles).
      Les pages en heritent : SpellDetailPanel.css / SpellListPanel.css lisent
      var(--spell-detail-*) / var(--spell-list-*), leurs valeurs desktop ne
-     servent que de repli. Valeurs de depart calees a l'oeil sur 390x844. */
+     servent que de repli. Valeurs calees a l'oeil sur 390x844, en px fixe
+     (meme logique que BookSpread.css desktop) : le canvas 3D (Bounds.fit) ne
+     scale pas lineairement avec vh/vw, un hybride px+vh se desynchronise a
+     chaque changement de viewport (barre d'adresse mobile qui se
+     replie/deplie en scrollant, par exemple - meme famille de bug que le
+     plein ecran desktop). Px fixe = plus de recalcul, donc plus de
+     desynchronisation, au prix de ne plus s'adapter a un autre telephone. */
   .book-spread {
     /* Bord visible de l'autre page, en % de l'ecran (sans unite). */
     --mobile-peek: 10;
@@ -24,21 +30,22 @@
     /* Boite du canvas (taille du livre 3D). Plus haut = livre plus grand
        seulement si c'est la hauteur qui limite le cadrage ; sinon passer
        par l'etirement vertical ci-dessous. */
-    --book-frame-top: 9vh;
-    --book-frame-height: 80vh;
+    --book-frame-top: 75px;
+    --book-frame-height: 685px;
+    --book-frame-width: 580px;
 
     /* Page gauche : fiche de sort. */
-    --spell-detail-top: 13.68vh;
-    --spell-detail-left: 0.5vh;
-    --spell-detail-width: 72vw;
-    --spell-detail-max-height: 72vh;
+    --spell-detail-top: 105px;
+    --spell-detail-left: 25px;
+    --spell-detail-width: 255px;
+    --spell-detail-height: 635px;
 
     /* Page droite : liste. */
-    --spell-list-top: 13.68vh;
-    --spell-list-height: 72.5vh;
+    --spell-list-top: 95px;
+    --spell-list-height: 645px;
     --spell-list-max-height: none;
-    --spell-list-right: 1%;
-    --spell-list-width: 47.5%;
+    --spell-list-right: 20px;
+    --spell-list-width: 270px;
     /* ===== fin des reglages ===== */
 
     /* Derive du peek : bande = 200 - 2 x peek (% de la fenetre). */
