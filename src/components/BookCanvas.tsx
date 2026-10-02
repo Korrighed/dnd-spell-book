@@ -76,8 +76,15 @@ export function BookCanvas() {
     },
   })
   const desktopStretch = useControls('Livre (desktop) - etirement du rendu', {
-    scaleX: { value: 1.25, min: 0.3, max: 3, step: 0.01 },
+    scaleX: { value: 1.3, min: 0.3, max: 3, step: 0.01 },
     scaleY: { value: 1, min: 0.3, max: 3, step: 0.01 },
+    offsetX: {
+      value: 0,
+      min: -300,
+      max: 300,
+      step: 1,
+      label: 'decalage horizontal (px)',
+    },
   })
 
   const mobileRotation = useControls('Livre (mobile)', {
@@ -93,12 +100,19 @@ export function BookCanvas() {
     },
   })
   const mobileStretch = useControls('Livre (mobile) - etirement du rendu', {
-    scaleX: { value: 1.25, min: 0.3, max: 3, step: 0.01 },
-    scaleY: { value: 1.2, min: 0.3, max: 3, step: 0.01 },
+    scaleX: { value: 0.95, min: 0.3, max: 3, step: 0.01 },
+    scaleY: { value: 1.24, min: 0.3, max: 3, step: 0.01 },
+    offsetX: {
+      value: 0,
+      min: -300,
+      max: 300,
+      step: 1,
+      label: 'decalage horizontal (px)',
+    },
   })
 
   const { x, y, z, margin } = isMobile ? mobileRotation : desktopRotation
-  const { scaleX, scaleY } = isMobile ? mobileStretch : desktopStretch
+  const { scaleX, scaleY, offsetX } = isMobile ? mobileStretch : desktopStretch
 
   // Tableau memoise : un nouveau tableau a chaque rendu relancerait le
   // recadrage de la camera a chaque frappe dans la recherche (App re-rend
@@ -114,6 +128,7 @@ export function BookCanvas() {
     height: '100%',
     '--book-canvas-scale-x': scaleX,
     '--book-canvas-scale-y': scaleY,
+    '--book-canvas-offset-x': `${offsetX}px`,
   } as CSSProperties
 
   return (
