@@ -1,36 +1,33 @@
-/* Triangle colore dans un coin du livre, declenche la pagination + l'animation
+/* Bouton icone dans un coin du livre, declenche la pagination + l'animation
    de tournage de page (voir BookSpread.tsx). Position absolue : s'ancre sur
    .spell-detail-panel / .spell-list-panel (deja position: absolute), pas
-   besoin de conteneur intermediaire. Forme via border (triangle CSS
-   classique) plutot qu'un rectangle : pointe dans le sens de la navigation. */
+   besoin de conteneur intermediaire. Icone : public/icons/circle-arrow-*.svg. */
+/* Reglages de position/taille : variables --page-turn-* (fallback = valeur
+   desktop). Mobile : voir PageTurnZone.mobile.css. */
 .page-turn-zone {
   position: absolute;
-  bottom: 10px;
-  width: 0;
-  height: 0;
+  bottom: var(--page-turn-bottom, 2px);
+  width: var(--page-turn-size, 28px);
+  height: var(--page-turn-size, 32px);
   padding: 0;
-  border-top: 18px solid transparent;
-  border-bottom: 18px solid transparent;
+  border: none;
   background: none;
   cursor: pointer;
   z-index: 2;
 }
 
-/* Caput Mortuum, voir docs/DESIGN.md : "Accent / action / element interactif". */
-.page-turn-zone--next {
-  border-left: 24px solid #632024;
-}
-
-.page-turn-zone--previous {
-  border-right: 24px solid #632024;
+.page-turn-zone img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .page-turn-zone--bottom-left {
-  left: 10px;
+  left: var(--page-turn-inset, 10px);
 }
 
 .page-turn-zone--bottom-right {
-  right: 10px;
+  right: var(--page-turn-inset, 5px);
 }
 
 .page-turn-zone:hover {

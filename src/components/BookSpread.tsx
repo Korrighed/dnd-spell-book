@@ -91,19 +91,6 @@ export function BookSpread({
             inert={isMobile && mobilePage !== 'left'}
           >
             {left}
-            {/* Desktop uniquement (voir docs/SPRINT-3-RENDU-3D-RESPONSIVE.md) :
-                retour en arriere depuis le bas de la page de gauche. En
-                mobile, cette section est `inert` quand elle n'est pas
-                affichee, donc ce bouton l'est aussi automatiquement. Pas de
-                bouton du tout sur la premiere page (rien a isoler) ni
-                pendant l'animation (evite un second declenchement). */}
-            {!isMobile && canGoPrevious && !isTurning && (
-              <PageTurnZone
-                direction="previous"
-                corner="bottom-left"
-                onClick={() => onPageChange(page - 1)}
-              />
-            )}
           </section>
           <section
             className="book-page spell-list-panel"
@@ -114,8 +101,7 @@ export function BookSpread({
             {!isTurning && right}
             {/* Pres de la reliure : retour en arriere accessible sans
                 traverser l'ecran (utile en mobile, pratique aussi en
-                desktop). Redondant avec la zone de la page de gauche en
-                desktop, volontairement. */}
+                desktop). */}
             {canGoPrevious && !isTurning && (
               <PageTurnZone
                 direction="previous"

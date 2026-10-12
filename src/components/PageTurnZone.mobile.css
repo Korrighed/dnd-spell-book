@@ -1,24 +1,12 @@
-/* Mobile (< 900px) : triangle plus grand, cible tactile plus confortable. */
+/* Mobile (< 900px) : icone plus grande, cible tactile plus confortable. */
 @media (max-width: 899px) {
   .page-turn-zone {
-    bottom: 8px;
-    border-top-width: 24px;
-    border-bottom-width: 24px;
+    --page-turn-bottom: 5px;
+    --page-turn-size: 40px;
   }
 
-  .page-turn-zone--next {
-    border-left-width: 32px;
-  }
-
-  .page-turn-zone--previous {
-    border-right-width: 32px;
-  }
-
-  .page-turn-zone--bottom-left {
-    left: 8px;
-  }
-
+  .page-turn-zone--bottom-left,
   .page-turn-zone--bottom-right {
-    right: 8px;
+    --page-turn-inset: 8px;
   }
 }

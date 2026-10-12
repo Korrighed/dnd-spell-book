@@ -32,7 +32,7 @@
        par l'etirement vertical ci-dessous. */
     --book-frame-top: 75px;
     --book-frame-height: 685px;
-    --book-frame-width: 580px;
+    --book-frame-width: 600px;
 
     /* Page gauche : fiche de sort. */
     --spell-detail-top: 105px;
@@ -45,7 +45,7 @@
     --spell-list-height: 645px;
     --spell-list-max-height: none;
     --spell-list-right: 20px;
-    --spell-list-width: 270px;
+    --spell-list-width: 250px;
     /* ===== fin des reglages ===== */
 
     /* Derive du peek : bande = 200 - 2 x peek (% de la fenetre). */

@@ -27,7 +27,7 @@ import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
 const SPELLS_PER_PAGE_DESKTOP = 14
-const SPELLS_PER_PAGE_MOBILE = 15
+const SPELLS_PER_PAGE_MOBILE = 16
 
 function App() {
   const { spells, loading, error } = useSpellList()

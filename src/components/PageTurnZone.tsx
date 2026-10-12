@@ -10,15 +10,14 @@ interface PageTurnZoneProps {
 }
 
 /**
- * Remplace les boutons texte "Precedent"/"Suivant" par un triangle colore,
- * place dans un coin du livre plutot qu'en ligne sous la liste. N'est rendu
+ * Bouton de pagination place dans un coin du livre, plutot qu'en ligne sous
+ * la liste. Icone SVG (public/icons/circle-arrow-*.svg). N'est rendu
  * par l'appelant (BookSpread) que quand l'action est possible : pas de
  * bouton desactive isole sur la premiere/derniere page.
- * Couleur Caput Mortuum (#632024, docs/DESIGN.md : "Accent / action /
- * element interactif").
  */
 export function PageTurnZone({ direction, corner, onClick }: PageTurnZoneProps) {
   const label = direction === 'next' ? 'Page suivante' : 'Page precedente'
+  const icon = direction === 'next' ? 'circle-arrow-right.svg' : 'circle-arrow-left.svg'
 
   return (
     <button
@@ -27,6 +26,8 @@ export function PageTurnZone({ direction, corner, onClick }: PageTurnZoneProps) 
       onClick={onClick}
       aria-label={label}
       title={label}
-    />
+    >
+      <img src={`${import.meta.env.BASE_URL}icons/${icon}`} alt="" draggable={false} />
+    </button>
   )
 }
