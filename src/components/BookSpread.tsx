@@ -70,7 +70,13 @@ export function BookSpread({
     if (!duration) return
     setIsTurning(true)
     const timeout = setTimeout(() => setIsTurning(false), duration * 1000)
-    return () => clearTimeout(timeout)
+    // Remet isTurning a false en plus d'annuler le timer : sinon, si le
+    // tournage suivant renvoie une duree nulle (return ci-dessus), plus rien
+    // ne le remet a false et la liste reste masquee.
+    return () => {
+      clearTimeout(timeout)
+      setIsTurning(false)
+    }
   }, [page])
 
   const canGoNext = page < totalPages - 1

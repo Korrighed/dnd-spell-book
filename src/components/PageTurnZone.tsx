@@ -1,5 +1,4 @@
 import './PageTurnZone.css'
-import './PageTurnZone.mobile.css'
 
 interface PageTurnZoneProps {
   /** Sens de la pagination declenchee par ce bouton. */
@@ -22,7 +21,7 @@ export function PageTurnZone({ direction, corner, onClick }: PageTurnZoneProps) 
   return (
     <button
       type="button"
-      className={`page-turn-zone page-turn-zone--${direction} page-turn-zone--${corner}`}
+      className={`page-turn-zone page-turn-zone--${corner}`}
       onClick={onClick}
       aria-label={label}
       title={label}

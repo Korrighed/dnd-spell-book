@@ -46,6 +46,12 @@
     --spell-list-max-height: none;
     --spell-list-right: 20px;
     --spell-list-width: 250px;
+
+    /* Boutons de pagination (PageTurnZone.css). */
+    --page-turn-bottom: 5px;
+    --page-turn-size: 40px;
+    --page-turn-inset-left: 8px;
+    --page-turn-inset-right: 8px;
     /* ===== fin des reglages ===== */
 
     /* Derive du peek : bande = 200 - 2 x peek (% de la fenetre). */

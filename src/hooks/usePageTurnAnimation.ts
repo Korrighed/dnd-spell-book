@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
 export type AnimationActions = Record<string, THREE.AnimationAction | null>
@@ -37,6 +37,15 @@ export function usePageTurnAnimation(): PageTurnAnimation {
   // setTimeout des changements de phase (vitesse) en cours : annules si un
   // nouveau tournage de page demarre avant la fin du precedent (clic rapide).
   const pendingPhaseTimeoutsRef = useRef<number[]>([])
+
+  // Annule les changements de phase encore en attente au demontage.
+  useEffect(() => {
+    const pendingPhaseTimeouts = pendingPhaseTimeoutsRef
+    return () => {
+      pendingPhaseTimeouts.current.forEach((id) => window.clearTimeout(id))
+      pendingPhaseTimeouts.current = []
+    }
+  }, [])
 
   const setActions = useCallback((actions: AnimationActions) => {
     actionsRef.current = actions
