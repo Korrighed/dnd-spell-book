@@ -1,9 +1,18 @@
-import { Suspense, useEffect, useMemo, type CSSProperties } from 'react'
+import {
+  Suspense,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  type CSSProperties,
+} from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Bounds, Center, useBounds, useGLTF } from '@react-three/drei'
+import { Bounds, Center, useAnimations, useBounds, useGLTF } from '@react-three/drei'
 import { Leva, useControls } from 'leva'
 import * as THREE from 'three'
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery'
+import { usePageTurnAnimation, type AnimationActions } from '../hooks/usePageTurnAnimation'
 
 const MODEL_PATH = '/assets/spellbook_lowpoly_v2.glb'
 
@@ -11,20 +20,38 @@ const MODEL_PATH = '/assets/spellbook_lowpoly_v2.glb'
 const DEFAULT_ROTATION_DEG = { x: -90, y: 0, z: -180 }
 const DEFAULT_MARGIN = 0.55
 
-interface SpellbookModelProps {
-  rotationDeg: { x: number; y: number; z: number }
+/** Impose par le methode exposee a l'exterieur (voir BookCanvasHandle). */
+export interface BookCanvasHandle {
+  /** Joue l'animation de tournage de page vers l'avant. Retourne sa duree (s). */
+  playNext: () => number
+  /** Joue l'animation de tournage de page vers l'arriere (meme clips, a l'envers). Retourne sa duree (s). */
+  playPrevious: () => number
 }
 
-function SpellbookModel({ rotationDeg }: SpellbookModelProps) {
-  const { scene } = useGLTF(MODEL_PATH)
+interface SpellbookModelProps {
+  rotationDeg: { x: number; y: number; z: number }
+  /** Remonte les actions d'animation vers BookCanvas des qu'elles sont pretes
+      (le modele est charge en Suspense, donc pas disponible au premier rendu
+      de BookCanvas). */
+  onActionsReady: (actions: AnimationActions) => void
+}
+
+function SpellbookModel({ rotationDeg, onActionsReady }: SpellbookModelProps) {
+  const groupRef = useRef<THREE.Group>(null)
+  const { scene, animations } = useGLTF(MODEL_PATH)
+  const { actions } = useAnimations(animations, groupRef)
   const rotation: [number, number, number] = [
     THREE.MathUtils.degToRad(rotationDeg.x),
     THREE.MathUtils.degToRad(rotationDeg.y),
     THREE.MathUtils.degToRad(rotationDeg.z),
   ]
 
+  useEffect(() => {
+    onActionsReady(actions)
+  }, [actions, onActionsReady])
+
   return (
-    <group rotation={rotation}>
+    <group ref={groupRef} rotation={rotation}>
       <Center>
         <primitive object={scene} />
       </Center>
@@ -59,9 +86,13 @@ function RefitOnChange({ trigger }: { trigger: unknown }) {
  * reglages ecrasait systematiquement l'un des deux formats (constat :
  * livre ecrase en haut en mobile). Toujours le meme modele/scene/canvas,
  * seuls les nombres different selon la largeur d'ecran.
+ *
+ * Expose playNext/playPrevious (ref imperatif) : le pilotage des clips
+ * d'animation (tournage de page) est dans le hook usePageTurnAnimation.
  */
-export function BookCanvas() {
+export const BookCanvas = forwardRef<BookCanvasHandle>(function BookCanvas(_props, ref) {
   const isMobile = useMediaQuery(MOBILE_QUERY)
+  const pageTurn = usePageTurnAnimation()
 
   const desktopRotation = useControls('Livre (desktop)', {
     x: { value: DEFAULT_ROTATION_DEG.x, min: -180, max: 180, step: 1 },
@@ -123,6 +154,15 @@ export function BookCanvas() {
     [x, y, z, margin, isMobile],
   )
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      playNext: pageTurn.playNext,
+      playPrevious: pageTurn.playPrevious,
+    }),
+    [pageTurn],
+  )
+
   const stretchStyle = {
     width: '100%',
     height: '100%',
@@ -142,11 +182,11 @@ export function BookCanvas() {
           <Suspense fallback={null}>
             <Bounds fit clip observe margin={margin}>
               <RefitOnChange trigger={refitTrigger} />
-              <SpellbookModel rotationDeg={{ x, y, z }} />
+              <SpellbookModel rotationDeg={{ x, y, z }} onActionsReady={pageTurn.setActions} />
             </Bounds>
           </Suspense>
         </Canvas>
       </div>
     </>
   )
-}
+})

@@ -6,8 +6,7 @@
    :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
    profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md). */
 #grimoire .spell-list li:not(.out-of-profile),
-#grimoire .spell-list .extra,
-#grimoire .spell-list-pagination button {
+#grimoire .spell-list .extra {
   color: #000;
 }
 
