@@ -1,6 +1,6 @@
 # Sprint 4 — Recherche permanente et marque-pages
 
-État au 2026-10-12. Plan d'action, **rien n'est codé**. Branche à créer depuis `dev` une fois `feature/book-page-turn` fusionnée. Décisions ouvertes en fin de document : à trancher avant de coder.
+État au 2026-10-13. **Implémenté** sur la branche `views-filtre` (commits de code, voir `SPRINT-4-GUIDE-IMPLEMENTATION.md`, section 6). Pas encore fusionné dans `dev`. Décisions ouvertes : toutes tranchées.
 
 ## Objectif
 
@@ -133,11 +133,11 @@ Code préparé, consignes et plan de test : `SPRINT-4-GUIDE-IMPLEMENTATION.md`.
    - état `sortMode: 'alpha' | 'level'` dans `App`, initialisé à `'alpha'` ;
    - appliqué après le filtrage (`filteredSpells`), sur une copie du tableau ;
    - choix du tri dans `SortView` ;
-   - tri alphabétique sur le nom affiché (`nameFr` ou `name` selon `detectBrowserLanguage`), avec `localeCompare` dans la même langue pour gérer les accents ;
+   - tri alphabétique sur le nom affiché (`nameFr` ou `name` selon `BROWSER_LANGUAGE`), avec `Intl.Collator` dans la même langue pour gérer les accents ;
    - tri par niveau : à niveau égal, ordre alphabétique sur le nom affiché, pour un ordre stable et prévisible ;
    - sortir la langue détectée de `SpellList` (constante de module aujourd'hui) vers un point partagé, pour que le tri et l'affichage utilisent la même valeur.
 9. **Grimoire en une langue** : `PersonalSpellbookPanel` affiche un seul nom selon la langue du navigateur, comme `SpellList`.
-10. **Messages F9** : chaque message suit sa fonction (chargement des sorts d'une classe ou d'une école dans `FiltersView`, erreur « classes lanceuses » dans `CharacterView`).
+10. **Messages F9** : chaque message suit sa fonction. Chargement et erreur des sorts d'une classe ou d'une école : page de droite, vue fermée (D4). Erreurs des listes déroulantes : `FiltersView`. Erreur « classes lanceuses » : `CharacterView`.
 11. Supprimer `details.other-panels`.
 12. Mettre à jour `SPECS.md` (section « Panneau de filtres ») et ce document.
 13. Vérifier : `tsc`, `eslint`, test manuel desktop + mobile (ouverture/fermeture des 4 vues, filtres combinés, tri alphabétique par défaut puis par niveau, ordre alphabétique en navigateur FR et EN, retour à la page 1 au changement de filtre ou de tri, F5 avec et sans profil, sélection de personnage, ouverture d'un sort depuis le grimoire).
@@ -149,5 +149,4 @@ Code préparé, consignes et plan de test : `SPRINT-4-GUIDE-IMPLEMENTATION.md`.
 3. ~~Où s'affiche une vue ouverte~~ : par-dessus le livre, refermable (voir étape 6).
 4. ~~Bouton cœur de la maquette mobile~~ : non repris, mêmes boutons sur tous les formats.
 5. ~~Tri~~ : vue dédiée (marque-page `arrow-up-1-0.svg`), alphabétique par défaut, sur le nom affiché selon la langue du navigateur.
-6. **Nom de branche** : reporté, planification d'abord.
-   Note : le `CLAUDE.md` du projet interdit les branches `feature/*`, mais les dernières branches les utilisent. Proposition : `feature/search-bookmarks`, ou travail direct sur `dev` si la règle s'applique.
+6. ~~Nom de branche~~ : tranché, `views-filtre`, créée depuis `dev`.

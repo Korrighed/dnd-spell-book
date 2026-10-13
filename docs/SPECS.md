@@ -34,8 +34,13 @@ Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par cl
 
 ### Panneau de filtres
 
-- Bouton d'activation en haut à droite de la fenêtre (icône filtre), ouvre un panneau regroupant : recherche par nom, filtre niveau, filtre classe, toggle langue.
-- Idée V2+ (non planifiée) : remplacer le bouton HTML par un marque-page 3D qui dépasse du livre dans la scène Three.js, cliquable directement dans la scène.
+- Recherche par nom (FR et EN), toujours visible au-dessus du livre, sur tous les formats. Case « Masquer les sorts hors profil » juste dessous, visible dès qu'un profil existe.
+- Quatre marque-pages (boutons avec icône SVG), identiques en desktop et mobile. Chacun ouvre une vue par-dessus le livre. Une seule vue ouverte à la fois, refermable par son bouton Fermer, par Escape ou par le marque-page actif :
+  - Filtres : niveau, classe, école.
+  - Tri : alphabétique (par défaut) ou par niveau, sur le nom affiché selon la langue du navigateur. Un tri ne retire aucun sort.
+  - Personnage : sélection, ajout, renommage et suppression de personnage, profils de classe.
+  - Grimoire personnel : sorts sauvegardés, dans l'ordre d'ajout, un seul nom par sort.
+- Idée V2+ (non planifiée) : remplacer les marque-pages HTML par un marque-page 3D qui dépasse du livre dans la scène Three.js, cliquable directement dans la scène.
 
 ### Langue
 

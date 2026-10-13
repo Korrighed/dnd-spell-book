@@ -8,7 +8,7 @@
 - `front` : brouillon de code.
 - `qa` : cas limites et plan de test.
 
-**Statut du code** : relu contre les types réels du dépôt, mais **jamais compilé**. `tsc` et `eslint` restent à passer à chaque commit. Aucun fichier source n'est modifié à ce stade.
+**Statut du code** : implémenté sur la branche `views-filtre` (6 commits de code, section 6). `tsc` et `eslint` passent à chaque commit. Tests manuels (section 7) **non exécutés** : pas de navigateur dans l'environnement d'implémentation. Écarts par rapport au code préparé : section 9.
 
 ---
 
@@ -28,7 +28,7 @@ Les agents ont relevé des points sur lesquels le plan ne dit rien. Le code de l
 | D8 | Indicateur de filtres actifs quand la vue est fermée | **Hors périmètre**, à prévoir dans la branche CSS | Le compteur `n / total` signale déjà une liste réduite. |
 | D9 | Le grimoire personnel est-il trié ? | **Non**, il garde l'ordre d'ajout | Le plan ne trie que la liste principale. |
 | D10 | Confirmation avant de supprimer un personnage | **Hors périmètre**, à noter | Aucune confirmation aujourd'hui dans `CharacterSelector` (vérifié). Ce sprint ne touche pas à ce comportement. |
-| D11 | Nom de branche | À trancher | Le `CLAUDE.md` du projet impose des commits directs sur `dev`, sans `feature/*`. Les branches récentes ne suivent pas cette règle. |
+| D11 | Nom de branche | Tranché : `views-filtre`, créée depuis `dev`. | Le `CLAUDE.md` du projet impose des commits directs sur `dev`, sans `feature/*`. Les branches récentes ne suivent pas cette règle. |
 
 ---
 
@@ -474,7 +474,7 @@ export function SortView({ open, onClose, value, onChange }: SortViewProps) {
 }
 ```
 
-Note : les libellés `label` sont des chaînes, donc pas de `<em>` dedans. Le format « FR (EN) » est un compromis ; à harmoniser dans la branche CSS si besoin.
+Écart appliqué à l'implémentation : libellés en JSX avec `<em>` (convention bilingue du dépôt), voir section 9.
 
 ### 5.8 `src/components/CharacterView.tsx`
 
@@ -1088,3 +1088,12 @@ Il n'y a pas de framework de test dans le projet (pas de Vitest dans `package.js
 - Indicateur de filtres actifs sur le marque-page « Filtres » (D8).
 - Confirmation avant la suppression d'un personnage (D10).
 - Zones tactiles d'au moins 44px et débordement des 4 marque-pages sur un écran de 320px : à traiter dans la branche CSS.
+
+---
+
+## 9. Écarts par rapport au code préparé
+
+- Commits 2 et 3 : le `<h2>` de `PersonalSpellbookPanel` reste jusqu'au commit 6, où le titre passe dans la vue. Le commit 2 retire seulement la règle `.name-en` ; le commit 3 retire seulement `profileForm`.
+- Commit 5 : la couleur `state:sortMode` de `DevFrame` est ajoutée dès le commit 5 (et non 6), car la liste l'utilise à ce commit. Le choix du tri est provisoire, en fieldset dans `details`, jusqu'au commit 6.
+- `SortView` : libellés en JSX avec `<em>` (convention bilingue du dépôt), au lieu de chaînes « FR (EN) ».
+- Le commit 6 retire les règles `h2` et `h2 em` de `PersonalSpellbookPanel.css`, devenues mortes.
