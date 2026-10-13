@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { DevFrame } from '../dev/DevFrame'
+import { t } from '../utils/browserLanguage'
 import type { SortMode } from '../utils/spellSort'
 import { BookmarkView } from './BookmarkView'
 
@@ -10,43 +10,18 @@ interface SortViewProps {
   onChange: (value: SortMode) => void
 }
 
-const SORT_OPTIONS: { mode: SortMode; label: ReactNode }[] = [
-  {
-    mode: 'alpha',
-    label: (
-      <>
-        Ordre alphabetique <em>Alphabetical</em>
-      </>
-    ),
-  },
-  {
-    mode: 'level',
-    label: (
-      <>
-        Par niveau <em>By level</em>
-      </>
-    ),
-  },
+const SORT_OPTIONS: { mode: SortMode; label: string }[] = [
+  { mode: 'alpha', label: t('Ordre alphabetique', 'Alphabetical') },
+  { mode: 'level', label: t('Par niveau', 'By level') },
 ]
 
 /** Un seul tri actif a la fois. Un tri ne retire aucun sort (contrairement au filtre niveau). */
 export function SortView({ open, onClose, value, onChange }: SortViewProps) {
   return (
-    <BookmarkView
-      id="sort"
-      open={open}
-      title={
-        <>
-          Tri <em>Sort</em>
-        </>
-      }
-      onClose={onClose}
-    >
+    <BookmarkView id="sort" open={open} title={t('Tri', 'Sort')} onClose={onClose}>
       <DevFrame name="SortView (radios)" uses={['state:sortMode']}>
         <fieldset>
-          <legend>
-            Trier la liste <em>Sort the list</em>
-          </legend>
+          <legend>{t('Trier la liste', 'Sort the list')}</legend>
           {SORT_OPTIONS.map((option) => (
             <label key={option.mode}>
               <input

@@ -21,6 +21,7 @@ import { BookSpread } from './components/BookSpread'
 import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery'
 import type { BookPage } from './hooks/useHorizontalSwipe'
 import { matchesSearch } from './utils/text'
+import { BROWSER_LANGUAGE, t } from './utils/browserLanguage'
 import type { LanguageMode } from './types/language'
 import { bookmarkButtonId, type BookmarkId } from './utils/bookmarks'
 import { DEFAULT_SORT_MODE, sortSpells, type SortMode } from './utils/spellSort'
@@ -60,7 +61,7 @@ function App() {
   const [page, setPage] = useState(0)
   const isMobile = useMediaQuery(MOBILE_QUERY)
   const spellsPerPage = isMobile ? SPELLS_PER_PAGE_MOBILE : SPELLS_PER_PAGE_DESKTOP
-  const [language, setLanguage] = useState<LanguageMode>('fr')
+  const [language, setLanguage] = useState<LanguageMode>(BROWSER_LANGUAGE)
   const {
     spells: personalSpells,
     indices: personalIndices,
@@ -204,7 +205,7 @@ function App() {
               checked={hideOutOfProfile}
               onChange={(event) => setHideOutOfProfile(event.target.checked)}
             />{' '}
-            Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
+            {t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
           </label>
         </DevFrame>
       )}
@@ -227,7 +228,7 @@ function App() {
             onPageChange={setPage}
             left={
               <>
-                {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
+                {selectedIndex && detailLoading && <p>{t('Chargement du detail du sort...', 'Loading spell details...')}</p>}
                 {detailError && <p role="alert">{detailError}</p>}
                 {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
                 {selectedSpell && (
@@ -259,7 +260,7 @@ function App() {
                     echec de l'API laisse une page vide sans explication. */}
                 {loading && (
                   <p>
-                    Chargement des sorts... <em>Loading spells...</em>
+                    {t('Chargement des sorts...', 'Loading spells...')}
                   </p>
                 )}
                 {error && <p role="alert">{error}</p>}
@@ -267,13 +268,13 @@ function App() {
                     vident la liste, ils doivent rester visibles vue fermee. */}
                 {classSpellsLoading && (
                   <p>
-                    Chargement des sorts de la classe... <em>Loading class spells...</em>
+                    {t('Chargement des sorts de la classe...', 'Loading class spells...')}
                   </p>
                 )}
                 {classSpellsError && <p role="alert">{classSpellsError}</p>}
                 {schoolSpellsLoading && (
                   <p>
-                    Chargement des sorts de l'ecole... <em>Loading school spells...</em>
+                    {t("Chargement des sorts de l'ecole...", 'Loading school spells...')}
                   </p>
                 )}
                 {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
@@ -295,7 +296,7 @@ function App() {
                     ]}
                   >
                     <p>
-                      {sortedSpells.length} / {spells.length} sorts <em>spells</em>
+                      {sortedSpells.length} / {spells.length} {t('sorts', 'spells')}
                     </p>
                     <SpellList
                       spells={pagedSpells}

@@ -1,4 +1,5 @@
 import type { SchoolListItem } from '../api/schools'
+import { t } from '../utils/browserLanguage'
 
 interface SpellSchoolFilterProps {
   schools: SchoolListItem[]
@@ -15,10 +16,10 @@ export function SpellSchoolFilter({ schools, value, onChange }: SpellSchoolFilte
         onChange(raw === 'all' ? null : raw)
       }}
     >
-      <option value="all">Toutes les ecoles (All schools)</option>
+      <option value="all">{t('Toutes les ecoles', 'All schools')}</option>
       {schools.map((school) => (
         <option key={school.index} value={school.index}>
-          {school.nameFr} ({school.name})
+          {t(school.nameFr, school.name)}
         </option>
       ))}
     </select>

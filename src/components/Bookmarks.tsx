@@ -4,6 +4,7 @@ import {
   bookmarkViewId,
   type BookmarkId,
 } from '../utils/bookmarks'
+import { t } from '../utils/browserLanguage'
 
 interface BookmarksProps {
   /** Vue actuellement ouverte, `null` si aucune. */
@@ -13,10 +14,10 @@ interface BookmarksProps {
 }
 
 const BOOKMARKS: Record<BookmarkId, { icon: string; label: string }> = {
-  filters: { icon: 'funnel.svg', label: 'Filtres (Filters)' },
-  sort: { icon: 'arrow-up-1-0.svg', label: 'Tri (Sort)' },
-  character: { icon: 'user-round-cog.svg', label: 'Personnage (Character)' },
-  spellbook: { icon: 'favourite-book.svg', label: 'Grimoire personnel (Personal spellbook)' },
+  filters: { icon: 'funnel.svg', label: t('Filtres', 'Filters') },
+  sort: { icon: 'arrow-up-1-0.svg', label: t('Tri', 'Sort') },
+  character: { icon: 'user-round-cog.svg', label: t('Personnage', 'Character') },
+  spellbook: { icon: 'favourite-book.svg', label: t('Grimoire personnel', 'Personal spellbook') },
 }
 
 /**

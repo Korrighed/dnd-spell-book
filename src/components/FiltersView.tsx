@@ -1,6 +1,7 @@
 import type { ClassListItem } from '../api/classes'
 import type { SchoolListItem } from '../api/schools'
 import { DevFrame } from '../dev/DevFrame'
+import { t } from '../utils/browserLanguage'
 import { BookmarkView } from './BookmarkView'
 import { SpellLevelFilter } from './SpellLevelFilter'
 import { SpellClassFilter } from './SpellClassFilter'
@@ -41,11 +42,7 @@ export function FiltersView({
     <BookmarkView
       id="filters"
       open={open}
-      title={
-        <>
-          Filtres <em>Filters</em>
-        </>
-      }
+      title={t('Filtres', 'Filters')}
       onClose={onClose}
     >
       {/* className conserve : App.css cible #grimoire .filters. */}

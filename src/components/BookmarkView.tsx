@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { bookmarkViewId, type BookmarkId } from '../utils/bookmarks'
+import { t } from '../utils/browserLanguage'
 
 interface BookmarkViewProps {
   id: BookmarkId
@@ -47,7 +48,7 @@ export function BookmarkView({ id, open, title, onClose, children }: BookmarkVie
         {title}
       </h2>
       <button type="button" className="bookmark-view-close" onClick={onClose}>
-        Fermer <em>Close</em>
+        {t('Fermer', 'Close')}
       </button>
       {children}
     </section>

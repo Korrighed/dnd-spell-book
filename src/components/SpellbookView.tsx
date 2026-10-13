@@ -2,6 +2,7 @@ import type { SpellListItem } from '../api/spells'
 import { DevFrame } from '../dev/DevFrame'
 import type { PersonalSpell } from '../hooks/usePersonalSpellbook'
 import type { SpellAccessCheck } from '../utils/spellAccess'
+import { t } from '../utils/browserLanguage'
 import { BookmarkView } from './BookmarkView'
 import { PersonalSpellbookPanel } from './PersonalSpellbookPanel'
 
@@ -32,11 +33,7 @@ export function SpellbookView({
     <BookmarkView
       id="spellbook"
       open={open}
-      title={
-        <>
-          Grimoire personnel <em>Personal spellbook</em> ({spells.length})
-        </>
-      }
+      title={`${t('Grimoire personnel', 'Personal spellbook')} (${spells.length})`}
       onClose={onClose}
     >
       <DevFrame

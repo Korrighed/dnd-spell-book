@@ -2,6 +2,7 @@ import type { ClassListItem } from '../api/classes'
 import { DevFrame } from '../dev/DevFrame'
 import type { ProfileSpellcastingInfo } from '../hooks/useMultiSpellAccess'
 import type { SpellcasterProfile } from '../hooks/usePersonalSpellbook'
+import { t } from '../utils/browserLanguage'
 import { BookmarkView } from './BookmarkView'
 import { CharacterSelector } from './CharacterSelector'
 import { SpellcasterProfileForm } from './SpellcasterProfileForm'
@@ -49,11 +50,7 @@ export function CharacterView({
     <BookmarkView
       id="character"
       open={open}
-      title={
-        <>
-          Personnage <em>Character</em>
-        </>
-      }
+      title={t('Personnage', 'Character')}
       onClose={onClose}
     >
       <DevFrame name="CharacterSelector" uses={['usePersonalSpellbook']}>

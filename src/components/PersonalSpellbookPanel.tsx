@@ -1,7 +1,7 @@
 import type { PersonalSpell } from '../hooks/usePersonalSpellbook'
 import type { SpellListItem } from '../api/spells'
 import type { SpellAccessCheck } from '../utils/spellAccess'
-import { BROWSER_LANGUAGE, spellDisplayName } from '../utils/browserLanguage'
+import { spellDisplayName, t } from '../utils/browserLanguage'
 import { OutOfProfileLabel } from './OutOfProfileLabel'
 import './PersonalSpellbookPanel.css'
 
@@ -53,7 +53,7 @@ export function PersonalSpellbookPanel({
                 >
                   {spell && (
                     <span className="level">
-                      {BROWSER_LANGUAGE === 'fr' ? 'Niv.' : 'Lvl'} {spell.level}
+                      {t('Niv.', 'Lvl')} {spell.level}
                     </span>
                   )}
                   <span className="name">{name}</span>
@@ -62,7 +62,10 @@ export function PersonalSpellbookPanel({
                 <button
                   type="button"
                   className="remove"
-                  aria-label={`Retirer ${name} du grimoire personnel`}
+                  aria-label={t(
+                    `Retirer ${name} du grimoire personnel`,
+                    `Remove ${name} from personal spellbook`,
+                  )}
                   onClick={() => onRemoveSpell(personal.index)}
                 >
                   &times;
