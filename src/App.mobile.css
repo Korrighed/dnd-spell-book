@@ -1,0 +1,9 @@
+/* Mobile (< 900px) : une seule page du livre visible a la fois. Aligner la
+   recherche sur la page de droite n'aurait pas de sens quand la fiche est
+   affichee : pleine largeur, contenu centre. */
+@media (max-width: 899px) {
+  #grimoire .search-bar {
+    width: auto;
+    margin: 0 0 16px;
+  }
+}

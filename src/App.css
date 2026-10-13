@@ -21,6 +21,28 @@
   max-width: 400px;
 }
 
+/* Recherche + case « hors profil », au-dessus du livre, alignees sur la
+   colonne de la liste (meme marge droite et meme largeur que
+   .spell-list-panel, variables declarees dans SpellListPanel.css). Contenu
+   centre dans cette colonne. Mobile : pleine largeur, voir App.mobile.css. */
+#grimoire .search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: var(--spell-list-width);
+  margin: 0 var(--spell-list-right) 16px auto;
+  text-align: center;
+}
+
+/* Colonne : flex-basis (300px plus haut) s'appliquerait a la hauteur. */
+#grimoire .search-bar input[type='search'] {
+  display: block;
+  flex: none;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+}
+
 #grimoire .spellbook-toggle {
   margin: 12px 0;
   padding: 8px 16px;

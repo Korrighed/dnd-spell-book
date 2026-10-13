@@ -27,6 +27,7 @@ import { bookmarkButtonId, type BookmarkId } from './utils/bookmarks'
 import { DEFAULT_SORT_MODE, sortSpells, type SortMode } from './utils/spellSort'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
+import './App.mobile.css'
 
 const SPELLS_PER_PAGE_DESKTOP = 14
 const SPELLS_PER_PAGE_MOBILE = 16
@@ -188,31 +189,37 @@ function App() {
 
   return (
     <main id="grimoire">
-      {/* Recherche permanente, au-dessus du livre, sur tous les formats. */}
-      <DevFrame name="SpellSearch" uses={['state:search']}>
-        <SpellSearch value={search} onChange={setSearch} />
-      </DevFrame>
-
-      {/* Acces rapide : se bascule souvent pendant une recherche, donc hors des vues. */}
-      {profiles.length > 0 && (
-        <DevFrame
-          name="HideOutOfProfile (App)"
-          uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
-        >
-          <label>
-            <input
-              type="checkbox"
-              checked={hideOutOfProfile}
-              onChange={(event) => setHideOutOfProfile(event.target.checked)}
-            />{' '}
-            {t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
-          </label>
-        </DevFrame>
-      )}
-
       <DevFrame name="Bookmarks" uses={['state:openView']}>
         <Bookmarks openView={openView} onToggle={handleToggleView} />
       </DevFrame>
+
+      {/* Recherche permanente, sous les marque-pages et au-dessus du livre,
+          sur tous les formats. Hors de BookSpread (pas dans la page de
+          droite) : elle y serait demontee
+          pendant le tournage de page et inerte en mobile. Alignee sur la
+          colonne de la liste par le CSS (App.css, .search-bar). */}
+      <div className="search-bar">
+        <DevFrame name="SpellSearch" uses={['state:search']}>
+          <SpellSearch value={search} onChange={setSearch} />
+        </DevFrame>
+
+        {/* Acces rapide : se bascule souvent pendant une recherche, donc hors des vues. */}
+        {profiles.length > 0 && (
+          <DevFrame
+            name="HideOutOfProfile (App)"
+            uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
+          >
+            <label>
+              <input
+                type="checkbox"
+                checked={hideOutOfProfile}
+                onChange={(event) => setHideOutOfProfile(event.target.checked)}
+              />{' '}
+              {t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
+            </label>
+          </DevFrame>
+        )}
+      </div>
 
       {/* Parent commun du livre et des vues (App.css). Les vues sont soeurs de
           BookSpread, jamais dedans : dans une page elles seraient demontees
