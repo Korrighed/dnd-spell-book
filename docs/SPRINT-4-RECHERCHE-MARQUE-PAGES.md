@@ -113,7 +113,9 @@ Raison de F5 sous la recherche : c'est un réglage qu'on bascule souvent pendant
 - Aujourd'hui la liste n'a aucun tri dans le code et suit l'ordre renvoyé par l'API.
 - Un tri ne retire aucun sort, contrairement au filtre niveau (F2).
 - Le tri alphabétique porte sur le **nom affiché**, qui dépend de la langue du navigateur : `nameFr` si le navigateur est en français, `name` (anglais) sinon. La détection existe déjà (`detectBrowserLanguage`, `src/utils/browserLanguage.ts`), et `SpellList` l'utilise déjà pour afficher un seul nom.
-- Changer de tri remet la liste en page 1. C'est automatique : l'ordre des index change, et le mécanisme `filteredKey` de `App.tsx` réagit à ce changement.
+- Changer de tri remet la liste en page 1. Ce n'est **pas** automatique avec le code actuel : `filteredKey` doit être calculé sur la liste triée (voir `SPRINT-4-GUIDE-IMPLEMENTATION.md`, section 2).
+
+Code préparé, consignes et plan de test : `SPRINT-4-GUIDE-IMPLEMENTATION.md`.
 
 **Langue d'affichage** : la liste du grimoire personnel (`PersonalSpellbookPanel`) affiche aujourd'hui les deux noms (FR et EN) côte à côte. Elle doit suivre la même règle que `SpellList` : un seul nom, selon la langue du navigateur.
 
