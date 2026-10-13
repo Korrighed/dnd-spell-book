@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import type { PersonalSpell } from '../hooks/usePersonalSpellbook'
 import type { SpellListItem } from '../api/spells'
 import type { SpellAccessCheck } from '../utils/spellAccess'
@@ -12,8 +11,6 @@ interface PersonalSpellbookPanelProps {
   selectedIndex: string | null
   onSelectSpell: (index: string) => void
   onRemoveSpell: (index: string) => void
-  /** Saisie du profil, affichee meme quand le grimoire est vide. */
-  profileForm: ReactNode
   /** `null` : aucun profil, rien n'est grise. */
   isAccessible: SpellAccessCheck | null
 }
@@ -24,7 +21,6 @@ export function PersonalSpellbookPanel({
   selectedIndex,
   onSelectSpell,
   onRemoveSpell,
-  profileForm,
   isAccessible,
 }: PersonalSpellbookPanelProps) {
   const spellByIndex = new Map(allSpells.map((spell) => [spell.index, spell]))
@@ -34,8 +30,6 @@ export function PersonalSpellbookPanel({
       <h2>
         Grimoire personnel <em>Personal spellbook</em> ({spells.length})
       </h2>
-
-      {profileForm}
 
       {/* La liste complete arrive de facon asynchrone : tant qu'elle est vide,
           aucun nom ne peut etre resolu, donc on n'affiche pas les sorts. */}
