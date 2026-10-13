@@ -22,6 +22,7 @@ import { BookSpread } from './components/BookSpread'
 import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery'
 import type { BookPage } from './hooks/useHorizontalSwipe'
 import { matchesSearch } from './utils/text'
+import { DEFAULT_SORT_MODE, sortSpells, type SortMode } from './utils/spellSort'
 import type { LanguageMode } from './types/language'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
@@ -39,6 +40,7 @@ function App() {
   const [classFilter, setClassFilter] = useState<string | null>(null)
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
   const [hideOutOfProfile, setHideOutOfProfile] = useState(false)
+  const [sortMode, setSortMode] = useState<SortMode>(DEFAULT_SORT_MODE)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
   // Mobile : page du livre visible (liste par defaut). Bascule automatique
   // vers la fiche a la PREMIERE selection d'un sort seulement, pour montrer
@@ -117,16 +119,23 @@ function App() {
     isAccessible,
   ])
 
-  // Remise a la premiere page a chaque changement du CONTENU de la liste
-  // filtree (recherche, filtres, profil) : une page 5 peut ne plus exister
-  // apres coup. Comparaison sur les index, pas sur la reference du tableau :
-  // filteredSpells est recalcule des qu'isAccessible change (fin de chargement
-  // d'un profil, niveau modifie), meme quand la liste affichee est identique.
+  // Tri applique APRES le filtrage, sur une copie : un tri ne retire aucun sort.
+  const sortedSpells = useMemo(
+    () => sortSpells(filteredSpells, sortMode),
+    [filteredSpells, sortMode],
+  )
+
+  // Remise a la premiere page a chaque changement du CONTENU ou de l'ORDRE de
+  // la liste (recherche, filtres, profil, tri) : une page 5 peut ne plus
+  // exister apres coup. Cle calculee sur la liste TRIEE : un tri change
+  // l'ordre des index sans changer leur ensemble. Comparaison sur les index,
+  // pas sur la reference du tableau : filteredSpells est recalcule des
+  // qu'isAccessible change, meme quand la liste affichee est identique.
   // Comparaison pendant le rendu plutot que dans un effet (regle
   // react-hooks/set-state-in-effect).
   const filteredKey = useMemo(
-    () => filteredSpells.map((spell) => spell.index).join(','),
-    [filteredSpells],
+    () => sortedSpells.map((spell) => spell.index).join(','),
+    [sortedSpells],
   )
   const [prevFilteredKey, setPrevFilteredKey] = useState(filteredKey)
   if (filteredKey !== prevFilteredKey) {
@@ -134,13 +143,13 @@ function App() {
     setPage(0)
   }
 
-  const totalPages = Math.max(1, Math.ceil(filteredSpells.length / spellsPerPage))
+  const totalPages = Math.max(1, Math.ceil(sortedSpells.length / spellsPerPage))
   // Le changement de gabarit d'ecran (spellsPerPage) peut rendre la page
   // courante hors bornes (ex. page 4 avec 15/page, resize vers 8/page).
   if (page >= totalPages) {
     setPage(totalPages - 1)
   }
-  const pagedSpells = filteredSpells.slice(
+  const pagedSpells = sortedSpells.slice(
     page * spellsPerPage,
     (page + 1) * spellsPerPage,
   )
@@ -192,6 +201,34 @@ function App() {
             <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
           </DevFrame>
         </div>
+
+        <DevFrame name="SortView (radios)" uses={['state:sortMode']}>
+          <fieldset>
+            <legend>
+              Trier la liste <em>Sort the list</em>
+            </legend>
+            <label>
+              <input
+                type="radio"
+                name="sort-mode"
+                value="alpha"
+                checked={sortMode === 'alpha'}
+                onChange={() => setSortMode('alpha')}
+              />{' '}
+              Ordre alphabetique <em>Alphabetical</em>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="sort-mode"
+                value="level"
+                checked={sortMode === 'level'}
+                onChange={() => setSortMode('level')}
+              />{' '}
+              Par niveau <em>By level</em>
+            </label>
+          </fieldset>
+        </DevFrame>
 
         {classListError && <p role="alert">{classListError}</p>}
         {schoolListError && <p role="alert">{schoolListError}</p>}
@@ -321,6 +358,7 @@ function App() {
                 'useSpellList',
                 'state:search',
                 'state:filtres',
+                'state:sortMode',
                 'useClassSpellIndices',
                 'useSchoolSpellIndices',
                 'useMultiSpellAccess',
@@ -331,7 +369,7 @@ function App() {
               ]}
             >
               <p>
-                {filteredSpells.length} / {spells.length} sorts <em>spells</em>
+                {sortedSpells.length} / {spells.length} sorts <em>spells</em>
               </p>
               <SpellList
                 spells={pagedSpells}
