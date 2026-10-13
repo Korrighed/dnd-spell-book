@@ -27,7 +27,7 @@ Les agents ont relevé des points sur lesquels le plan ne dit rien. Le code de l
 | D7 | `hideOutOfProfile` quand le dernier profil est supprimé | **Ne rien changer** | Le filtre est déjà inactif sans profil (`isAccessible === null`). Si un profil revient, la case réapparaît cochée : l'état reste visible. |
 | D8 | Indicateur de filtres actifs quand la vue est fermée | **Hors périmètre**, à prévoir dans la branche CSS | Le compteur `n / total` signale déjà une liste réduite. |
 | D9 | Le grimoire personnel est-il trié ? | **Non**, il garde l'ordre d'ajout | Le plan ne trie que la liste principale. |
-| D10 | Confirmation avant de supprimer un personnage | **Hors périmètre**, à noter | Aucune confirmation aujourd'hui dans `CharacterSelector` (vérifié). Ce sprint ne touche pas à ce comportement. |
+| D10 | Confirmation avant de supprimer un personnage | **Rien à faire** | Correction du 2026-10-13 : la confirmation existe déjà (`window.confirm`, `CharacterSelector.tsx`). L'affirmation « aucune confirmation » était fausse (grep mal vérifié). |
 | D11 | Nom de branche | Tranché : `views-filtre`, créée depuis `dev`. | Le `CLAUDE.md` du projet impose des commits directs sur `dev`, sans `feature/*`. Les branches récentes ne suivent pas cette règle. |
 
 ---
@@ -74,7 +74,7 @@ Les agents ont relevé des points sur lesquels le plan ne dit rien. Le code de l
 
 ### Conventions du dépôt
 
-12. Commentaires en français **sans accents**, densité proche du code existant. Exports nommés, `interface XxxProps`, libellés bilingues `Français <em>English</em>`.
+12. Commentaires en français **sans accents**, densité proche du code existant. Exports nommés, `interface XxxProps`. Libellés d'interface : **une seule langue**, via `t('Français', 'English')` (`src/utils/browserLanguage.ts`, décision du 2026-10-13). L'ancien format bilingue `Français <em>English</em>` est abandonné.
 13. Garder les `DevFrame` existants et leurs noms. Ajouter `state:sortMode` et `state:openView` dans `SOURCE_COLORS` (`src/dev/DevFrame.tsx`).
 14. Garder `className="filters"` sur le conteneur de `FiltersView` : `App.css` cible `#grimoire .filters`.
 15. Chaque commit passe `npx tsc -b --noEmit` et `npx eslint .`. Format de message du `CLAUDE.md`, sans `Co-Authored-By`.
@@ -1086,7 +1086,6 @@ Il n'y a pas de framework de test dans le projet (pas de Vitest dans `package.js
 
 - Style des marque-pages, des vues, du fond et de la position (branche CSS).
 - Indicateur de filtres actifs sur le marque-page « Filtres » (D8).
-- Confirmation avant la suppression d'un personnage (D10).
 - Zones tactiles d'au moins 44px et débordement des 4 marque-pages sur un écran de 320px : à traiter dans la branche CSS.
 
 ---
