@@ -152,6 +152,28 @@ function App() {
 
   return (
     <main id="grimoire">
+      {/* Recherche permanente, au-dessus du livre, sur tous les formats. */}
+      <DevFrame name="SpellSearch" uses={['state:search']}>
+        <SpellSearch value={search} onChange={setSearch} />
+      </DevFrame>
+
+      {/* Acces rapide : se bascule souvent pendant une recherche. */}
+      {profiles.length > 0 && (
+        <DevFrame
+          name="HideOutOfProfile (App)"
+          uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
+        >
+          <label>
+            <input
+              type="checkbox"
+              checked={hideOutOfProfile}
+              onChange={(event) => setHideOutOfProfile(event.target.checked)}
+            />{' '}
+            Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
+          </label>
+        </DevFrame>
+      )}
+
       {/* Replie par defaut : le but est de laisser un maximum de place au
           canvas pendant le reglage de la position/taille du livre 3D.
           Remonte en haut de page (avant BookSpread) : les filtres restent
@@ -160,9 +182,6 @@ function App() {
         <summary>Filtres et grimoire personnel</summary>
 
         <div className="filters">
-          <DevFrame name="SpellSearch" uses={['state:search']}>
-            <SpellSearch value={search} onChange={setSearch} />
-          </DevFrame>
           <DevFrame name="SpellLevelFilter" uses={['state:filtres']}>
             <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
           </DevFrame>
@@ -172,21 +191,6 @@ function App() {
           <DevFrame name="SpellSchoolFilter" uses={['state:filtres', 'useSchoolList']}>
             <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
           </DevFrame>
-          {profiles.length > 0 && (
-            <DevFrame
-              name="HideOutOfProfile (App)"
-              uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
-            >
-              <label>
-                <input
-                  type="checkbox"
-                  checked={hideOutOfProfile}
-                  onChange={(event) => setHideOutOfProfile(event.target.checked)}
-                />{' '}
-                Masquer les sorts hors profil <em>Hide out-of-profile spells</em>
-              </label>
-            </DevFrame>
-          )}
         </div>
 
         {classListError && <p role="alert">{classListError}</p>}
