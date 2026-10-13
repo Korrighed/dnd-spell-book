@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useSpellList } from './hooks/useSpellList'
 import { useClassList } from './hooks/useClassList'
 import { useClassSpellIndices } from './hooks/useClassSpellIndices'
@@ -10,20 +10,20 @@ import { usePersonalSpellbook } from './hooks/usePersonalSpellbook'
 import { useMultiSpellAccess } from './hooks/useMultiSpellAccess'
 import { useSpellcastingClasses } from './hooks/useSpellcastingClasses'
 import { SpellSearch } from './components/SpellSearch'
-import { SpellLevelFilter } from './components/SpellLevelFilter'
-import { SpellClassFilter } from './components/SpellClassFilter'
-import { SpellSchoolFilter } from './components/SpellSchoolFilter'
 import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
-import { PersonalSpellbookPanel } from './components/PersonalSpellbookPanel'
-import { SpellcasterProfileForm } from './components/SpellcasterProfileForm'
-import { CharacterSelector } from './components/CharacterSelector'
+import { Bookmarks } from './components/Bookmarks'
+import { FiltersView } from './components/FiltersView'
+import { SortView } from './components/SortView'
+import { CharacterView } from './components/CharacterView'
+import { SpellbookView } from './components/SpellbookView'
 import { BookSpread } from './components/BookSpread'
 import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery'
 import type { BookPage } from './hooks/useHorizontalSwipe'
 import { matchesSearch } from './utils/text'
-import { DEFAULT_SORT_MODE, sortSpells, type SortMode } from './utils/spellSort'
 import type { LanguageMode } from './types/language'
+import { bookmarkButtonId, type BookmarkId } from './utils/bookmarks'
+import { DEFAULT_SORT_MODE, sortSpells, type SortMode } from './utils/spellSort'
 import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 
@@ -41,6 +41,8 @@ function App() {
   const [schoolFilter, setSchoolFilter] = useState<string | null>(null)
   const [hideOutOfProfile, setHideOutOfProfile] = useState(false)
   const [sortMode, setSortMode] = useState<SortMode>(DEFAULT_SORT_MODE)
+  // Vue ouverte par un marque-page, une seule a la fois, `null` : aucune.
+  const [openView, setOpenView] = useState<BookmarkId | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
   // Mobile : page du livre visible (liste par defaut). Bascule automatique
   // vers la fiche a la PREMIERE selection d'un sort seulement, pour montrer
@@ -159,6 +161,30 @@ function App() {
     isAccessible !== null &&
     !isAccessible(selectedSpell.mechanics.index, selectedSpell.mechanics.level)
 
+  // Fermeture d'une vue : le focus revient au marque-page qui l'a ouverte.
+  // Fait ici et pas dans la vue : passer d'une vue a une autre ne doit pas
+  // rendre le focus a l'ancien marque-page.
+  const closeView = useCallback(() => {
+    if (openView === null) return
+    setOpenView(null)
+    document.getElementById(bookmarkButtonId(openView))?.focus()
+  }, [openView])
+
+  // Clic sur le marque-page actif : referme la vue.
+  const handleToggleView = (id: BookmarkId) => {
+    if (id === openView) closeView()
+    else setOpenView(id)
+  }
+
+  // Choix d'un sort depuis le grimoire (D3) : la fiche serait cachee sous la
+  // vue, donc on la ferme. En mobile, bascule sur la fiche a chaque fois (pas
+  // seulement a la premiere selection) : l'utilisateur vient de demander ce sort.
+  const handleSelectFromSpellbook = (index: string) => {
+    handleSelectSpell(index)
+    closeView()
+    if (window.matchMedia(MOBILE_QUERY).matches) setMobilePage('left')
+  }
+
   return (
     <main id="grimoire">
       {/* Recherche permanente, au-dessus du livre, sur tous les formats. */}
@@ -166,7 +192,7 @@ function App() {
         <SpellSearch value={search} onChange={setSearch} />
       </DevFrame>
 
-      {/* Acces rapide : se bascule souvent pendant une recherche. */}
+      {/* Acces rapide : se bascule souvent pendant une recherche, donc hors des vues. */}
       {profiles.length > 0 && (
         <DevFrame
           name="HideOutOfProfile (App)"
@@ -183,205 +209,156 @@ function App() {
         </DevFrame>
       )}
 
-      {/* Replie par defaut : le but est de laisser un maximum de place au
-          canvas pendant le reglage de la position/taille du livre 3D.
-          Remonte en haut de page (avant BookSpread) : les filtres restent
-          la premiere chose visible/deployable en haut de la fenetre. */}
-      <details className="other-panels">
-        <summary>Filtres et grimoire personnel</summary>
+      <DevFrame name="Bookmarks" uses={['state:openView']}>
+        <Bookmarks openView={openView} onToggle={handleToggleView} />
+      </DevFrame>
 
-        <div className="filters">
-          <DevFrame name="SpellLevelFilter" uses={['state:filtres']}>
-            <SpellLevelFilter value={levelFilter} onChange={setLevelFilter} />
-          </DevFrame>
-          <DevFrame name="SpellClassFilter" uses={['state:filtres', 'useClassList']}>
-            <SpellClassFilter classes={classes} value={classFilter} onChange={setClassFilter} />
-          </DevFrame>
-          <DevFrame name="SpellSchoolFilter" uses={['state:filtres', 'useSchoolList']}>
-            <SpellSchoolFilter schools={schools} value={schoolFilter} onChange={setSchoolFilter} />
-          </DevFrame>
+      {/* Parent commun du livre et des vues (App.css). Les vues sont soeurs de
+          BookSpread, jamais dedans : dans une page elles seraient demontees
+          pendant le tournage, inertes en mobile, et prises par le swipe. */}
+      <div className="book-zone">
+        {/* Livre inerte sous une vue ouverte : ni focus clavier, ni swipe. */}
+        <div inert={openView !== null}>
+          <BookSpread
+            mobilePage={mobilePage}
+            onMobilePageChange={setMobilePage}
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            left={
+              <>
+                {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
+                {detailError && <p role="alert">{detailError}</p>}
+                {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
+                {selectedSpell && (
+                  <DevFrame
+                    name="SpellDetail"
+                    uses={[
+                      'useSpellDetail',
+                      'usePersonalSpellbook',
+                      'useMultiSpellAccess',
+                      'state:language',
+                      'state:selectedIndex',
+                    ]}
+                  >
+                    <SpellDetail
+                      detail={selectedSpell}
+                      language={language}
+                      onLanguageChange={setLanguage}
+                      inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
+                      onToggleSpellbook={toggleSpellbook}
+                      outOfProfile={selectedOutOfProfile}
+                    />
+                  </DevFrame>
+                )}
+              </>
+            }
+            right={
+              <>
+                {/* Sur la page elle-meme, pas dans une vue fermee : sinon un
+                    echec de l'API laisse une page vide sans explication. */}
+                {loading && (
+                  <p>
+                    Chargement des sorts... <em>Loading spells...</em>
+                  </p>
+                )}
+                {error && <p role="alert">{error}</p>}
+                {/* Sur la page et pas dans la vue Filtres (D4) : ces etats
+                    vident la liste, ils doivent rester visibles vue fermee. */}
+                {classSpellsLoading && (
+                  <p>
+                    Chargement des sorts de la classe... <em>Loading class spells...</em>
+                  </p>
+                )}
+                {classSpellsError && <p role="alert">{classSpellsError}</p>}
+                {schoolSpellsLoading && (
+                  <p>
+                    Chargement des sorts de l'ecole... <em>Loading school spells...</em>
+                  </p>
+                )}
+                {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
+                {!loading && !error && (
+                  <DevFrame
+                    name="SpellList"
+                    uses={[
+                      'useSpellList',
+                      'state:search',
+                      'state:filtres',
+                      'state:sortMode',
+                      'useClassSpellIndices',
+                      'useSchoolSpellIndices',
+                      'useMultiSpellAccess',
+                      'state:hideOutOfProfile',
+                      'state:selectedIndex',
+                      'state:page',
+                      'useSpellSummaries',
+                    ]}
+                  >
+                    <p>
+                      {sortedSpells.length} / {spells.length} sorts <em>spells</em>
+                    </p>
+                    <SpellList
+                      spells={pagedSpells}
+                      onSelect={handleSelectSpell}
+                      isAccessible={isAccessible}
+                      summaries={spellSummaries}
+                    />
+                  </DevFrame>
+                )}
+              </>
+            }
+          />
         </div>
 
-        <DevFrame name="SortView (radios)" uses={['state:sortMode']}>
-          <fieldset>
-            <legend>
-              Trier la liste <em>Sort the list</em>
-            </legend>
-            <label>
-              <input
-                type="radio"
-                name="sort-mode"
-                value="alpha"
-                checked={sortMode === 'alpha'}
-                onChange={() => setSortMode('alpha')}
-              />{' '}
-              Ordre alphabetique <em>Alphabetical</em>
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="sort-mode"
-                value="level"
-                checked={sortMode === 'level'}
-                onChange={() => setSortMode('level')}
-              />{' '}
-              Par niveau <em>By level</em>
-            </label>
-          </fieldset>
-        </DevFrame>
-
-        {classListError && <p role="alert">{classListError}</p>}
-        {schoolListError && <p role="alert">{schoolListError}</p>}
-        {classSpellsLoading && (
-          <p>
-            Chargement des sorts de la classe... <em>Loading class spells...</em>
-          </p>
-        )}
-        {classSpellsError && <p role="alert">{classSpellsError}</p>}
-        {schoolSpellsLoading && (
-          <p>
-            Chargement des sorts de l'ecole... <em>Loading school spells...</em>
-          </p>
-        )}
-        {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
-
-        <DevFrame name="CharacterSelector" uses={['usePersonalSpellbook']}>
-          <CharacterSelector
-            characters={characters}
-            activeCharacterId={activeCharacterId}
-            onSelect={setActiveCharacterId}
-            onAdd={addCharacter}
-            onRemove={removeCharacter}
-            onRename={renameCharacter}
-          />
-        </DevFrame>
-        {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
-        {profiles.map((profile, index) => (
-          <DevFrame
-            key={profile.id}
-            name={`SpellcasterProfileForm (classe ${index + 1})`}
-            uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useMultiSpellAccess']}
-          >
-            <SpellcasterProfileForm
-              classes={spellcastingClasses}
-              profile={profile}
-              maxSpellLevel={perProfile[index].maxSpellLevel}
-              subclassSpellGrants={perProfile[index].subclassSpellGrants}
-              loading={perProfile[index].loading}
-              error={perProfile[index].error}
-              onChange={(next) =>
-                next ? setProfileById(profile.id, next) : removeProfileById(profile.id)
-              }
-            />
-          </DevFrame>
-        ))}
-        <DevFrame
-          name="SpellcasterProfileForm (ajouter une classe)"
-          uses={['usePersonalSpellbook', 'useSpellcastingClasses']}
-        >
-          <SpellcasterProfileForm
-            classes={spellcastingClasses}
-            profile={null}
-            maxSpellLevel={null}
-            subclassSpellGrants={null}
-            loading={false}
-            error={null}
-            onChange={(next) => {
-              if (next) addProfile(next)
-            }}
-          />
-        </DevFrame>
-
-        <DevFrame
-          name="PersonalSpellbookPanel"
-          uses={['usePersonalSpellbook', 'useSpellList', 'useMultiSpellAccess', 'state:selectedIndex']}
-        >
-          <PersonalSpellbookPanel
-            spells={personalSpells}
-            allSpells={spells}
-            selectedIndex={selectedIndex}
-            onSelectSpell={handleSelectSpell}
-            onRemoveSpell={removeFromSpellbook}
-            isAccessible={isAccessible}
-          />
-        </DevFrame>
-      </details>
-
-      <BookSpread
-        mobilePage={mobilePage}
-        onMobilePageChange={setMobilePage}
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        left={
-          <>
-            {selectedIndex && detailLoading && <p>Chargement du detail du sort...</p>}
-            {detailError && <p role="alert">{detailError}</p>}
-            {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
-            {selectedSpell && (
-              <DevFrame
-                name="SpellDetail"
-                uses={[
-                  'useSpellDetail',
-                  'usePersonalSpellbook',
-                  'useMultiSpellAccess',
-                  'state:language',
-                  'state:selectedIndex',
-                ]}
-              >
-                <SpellDetail
-                  detail={selectedSpell}
-                  language={language}
-                  onLanguageChange={setLanguage}
-                  inSpellbook={personalIndices.has(selectedSpell.mechanics.index)}
-                  onToggleSpellbook={toggleSpellbook}
-                  outOfProfile={selectedOutOfProfile}
-                />
-              </DevFrame>
-            )}
-          </>
-        }
-        right={
-          <>
-            {/* Sur la page elle-meme, pas dans le panneau replie : sinon un
-                echec de l'API laisse une page vide sans explication. */}
-            {loading && (
-              <p>
-                Chargement des sorts... <em>Loading spells...</em>
-              </p>
-            )}
-            {error && <p role="alert">{error}</p>}
-            {!loading && !error && (
-            <DevFrame
-              name="SpellList"
-              uses={[
-                'useSpellList',
-                'state:search',
-                'state:filtres',
-                'state:sortMode',
-                'useClassSpellIndices',
-                'useSchoolSpellIndices',
-                'useMultiSpellAccess',
-                'state:hideOutOfProfile',
-                'state:selectedIndex',
-                'state:page',
-                'useSpellSummaries',
-              ]}
-            >
-              <p>
-                {sortedSpells.length} / {spells.length} sorts <em>spells</em>
-              </p>
-              <SpellList
-                spells={pagedSpells}
-                onSelect={handleSelectSpell}
-                isAccessible={isAccessible}
-                summaries={spellSummaries}
-              />
-            </DevFrame>
-            )}
-          </>
-        }
-      />
+        {/* Toujours montees, masquees par `hidden` : voir BookmarkView. */}
+        <FiltersView
+          open={openView === 'filters'}
+          onClose={closeView}
+          levelFilter={levelFilter}
+          onLevelChange={setLevelFilter}
+          classes={classes}
+          classFilter={classFilter}
+          onClassChange={setClassFilter}
+          schools={schools}
+          schoolFilter={schoolFilter}
+          onSchoolChange={setSchoolFilter}
+          classListError={classListError}
+          schoolListError={schoolListError}
+        />
+        <SortView
+          open={openView === 'sort'}
+          onClose={closeView}
+          value={sortMode}
+          onChange={setSortMode}
+        />
+        <CharacterView
+          open={openView === 'character'}
+          onClose={closeView}
+          characters={characters}
+          activeCharacterId={activeCharacterId}
+          onSelectCharacter={setActiveCharacterId}
+          onAddCharacter={addCharacter}
+          onRemoveCharacter={removeCharacter}
+          onRenameCharacter={renameCharacter}
+          spellcastingClasses={spellcastingClasses}
+          spellcastingClassesError={spellcastingClassesError}
+          profiles={profiles}
+          perProfile={perProfile}
+          onSetProfile={setProfileById}
+          onAddProfile={addProfile}
+          onRemoveProfile={removeProfileById}
+        />
+        <SpellbookView
+          open={openView === 'spellbook'}
+          onClose={closeView}
+          spells={personalSpells}
+          allSpells={spells}
+          selectedIndex={selectedIndex}
+          onSelectSpell={handleSelectFromSpellbook}
+          onRemoveSpell={removeFromSpellbook}
+          isAccessible={isAccessible}
+        />
+      </div>
 
       <DevFramesToggle />
     </main>

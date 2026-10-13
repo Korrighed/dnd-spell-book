@@ -34,3 +34,20 @@
 #grimoire .spellbook-toggle[aria-pressed='true'] {
   background: none;
 }
+
+/* Parent commun du livre et des vues de marque-page : sert d'ancre a
+   .bookmark-view (position: absolute). */
+#grimoire .book-zone {
+  position: relative;
+}
+
+/* Vue par-dessus le livre. Jamais de `display` ici : il ecraserait
+   l'attribut `hidden` qui ferme la vue. Fond provisoire (D2) en attendant la
+   branche CSS. */
+#grimoire .bookmark-view {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow-y: auto;
+  background: var(--bg);
+}

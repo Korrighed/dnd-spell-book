@@ -27,10 +27,6 @@ export function PersonalSpellbookPanel({
 
   return (
     <section className="personal-spellbook">
-      <h2>
-        Grimoire personnel <em>Personal spellbook</em> ({spells.length})
-      </h2>
-
       {/* La liste complete arrive de facon asynchrone : tant qu'elle est vide,
           aucun nom ne peut etre resolu, donc on n'affiche pas les sorts. */}
       {spells.length > 0 && allSpells.length > 0 && (
