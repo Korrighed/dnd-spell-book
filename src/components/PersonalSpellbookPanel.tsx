@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { PersonalSpell } from '../hooks/usePersonalSpellbook'
 import type { SpellListItem } from '../api/spells'
 import type { SpellAccessCheck } from '../utils/spellAccess'
+import { BROWSER_LANGUAGE, spellDisplayName } from '../utils/browserLanguage'
 import { OutOfProfileLabel } from './OutOfProfileLabel'
 import './PersonalSpellbookPanel.css'
 
@@ -49,6 +50,8 @@ export function PersonalSpellbookPanel({
             const className = [isSelected && 'selected', outOfProfile && 'out-of-profile']
               .filter(Boolean)
               .join(' ')
+            // Une seule langue, comme SpellList.
+            const name = spell ? spellDisplayName(spell) : personal.index
 
             return (
               <li key={personal.index} className={className || undefined}>
@@ -58,21 +61,18 @@ export function PersonalSpellbookPanel({
                   aria-current={isSelected ? 'true' : undefined}
                   onClick={() => onSelectSpell(personal.index)}
                 >
-                  {spell ? (
-                    <>
-                      <span className="level">Niv. {spell.level}</span>
-                      <span className="name-fr">{spell.nameFr}</span>
-                      <span className="name-en">{spell.name}</span>
-                      {outOfProfile && <OutOfProfileLabel />}
-                    </>
-                  ) : (
-                    <span className="name-fr">{personal.index}</span>
+                  {spell && (
+                    <span className="level">
+                      {BROWSER_LANGUAGE === 'fr' ? 'Niv.' : 'Lvl'} {spell.level}
+                    </span>
                   )}
+                  <span className="name">{name}</span>
+                  {outOfProfile && <OutOfProfileLabel />}
                 </button>
                 <button
                   type="button"
                   className="remove"
-                  aria-label={`Retirer ${spell?.nameFr ?? personal.index} du grimoire personnel`}
+                  aria-label={`Retirer ${name} du grimoire personnel`}
                   onClick={() => onRemoveSpell(personal.index)}
                 >
                   &times;

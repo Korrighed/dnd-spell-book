@@ -61,10 +61,6 @@
   flex-shrink: 0;
 }
 
-.personal-spellbook .name-en {
-  font-style: italic;
-}
-
 .personal-spellbook .remove {
   flex-shrink: 0;
   padding: 0 8px;
