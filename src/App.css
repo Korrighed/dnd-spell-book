@@ -1,5 +1,8 @@
+/* Desktop : marges verticales reduites pour que la page tienne sans scroll
+   (canvas du livre cale sur window.innerHeight = 785, voir BookSpread.css).
+   Mobile : voir App.mobile.css. */
 #grimoire {
-  padding: 24px;
+  padding: 8px 24px;
   text-align: left;
 }
 
@@ -28,9 +31,9 @@
 #grimoire .search-bar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   width: var(--spell-list-width);
-  margin: 0 var(--spell-list-right) 16px auto;
+  margin: 0 var(--spell-list-right) 4px auto;
   text-align: center;
 }
 
