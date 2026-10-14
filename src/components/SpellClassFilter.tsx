@@ -10,6 +10,7 @@ interface SpellClassFilterProps {
 export function SpellClassFilter({ classes, value, onChange }: SpellClassFilterProps) {
   return (
     <select
+      aria-label={t('Classe', 'Class')}
       value={value ?? 'all'}
       onChange={(event) => {
         const raw = event.target.value

@@ -33,7 +33,10 @@ export function SpellList({ spells, onSelect, isAccessible, summaries }: SpellLi
               <span className="level">
                 {LANGUAGE === 'fr' ? 'Niv.' : 'Lvl'} {spell.level}
               </span>
-              <span className="name">{name}</span>
+              {/* Espace de largeur nulle apres « / » : un nom double
+                  (Agrandissement/Rapetissement) se coupe sur la barre plutot
+                  qu'en plein mot dans une colonne etroite. */}
+              <span className="name">{name.replaceAll('/', '/​')}</span>
               <span className="extra">
                 {summary ? (
                   <>
