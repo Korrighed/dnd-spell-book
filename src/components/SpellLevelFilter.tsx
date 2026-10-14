@@ -1,7 +1,9 @@
+import { t } from '../utils/browserLanguage'
+
 const LEVELS = Array.from({ length: 10 }, (_, index) => index)
 
 function levelLabel(level: number): string {
-  return level === 0 ? 'Tour de magie (Cantrip)' : `Niveau ${level} (Level ${level})`
+  return level === 0 ? t('Tour de magie', 'Cantrip') : t(`Niveau ${level}`, `Level ${level}`)
 }
 
 interface SpellLevelFilterProps {
@@ -18,7 +20,7 @@ export function SpellLevelFilter({ value, onChange }: SpellLevelFilterProps) {
         onChange(raw === 'all' ? null : Number(raw))
       }}
     >
-      <option value="all">Tous les niveaux (All levels)</option>
+      <option value="all">{t('Tous les niveaux', 'All levels')}</option>
       {LEVELS.map((level) => (
         <option key={level} value={level}>
           {levelLabel(level)}

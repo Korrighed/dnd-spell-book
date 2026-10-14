@@ -2,6 +2,7 @@ import type { SpellDetail as SpellDetailData, SpellTexts } from '../api/spellDet
 import type { LanguageMode } from '../types/language'
 import { Bilingual, BilingualParagraphs } from './Bilingual'
 import { LanguageToggle } from './LanguageToggle'
+import { BROWSER_LANGUAGE, t } from '../utils/browserLanguage'
 
 interface SpellDetailProps {
   detail: SpellDetailData
@@ -42,8 +43,10 @@ export function SpellDetail({
     <section className={outOfProfile ? 'spell-detail out-of-profile' : 'spell-detail'}>
       {outOfProfile && (
         <p role="note">
-          Ce sort ne correspond pas a votre profil de lanceur.{' '}
-          <em>This spell is outside your spellcaster profile.</em>
+          {t(
+            'Ce sort ne correspond pas a votre profil de lanceur.',
+            'This spell is outside your spellcaster profile.',
+          )}
         </p>
       )}
 
@@ -55,7 +58,9 @@ export function SpellDetail({
         aria-pressed={inSpellbook}
         onClick={() => onToggleSpellbook(mechanics.index)}
       >
-        {inSpellbook ? 'Retirer du grimoire personnel' : 'Ajouter au grimoire personnel'}
+        {inSpellbook
+          ? t('Retirer du grimoire personnel', 'Remove from personal spellbook')
+          : t('Ajouter au grimoire personnel', 'Add to personal spellbook')}
       </button>
 
       <h2>
@@ -63,24 +68,24 @@ export function SpellDetail({
       </h2>
 
       <p>
-        Niveau {mechanics.level} — <Bilingual mode={language} fr={fr.school} en={en.school} />
+        {t('Niveau', 'Level')} {mechanics.level} — <Bilingual mode={language} fr={fr.school} en={en.school} />
       </p>
       <p>
-        Classes :{' '}
+        {t('Classes :', 'Classes:')}{' '}
         <Bilingual mode={language} fr={fr.classes.join(', ')} en={en.classes.join(', ')} />
       </p>
       <p>
-        Temps d'incantation :{' '}
+        {t("Temps d'incantation :", 'Casting time:')}{' '}
         <Bilingual mode={language} fr={fr.castingTime} en={en.castingTime} />
       </p>
       <p>
-        Portee : <Bilingual mode={language} fr={fr.range} en={en.range} />
+        {t('Portee :', 'Range:')} <Bilingual mode={language} fr={fr.range} en={en.range} />
       </p>
       <p>
-        Duree : <Bilingual mode={language} fr={fr.duration} en={en.duration} />
+        {t('Duree :', 'Duration:')} <Bilingual mode={language} fr={fr.duration} en={en.duration} />
       </p>
       <p>
-        Composants : {mechanics.components.join(', ')}
+        {t('Composants :', 'Components:')} {mechanics.components.join(', ')}
         {en.material && (
           <>
             {' '}
@@ -89,13 +94,14 @@ export function SpellDetail({
         )}
       </p>
       <p>
-        Rituel : {mechanics.ritual ? 'Oui' : 'Non'} — Concentration :{' '}
-        {mechanics.concentration ? 'Oui' : 'Non'}
+        {t('Rituel :', 'Ritual:')} {mechanics.ritual ? t('Oui', 'Yes') : t('Non', 'No')} —{' '}
+        {t('Concentration :', 'Concentration:')}{' '}
+        {mechanics.concentration ? t('Oui', 'Yes') : t('Non', 'No')}
       </p>
 
       {mechanics.damage && (
         <p>
-          Degats : {damageValue}
+          {t('Degats :', 'Damage:')} {damageValue}
           {mechanics.damage.typeIndex && (
             <>
               {' '}
@@ -111,7 +117,7 @@ export function SpellDetail({
 
       {en.dcType && (
         <p>
-          Jet de sauvegarde :{' '}
+          {t('Jet de sauvegarde :', 'Saving throw:')}{' '}
           <Bilingual mode={language} fr={fr.dcType ?? en.dcType} en={en.dcType} /> (
           {mechanics.dcSuccess})
         </p>
@@ -119,25 +125,28 @@ export function SpellDetail({
 
       {mechanics.areaOfEffect && (
         <p>
-          Zone d'effet : {mechanics.areaOfEffect.type}, {mechanics.areaOfEffect.sizeMeters} m (
+          {t("Zone d'effet :", 'Area of effect:')} {mechanics.areaOfEffect.type}, {mechanics.areaOfEffect.sizeMeters} m (
           {mechanics.areaOfEffect.sizeFeet} ft)
         </p>
       )}
 
       <div>
-        <h3>Description</h3>
+        <h3>{t('Description', 'Description')}</h3>
         <BilingualParagraphs mode={language} fr={fr.desc} en={en.desc} />
       </div>
 
       {en.higherLevel.length > 0 && (
         <div>
-          <h3>Aux niveaux superieurs</h3>
+          <h3>{t('Aux niveaux superieurs', 'At higher levels')}</h3>
           <BilingualParagraphs mode={language} fr={fr.higherLevel} en={en.higherLevel} />
         </div>
       )}
 
       <p>
-        <small>Mis a jour le {new Date(mechanics.updatedAt).toLocaleDateString('fr-FR')}</small>
+        <small>
+          {t('Mis a jour le', 'Updated on')}{' '}
+          {new Date(mechanics.updatedAt).toLocaleDateString(BROWSER_LANGUAGE === 'fr' ? 'fr-FR' : 'en-US')}
+        </small>
       </p>
     </section>
   )

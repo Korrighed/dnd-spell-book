@@ -5,17 +5,6 @@
   background: var(--accent-bg);
 }
 
-.personal-spellbook h2 {
-  margin: 0 0 8px;
-  font-size: 1rem;
-  color: var(--text-h);
-}
-
-.personal-spellbook h2 em {
-  color: var(--text);
-  font-weight: normal;
-}
-
 .personal-spellbook ul {
   list-style: none;
   padding: 0;
@@ -59,10 +48,6 @@
 .personal-spellbook .level {
   width: 60px;
   flex-shrink: 0;
-}
-
-.personal-spellbook .name-en {
-  font-style: italic;
 }
 
 .personal-spellbook .remove {

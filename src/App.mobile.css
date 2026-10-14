@@ -1,0 +1,15 @@
+/* Mobile (< 900px) : une seule page du livre visible a la fois. Aligner la
+   recherche sur la page de droite n'aurait pas de sens quand la fiche est
+   affichee : pleine largeur, contenu centre. Le scroll vertical reste permis
+   en mobile : marges d'origine, plus aerees que le desktop (App.css). */
+@media (max-width: 899px) {
+  #grimoire {
+    padding: 24px;
+  }
+
+  #grimoire .search-bar {
+    gap: 8px;
+    width: auto;
+    margin: 0 0 16px;
+  }
+}

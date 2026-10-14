@@ -1,3 +1,4 @@
+import { t } from '../utils/browserLanguage'
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
 /**
@@ -37,7 +38,7 @@ export async function fetchSpellList(): Promise<SpellListItem[]> {
 
   if (!enRes.ok || !frRes.ok) {
     throw new Error(
-      'Impossible de charger la liste des sorts depuis l\'API. (Unable to load the spell list from the API.)',
+      t('Impossible de charger la liste des sorts depuis l\'API.', 'Unable to load the spell list from the API.'),
     )
   }
 

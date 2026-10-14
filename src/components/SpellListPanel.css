@@ -10,6 +10,17 @@
   color: #000;
 }
 
+/* Marge droite et largeur de la page de droite, declarees UNE SEULE FOIS sur
+   #grimoire (pas sur .spell-list-panel) : la barre de recherche (App.css,
+   .search-bar), hors du livre, s'aligne sur la meme colonne en lisant les
+   memes variables. Pas de valeur de repli dupliquee plus bas, meme raison
+   que --book-frame-* (BookSpread.css). Le mobile les redefinit sur
+   .book-spread (BookSpread.mobile.css). */
+#grimoire {
+  --spell-list-right: 55px;
+  --spell-list-width: 615px;
+}
+
 /* Position et taille de la page de droite (recherche/filtres/liste),
    independantes de .book-spread-pages et de .spell-detail-panel : les
    changer ici ne bouge jamais la fiche, ni le canvas du livre (voir
@@ -17,10 +28,10 @@
 .spell-list-panel {
   position: absolute;
   top: var(--spell-list-top, 91px);
-  right: var(--spell-list-right, 55px);
+  right: var(--spell-list-right);
   /* Largeur derivee des marges, voir SpellDetailPanel.css, meme raison :
      right + width + width(fiche) + left doit toujours faire 100%. */
-  width: var(--spell-list-width, 615px);
+  width: var(--spell-list-width);
   height: var(--spell-list-height, 555px);
   /* Plafond fixe : le contenu de la liste ne peut jamais l'agrandir
      au-dela, quel que soit le nombre de sorts affiches. */

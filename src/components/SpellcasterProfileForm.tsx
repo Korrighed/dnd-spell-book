@@ -8,6 +8,7 @@ import {
   type SpellcasterProfile,
 } from '../hooks/usePersonalSpellbook'
 import { useClassSubclasses } from '../hooks/useClassSubclasses'
+import { t } from '../utils/browserLanguage'
 import './SpellcasterProfileForm.css'
 
 interface SpellcasterProfileFormProps {
@@ -67,13 +68,14 @@ export function SpellcasterProfileForm({
 
   // Distingue les boutons (aria-label) d'un bloc a l'autre en multiclasse : sans
   // ca, un lecteur d'ecran rencontre plusieurs boutons au meme intitule.
-  const blockLabel = classes.find((cls) => cls.index === profile?.classIndex)?.nameFr ?? 'nouvelle classe'
+  const blockClass = classes.find((cls) => cls.index === profile?.classIndex)
+  const blockLabel = blockClass ? t(blockClass.nameFr, blockClass.name) : t('nouvelle classe', 'new class')
 
   return (
     <fieldset className="spellcaster-profile">
-      <legend>{profile ? blockLabel : 'Nouvelle classe'}</legend>
+      <legend>{profile ? blockLabel : t('Nouvelle classe', 'New class')}</legend>
       <label>
-        Classe <em>Class</em>{' '}
+        {t('Classe', 'Class')}{' '}
         <select
           value={profile?.classIndex ?? ''}
           onChange={(event) => {
@@ -95,24 +97,24 @@ export function SpellcasterProfileForm({
             )
           }}
         >
-          <option value="">Aucune classe (No class)</option>
+          <option value="">{t('Aucune classe', 'No class')}</option>
           {classes.map((cls) => (
             <option key={cls.index} value={cls.index}>
-              {cls.nameFr} ({cls.name})
+              {t(cls.nameFr, cls.name)}
             </option>
           ))}
         </select>
       </label>
       <button
         type="button"
-        aria-label={`Deselectionner la classe (${blockLabel})`}
+        aria-label={t(`Deselectionner la classe (${blockLabel})`, `Unselect class (${blockLabel})`)}
         disabled={!profile}
         onClick={() => onChange(null)}
       >
         &times;
       </button>{' '}
       <label>
-        Niveau <em>Level</em>{' '}
+        {t('Niveau', 'Level')}{' '}
         <select
           value={profile?.characterLevel ?? ''}
           disabled={!profile}
@@ -131,7 +133,7 @@ export function SpellcasterProfileForm({
             })
           }}
         >
-          <option value="">Niveau max (Max level)</option>
+          <option value="">{t('Niveau max', 'Max level')}</option>
           {CHARACTER_LEVELS.map((level) => (
             <option key={level} value={level}>
               {level}
@@ -141,7 +143,7 @@ export function SpellcasterProfileForm({
       </label>
       <button
         type="button"
-        aria-label={`Deselectionner le niveau (${blockLabel})`}
+        aria-label={t(`Deselectionner le niveau (${blockLabel})`, `Unselect level (${blockLabel})`)}
         disabled={!hasLevel}
         onClick={() => profile && onChange({ ...profile, characterLevel: null })}
       >
@@ -158,7 +160,7 @@ export function SpellcasterProfileForm({
       {subclassUnlocked && (subclasses.length > 0 || profile?.subclassIndex) && (
         <>
           <label>
-            Sous-classe <em>Subclass</em>{' '}
+            {t('Sous-classe', 'Subclass')}{' '}
             <select
               value={profile?.subclassIndex ?? ''}
               onChange={(event) => {
@@ -168,11 +170,11 @@ export function SpellcasterProfileForm({
                 onChange({ ...profile, subclassIndex, subclassFeatureIndex: null })
               }}
             >
-              <option value="">Aucune sous-classe (No subclass)</option>
+              <option value="">{t('Aucune sous-classe', 'No subclass')}</option>
               {subclasses.length > 0
                 ? subclasses.map((sub) => (
                     <option key={sub.index} value={sub.index}>
-                      {sub.nameFr} ({sub.name})
+                      {t(sub.nameFr, sub.name)}
                     </option>
                   ))
                 : profile?.subclassIndex && (
@@ -182,7 +184,7 @@ export function SpellcasterProfileForm({
           </label>
           <button
             type="button"
-            aria-label={`Deselectionner la sous-classe (${blockLabel})`}
+            aria-label={t(`Deselectionner la sous-classe (${blockLabel})`, `Unselect subclass (${blockLabel})`)}
             disabled={!profile?.subclassIndex}
             onClick={() =>
               profile && onChange({ ...profile, subclassIndex: null, subclassFeatureIndex: null })
@@ -193,11 +195,16 @@ export function SpellcasterProfileForm({
           {subclasses.length === 0 && (
             <p role="alert">
               {subclassesError
-                ? `Liste des sous-classes indisponible (${subclassesError})`
+                ? t(
+                    `Liste des sous-classes indisponible (${subclassesError})`,
+                    `Subclass list unavailable (${subclassesError})`,
+                  )
                 : subclassesLoading
-                  ? 'Chargement de la liste des sous-classes...'
-                  : 'Sous-classe enregistree introuvable dans la liste actuelle.'}{' '}
-              <em>Subclass list unavailable</em>
+                  ? t('Chargement de la liste des sous-classes...', 'Loading subclass list...')
+                  : t(
+                      'Sous-classe enregistree introuvable dans la liste actuelle.',
+                      'Saved subclass not found in the current list.',
+                    )}
             </p>
           )}
         </>
@@ -205,24 +212,24 @@ export function SpellcasterProfileForm({
       {profile?.subclassIndex && subclassFeatureOptions.length > 0 && (
         <>
           <label>
-            Terrain <em>Terrain</em>{' '}
+            {t('Terrain', 'Terrain')}{' '}
             <select
               value={profile.subclassFeatureIndex ?? ''}
               onChange={(event) =>
                 onChange({ ...profile, subclassFeatureIndex: event.target.value || null })
               }
             >
-              <option value="">Non precise (Unspecified)</option>
+              <option value="">{t('Non precise', 'Unspecified')}</option>
               {subclassFeatureOptions.map((option) => (
                 <option key={option.index} value={option.index}>
-                  {option.nameFr} ({option.name})
+                  {t(option.nameFr, option.name)}
                 </option>
               ))}
             </select>
           </label>
           <button
             type="button"
-            aria-label={`Deselectionner le terrain (${blockLabel})`}
+            aria-label={t(`Deselectionner le terrain (${blockLabel})`, `Unselect terrain (${blockLabel})`)}
             disabled={!profile.subclassFeatureIndex}
             onClick={() => onChange({ ...profile, subclassFeatureIndex: null })}
           >
@@ -231,13 +238,13 @@ export function SpellcasterProfileForm({
         </>
       )}
       <button type="button" disabled={!profile} onClick={() => onChange(null)}>
-        Effacer <em>Clear</em>
+        {t('Effacer', 'Clear')}
       </button>
-      {profile && loading && <p>Calcul des sorts accessibles...</p>}
+      {profile && loading && <p>{t('Calcul des sorts accessibles...', 'Computing accessible spells...')}</p>}
       {profile && error && <p role="alert">{error}</p>}
       {profile && !loading && !error && (
         <p>
-          Niveau de sort max : {hasLevel ? maxSpellLevel : 'tous'} <em>Max spell level</em>
+          {t('Niveau de sort max :', 'Max spell level:')} {hasLevel ? maxSpellLevel : t('tous', 'all')}
         </p>
       )}
     </fieldset>

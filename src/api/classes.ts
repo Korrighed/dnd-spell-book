@@ -1,3 +1,4 @@
+import { t } from '../utils/browserLanguage'
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
 /** Langue explicite obligatoire : sans `lang`, l'API suit l'en-tete `Accept-Language`. */
@@ -30,7 +31,7 @@ export async function fetchClassList(): Promise<ClassListItem[]> {
 
   if (!enRes.ok || !frRes.ok) {
     throw new Error(
-      'Impossible de charger la liste des classes depuis l\'API. (Unable to load the class list from the API.)',
+      t('Impossible de charger la liste des classes depuis l\'API.', 'Unable to load the class list from the API.'),
     )
   }
 
@@ -66,7 +67,7 @@ export async function fetchClassSpellIndices(classIndex: string): Promise<Set<st
 
   if (!res.ok) {
     throw new Error(
-      `Impossible de charger les sorts de cette classe. (Unable to load spells for this class.)`,
+      t(`Impossible de charger les sorts de cette classe.`, `Unable to load spells for this class.`),
     )
   }
 
@@ -91,7 +92,7 @@ export async function fetchSpellcastingClassIndices(
       const res = await fetch(`${BASE_URL}/classes/${classIndex}${EN}`)
       if (!res.ok) {
         throw new Error(
-          'Impossible de determiner les classes de lanceurs de sorts. (Unable to load spellcasting classes.)',
+          t('Impossible de determiner les classes de lanceurs de sorts.', 'Unable to load spellcasting classes.'),
         )
       }
       return (await res.json()) as RawClassDetail
@@ -131,7 +132,7 @@ export async function fetchClassLevelSpellcasting(key: string): Promise<ClassLev
 
   if (!res.ok) {
     throw new Error(
-      'Impossible de charger les emplacements de sorts de ce niveau. (Unable to load spell slots for this level.)',
+      t('Impossible de charger les emplacements de sorts de ce niveau.', 'Unable to load spell slots for this level.'),
     )
   }
 

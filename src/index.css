@@ -62,6 +62,24 @@
   box-sizing: border-box;
 }
 
+/* Grand ecran (21" a 100 %, ~1920px CSS de large). Toutes les dimensions en
+   px sont calees sur le 15" (~1536px CSS) : sans ca, tout parait 1.25x plus
+   petit et il faut zoomer le navigateur a 125 %. Un seul facteur d'echelle
+   plutot qu'un second jeu de valeurs : une seule source de verite, le livre
+   3D et les pages HTML grandissent ensemble (pas de desynchronisation, voir
+   docs/SPRINT-3-RENDU-3D-RESPONSIVE.md). Largeur et hauteur divisees par le
+   facteur : zoom les multiplie ensuite, la largeur INTERNE reste celle du 15"
+   (95vw de 1536 = 1459px). Seuil entre les deux largeurs CSS (1536 / 1920). */
+@media (min-width: 1728px) {
+  #root {
+    --screen-scale: 1.25;
+    zoom: var(--screen-scale);
+    width: calc(95vw / var(--screen-scale));
+    max-width: none;
+    min-height: calc(100svh / var(--screen-scale));
+  }
+}
+
 body {
   margin: 0;
   /* Le canvas du livre est etire (scaleX Leva) et deborde de #root : sans

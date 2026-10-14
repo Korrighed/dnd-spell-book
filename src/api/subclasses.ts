@@ -1,3 +1,4 @@
+import { t } from '../utils/browserLanguage'
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
 /** Langue explicite obligatoire : sans `lang`, l'API suit l'en-tete `Accept-Language`. */
@@ -33,7 +34,7 @@ export async function fetchClassSubclasses(classIndex: string): Promise<Subclass
 
   if (!enRes.ok || !frRes.ok) {
     throw new Error(
-      'Impossible de charger les sous-classes de cette classe. (Unable to load subclasses for this class.)',
+      t('Impossible de charger les sous-classes de cette classe.', 'Unable to load subclasses for this class.'),
     )
   }
 
@@ -93,7 +94,7 @@ async function fetchRawSubclassDetail(
 
   if (!res.ok) {
     throw new Error(
-      'Impossible de charger les sorts de cette sous-classe. (Unable to load spells for this subclass.)',
+      t('Impossible de charger les sorts de cette sous-classe.', 'Unable to load spells for this subclass.'),
     )
   }
 

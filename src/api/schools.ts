@@ -1,3 +1,4 @@
+import { t } from '../utils/browserLanguage'
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
 /** Langue explicite obligatoire : sans `lang`, l'API suit l'en-tete `Accept-Language`. */
@@ -30,7 +31,7 @@ export async function fetchSchoolList(): Promise<SchoolListItem[]> {
 
   if (!enRes.ok || !frRes.ok) {
     throw new Error(
-      'Impossible de charger la liste des ecoles depuis l\'API. (Unable to load the school list from the API.)',
+      t('Impossible de charger la liste des ecoles depuis l\'API.', 'Unable to load the school list from the API.'),
     )
   }
 
@@ -66,7 +67,7 @@ export async function fetchSchoolSpellIndices(schoolIndex: string): Promise<Set<
 
   if (!res.ok) {
     throw new Error(
-      'Impossible de charger les sorts de cette ecole. (Unable to load spells for this school.)',
+      t('Impossible de charger les sorts de cette ecole.', 'Unable to load spells for this school.'),
     )
   }
 

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { t } from '../utils/browserLanguage'
 import './CharacterSelector.css'
 
 interface CharacterListItem {
@@ -52,7 +53,7 @@ export function CharacterSelector({
   return (
     <div className="character-selector">
       <label>
-        Personnage <em>Character</em>{' '}
+        {t('Personnage', 'Character')}{' '}
         <select value={activeCharacterId} onChange={(event) => onSelect(event.target.value)}>
           {characters.map((character) => (
             <option key={character.id} value={character.id}>
@@ -63,20 +64,21 @@ export function CharacterSelector({
       </label>{' '}
       <button
         type="button"
-        aria-label="Supprimer ce personnage"
+        aria-label={t('Supprimer ce personnage', 'Delete this character')}
         disabled={characters.length <= 1}
         onClick={() => {
           // Suppression definitive (sorts + classes du personnage), pas de corbeille :
           // seule action de ce composant qui merite une confirmation bloquante.
-          if (window.confirm(`Supprimer le personnage « ${activeCharacter?.name ?? ''} » ?`)) {
+          const name = activeCharacter?.name ?? ''
+          if (window.confirm(t(`Supprimer le personnage « ${name} » ?`, `Delete character "${name}"?`))) {
             onRemove(activeCharacterId)
           }
         }}
       >
-        Supprimer <em>Delete</em>
+        {t('Supprimer', 'Delete')}
       </button>{' '}
       <label>
-        Renommer <em>Rename</em>{' '}
+        {t('Renommer', 'Rename')}{' '}
         <input
           type="text"
           value={nameDraft}
@@ -91,11 +93,11 @@ export function CharacterSelector({
         />
       </label>{' '}
       <label>
-        Nouveau personnage <em>New character</em>{' '}
+        {t('Nouveau personnage', 'New character')}{' '}
         <input
           type="text"
           value={newName}
-          placeholder="Nom (Name)"
+          placeholder={t('Nom', 'Name')}
           onChange={(event) => setNewName(event.target.value)}
         />
       </label>{' '}
@@ -107,7 +109,7 @@ export function CharacterSelector({
           setNewName('')
         }}
       >
-        Ajouter <em>Add</em>
+        {t('Ajouter', 'Add')}
       </button>
     </div>
   )

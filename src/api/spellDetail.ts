@@ -1,3 +1,4 @@
+import { t } from '../utils/browserLanguage'
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
 interface RawRef {
@@ -155,7 +156,7 @@ async function fetchRaw(index: string, lang: 'en' | 'fr-FR'): Promise<RawSpell> 
   const res = await fetch(`${BASE_URL}/spells/${index}?lang=${lang}`)
 
   if (!res.ok) {
-    throw new Error('Impossible de charger le detail du sort. (Unable to load the spell detail.)')
+    throw new Error(t('Impossible de charger le detail du sort.', 'Unable to load the spell detail.'))
   }
 
   return (await res.json()) as RawSpell

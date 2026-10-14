@@ -1,7 +1,7 @@
 import type { SpellSummary } from '../api/spellSummary'
 import type { SpellListItem } from '../api/spells'
 import type { SpellAccessCheck } from '../utils/spellAccess'
-import { detectBrowserLanguage } from '../utils/browserLanguage'
+import { BROWSER_LANGUAGE as LANGUAGE, spellDisplayName } from '../utils/browserLanguage'
 import { OutOfProfileLabel } from './OutOfProfileLabel'
 import './SpellList.css'
 import './SpellList.mobile.css'
@@ -15,19 +15,16 @@ interface SpellListProps {
   summaries: Record<string, SpellSummary>
 }
 
-// Une seule langue par ligne, deduite du navigateur : contrairement a
-// SpellDetail, la liste n'a pas de toggle FR/EN explicite, donc pas de FR+EN
-// mixe possible ici. Constante au niveau module : la langue du navigateur ne
-// change pas pendant la vie de l'application.
-const LANGUAGE = detectBrowserLanguage()
-
+// Une seule langue par ligne, deduite du navigateur (BROWSER_LANGUAGE, partagee
+// avec le tri) : contrairement a SpellDetail, la liste n'a pas de toggle FR/EN
+// explicite, donc pas de FR+EN mixe possible ici.
 export function SpellList({ spells, onSelect, isAccessible, summaries }: SpellListProps) {
   return (
     <ul className="spell-list">
       {spells.map((spell) => {
         const outOfProfile = isAccessible !== null && !isAccessible(spell.index, spell.level)
         const summary = summaries[spell.index]
-        const name = LANGUAGE === 'fr' ? spell.nameFr : spell.name
+        const name = spellDisplayName(spell)
         const damage = summary && (LANGUAGE === 'fr' ? summary.damageFr : summary.damageEn)
 
         return (

@@ -8,7 +8,7 @@
 - `front` : brouillon de code.
 - `qa` : cas limites et plan de test.
 
-**Statut du code** : relu contre les types réels du dépôt, mais **jamais compilé**. `tsc` et `eslint` restent à passer à chaque commit. Aucun fichier source n'est modifié à ce stade.
+**Statut du code** : implémenté sur la branche `views-filtre` (6 commits de code, section 6). `tsc` et `eslint` passent à chaque commit. Tests manuels (section 7) **non exécutés** : pas de navigateur dans l'environnement d'implémentation. Écarts par rapport au code préparé : section 9.
 
 ---
 
@@ -27,8 +27,8 @@ Les agents ont relevé des points sur lesquels le plan ne dit rien. Le code de l
 | D7 | `hideOutOfProfile` quand le dernier profil est supprimé | **Ne rien changer** | Le filtre est déjà inactif sans profil (`isAccessible === null`). Si un profil revient, la case réapparaît cochée : l'état reste visible. |
 | D8 | Indicateur de filtres actifs quand la vue est fermée | **Hors périmètre**, à prévoir dans la branche CSS | Le compteur `n / total` signale déjà une liste réduite. |
 | D9 | Le grimoire personnel est-il trié ? | **Non**, il garde l'ordre d'ajout | Le plan ne trie que la liste principale. |
-| D10 | Confirmation avant de supprimer un personnage | **Hors périmètre**, à noter | Aucune confirmation aujourd'hui dans `CharacterSelector` (vérifié). Ce sprint ne touche pas à ce comportement. |
-| D11 | Nom de branche | À trancher | Le `CLAUDE.md` du projet impose des commits directs sur `dev`, sans `feature/*`. Les branches récentes ne suivent pas cette règle. |
+| D10 | Confirmation avant de supprimer un personnage | **Rien à faire** | Correction du 2026-10-13 : la confirmation existe déjà (`window.confirm`, `CharacterSelector.tsx`). L'affirmation « aucune confirmation » était fausse (grep mal vérifié). |
+| D11 | Nom de branche | Tranché : `views-filtre`, créée depuis `dev`. | Le `CLAUDE.md` du projet impose des commits directs sur `dev`, sans `feature/*`. Les branches récentes ne suivent pas cette règle. |
 
 ---
 
@@ -74,7 +74,7 @@ Les agents ont relevé des points sur lesquels le plan ne dit rien. Le code de l
 
 ### Conventions du dépôt
 
-12. Commentaires en français **sans accents**, densité proche du code existant. Exports nommés, `interface XxxProps`, libellés bilingues `Français <em>English</em>`.
+12. Commentaires en français **sans accents**, densité proche du code existant. Exports nommés, `interface XxxProps`. Libellés d'interface : **une seule langue**, via `t('Français', 'English')` (`src/utils/browserLanguage.ts`, décision du 2026-10-13). L'ancien format bilingue `Français <em>English</em>` est abandonné.
 13. Garder les `DevFrame` existants et leurs noms. Ajouter `state:sortMode` et `state:openView` dans `SOURCE_COLORS` (`src/dev/DevFrame.tsx`).
 14. Garder `className="filters"` sur le conteneur de `FiltersView` : `App.css` cible `#grimoire .filters`.
 15. Chaque commit passe `npx tsc -b --noEmit` et `npx eslint .`. Format de message du `CLAUDE.md`, sans `Co-Authored-By`.
@@ -474,7 +474,7 @@ export function SortView({ open, onClose, value, onChange }: SortViewProps) {
 }
 ```
 
-Note : les libellés `label` sont des chaînes, donc pas de `<em>` dedans. Le format « FR (EN) » est un compromis ; à harmoniser dans la branche CSS si besoin.
+Écart appliqué à l'implémentation : libellés en JSX avec `<em>` (convention bilingue du dépôt), voir section 9.
 
 ### 5.8 `src/components/CharacterView.tsx`
 
@@ -1086,5 +1086,13 @@ Il n'y a pas de framework de test dans le projet (pas de Vitest dans `package.js
 
 - Style des marque-pages, des vues, du fond et de la position (branche CSS).
 - Indicateur de filtres actifs sur le marque-page « Filtres » (D8).
-- Confirmation avant la suppression d'un personnage (D10).
 - Zones tactiles d'au moins 44px et débordement des 4 marque-pages sur un écran de 320px : à traiter dans la branche CSS.
+
+---
+
+## 9. Écarts par rapport au code préparé
+
+- Commits 2 et 3 : le `<h2>` de `PersonalSpellbookPanel` reste jusqu'au commit 6, où le titre passe dans la vue. Le commit 2 retire seulement la règle `.name-en` ; le commit 3 retire seulement `profileForm`.
+- Commit 5 : la couleur `state:sortMode` de `DevFrame` est ajoutée dès le commit 5 (et non 6), car la liste l'utilise à ce commit. Le choix du tri est provisoire, en fieldset dans `details`, jusqu'au commit 6.
+- `SortView` : libellés en JSX avec `<em>` (convention bilingue du dépôt), au lieu de chaînes « FR (EN) ».
+- Le commit 6 retire les règles `h2` et `h2 em` de `PersonalSpellbookPanel.css`, devenues mortes.

@@ -31,8 +31,13 @@
 
 .book-spread-canvas canvas {
   display: block;
-  width: 100%;
-  height: 100%;
+  /* !important : react-three-fiber ecrit la taille MESUREE en px dans le
+     style inline du canvas. Sous le `zoom` grand ecran (index.css), cette
+     mesure est deja zoomee et le zoom la multiplierait une seconde fois
+     (livre 1.56x trop grand). 100 % du conteneur reste juste dans tous les
+     cas ; le buffer de dessin garde la taille mesuree, donc le rendu reste net. */
+  width: 100% !important;
+  height: 100% !important;
   /* Etirement + decalage du RENDU 3D lui-meme, independant de la boite
      ci-dessus (largeur/hauteur de la boite vs. echelle/position du dessin
      dedans) : pilote par Leva (BookCanvas.tsx). 1 = pas d'etirement, 0 = pas

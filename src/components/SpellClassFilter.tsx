@@ -1,4 +1,5 @@
 import type { ClassListItem } from '../api/classes'
+import { t } from '../utils/browserLanguage'
 
 interface SpellClassFilterProps {
   classes: ClassListItem[]
@@ -15,10 +16,10 @@ export function SpellClassFilter({ classes, value, onChange }: SpellClassFilterP
         onChange(raw === 'all' ? null : raw)
       }}
     >
-      <option value="all">Toutes les classes (All classes)</option>
+      <option value="all">{t('Toutes les classes', 'All classes')}</option>
       {classes.map((cls) => (
         <option key={cls.index} value={cls.index}>
-          {cls.nameFr} ({cls.name})
+          {t(cls.nameFr, cls.name)}
         </option>
       ))}
     </select>

@@ -24,6 +24,8 @@ const SOURCE_COLORS: Record<string, string> = {
   'state:search': '#aaffc3',
   'state:filtres': '#ffe119',
   'state:hideOutOfProfile': '#9a6324',
+  'state:sortMode': '#800000',
+  'state:openView': '#000075',
   'state:selectedIndex': '#ffffff',
   'state:language': '#808000',
   'state:page': '#008080',
