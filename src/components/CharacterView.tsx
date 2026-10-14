@@ -1,5 +1,4 @@
 import type { ClassListItem } from '../api/classes'
-import { DevFrame } from '../dev/DevFrame'
 import type { ProfileSpellcastingInfo } from '../hooks/useMultiSpellAccess'
 import type { SpellcasterProfile } from '../hooks/usePersonalSpellbook'
 import { t } from '../utils/browserLanguage'
@@ -53,52 +52,39 @@ export function CharacterView({
       title={t('Personnage', 'Character')}
       onClose={onClose}
     >
-      <DevFrame name="CharacterSelector" uses={['usePersonalSpellbook']}>
-        <CharacterSelector
-          characters={characters}
-          activeCharacterId={activeCharacterId}
-          onSelect={onSelectCharacter}
-          onAdd={onAddCharacter}
-          onRemove={onRemoveCharacter}
-          onRename={onRenameCharacter}
-        />
-      </DevFrame>
+      <CharacterSelector
+        characters={characters}
+        activeCharacterId={activeCharacterId}
+        onSelect={onSelectCharacter}
+        onAdd={onAddCharacter}
+        onRemove={onRemoveCharacter}
+        onRename={onRenameCharacter}
+      />
       {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
       {profiles.map((profile, index) => (
-        <DevFrame
-          key={profile.id}
-          name={`SpellcasterProfileForm (classe ${index + 1})`}
-          uses={['usePersonalSpellbook', 'useSpellcastingClasses', 'useMultiSpellAccess']}
-        >
-          <SpellcasterProfileForm
-            classes={spellcastingClasses}
-            profile={profile}
-            maxSpellLevel={perProfile[index].maxSpellLevel}
-            subclassSpellGrants={perProfile[index].subclassSpellGrants}
-            loading={perProfile[index].loading}
-            error={perProfile[index].error}
-            onChange={(next) =>
-              next ? onSetProfile(profile.id, next) : onRemoveProfile(profile.id)
-            }
-          />
-        </DevFrame>
-      ))}
-      <DevFrame
-        name="SpellcasterProfileForm (ajouter une classe)"
-        uses={['usePersonalSpellbook', 'useSpellcastingClasses']}
-      >
         <SpellcasterProfileForm
           classes={spellcastingClasses}
-          profile={null}
-          maxSpellLevel={null}
-          subclassSpellGrants={null}
-          loading={false}
-          error={null}
-          onChange={(next) => {
-            if (next) onAddProfile(next)
-          }}
+          profile={profile}
+          maxSpellLevel={perProfile[index].maxSpellLevel}
+          subclassSpellGrants={perProfile[index].subclassSpellGrants}
+          loading={perProfile[index].loading}
+          error={perProfile[index].error}
+          onChange={(next) =>
+            next ? onSetProfile(profile.id, next) : onRemoveProfile(profile.id)
+          }
         />
-      </DevFrame>
+      ))}
+      <SpellcasterProfileForm
+        classes={spellcastingClasses}
+        profile={null}
+        maxSpellLevel={null}
+        subclassSpellGrants={null}
+        loading={false}
+        error={null}
+        onChange={(next) => {
+          if (next) onAddProfile(next)
+        }}
+      />
     </BookmarkView>
   )
 }

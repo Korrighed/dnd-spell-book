@@ -1,8 +1,10 @@
+import type { CSSProperties } from 'react'
 import {
   BOOKMARK_IDS,
   bookmarkButtonId,
   bookmarkViewId,
   type BookmarkId,
+  type TabBookmarkId,
 } from '../utils/bookmarks'
 import { t } from '../utils/browserLanguage'
 
@@ -13,15 +15,14 @@ interface BookmarksProps {
   onToggle: (id: BookmarkId) => void
 }
 
-const BOOKMARKS: Record<BookmarkId, { icon: string; label: string }> = {
-  filters: { icon: 'funnel.svg', label: t('Filtres', 'Filters') },
-  sort: { icon: 'arrow-up-1-0.svg', label: t('Tri', 'Sort') },
+const BOOKMARKS: Record<TabBookmarkId, { icon: string; label: string }> = {
+  filters: { icon: 'funnel.svg', label: t('Filtres et tri', 'Filters and sort') },
   character: { icon: 'user-round-cog.svg', label: t('Personnage', 'Character') },
   spellbook: { icon: 'favourite-book.svg', label: t('Grimoire personnel', 'Personal spellbook') },
 }
 
 /**
- * Rangee de quatre marque-pages, identiques sur desktop et mobile.
+ * Rangee de trois marque-pages, identiques sur desktop et mobile.
  * aria-expanded : la vue liee est ouverte. aria-controls : id de cette vue
  * (toujours presente dans le DOM, masquee par `hidden`).
  * Aucun style ici : position, forme et couleur viendront dans la branche CSS.
@@ -44,7 +45,18 @@ export function Bookmarks({ openView, onToggle }: BookmarksProps) {
             aria-controls={bookmarkViewId(id)}
             onClick={() => onToggle(id)}
           >
-            <img src={`${import.meta.env.BASE_URL}icons/${icon}`} alt="" draggable={false} />
+            {/* Icone en masque CSS (App.css, .bookmark-icon) plutot qu'en <img> :
+                elle prend la couleur du texte (currentColor), donc le Tan de
+                la charte sur le Caput Mortuum de l'onglet. */}
+            <span
+              className="bookmark-icon"
+              aria-hidden="true"
+              style={
+                {
+                  '--icon': `url(${import.meta.env.BASE_URL}icons/${icon})`,
+                } as CSSProperties
+              }
+            />
           </button>
         )
       })}

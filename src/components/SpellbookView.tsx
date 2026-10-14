@@ -1,5 +1,4 @@
 import type { SpellListItem } from '../api/spells'
-import { DevFrame } from '../dev/DevFrame'
 import type { PersonalSpell } from '../hooks/usePersonalSpellbook'
 import type { SpellAccessCheck } from '../utils/spellAccess'
 import { t } from '../utils/browserLanguage'
@@ -36,19 +35,14 @@ export function SpellbookView({
       title={`${t('Grimoire personnel', 'Personal spellbook')} (${spells.length})`}
       onClose={onClose}
     >
-      <DevFrame
-        name="PersonalSpellbookPanel"
-        uses={['usePersonalSpellbook', 'useSpellList', 'useMultiSpellAccess', 'state:selectedIndex']}
-      >
-        <PersonalSpellbookPanel
-          spells={spells}
-          allSpells={allSpells}
-          selectedIndex={selectedIndex}
-          onSelectSpell={onSelectSpell}
-          onRemoveSpell={onRemoveSpell}
-          isAccessible={isAccessible}
-        />
-      </DevFrame>
+      <PersonalSpellbookPanel
+        spells={spells}
+        allSpells={allSpells}
+        selectedIndex={selectedIndex}
+        onSelectSpell={onSelectSpell}
+        onRemoveSpell={onRemoveSpell}
+        isAccessible={isAccessible}
+      />
     </BookmarkView>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { bookmarkViewId, type BookmarkId } from '../utils/bookmarks'
 import { t } from '../utils/browserLanguage'
 
@@ -10,6 +10,8 @@ interface BookmarkViewProps {
   title: ReactNode
   /** Bouton Fermer et touche Escape. Le retour du focus au marque-page est fait par l'appelant. */
   onClose: () => void
+  /** Classe en plus de .bookmark-view (ex. .help-view, autre emprise et fond). */
+  className?: string
   children: ReactNode
 }
 
@@ -21,7 +23,14 @@ interface BookmarkViewProps {
  * Escape ecoute sur la vue et pas sur document : Escape dans la recherche
  * doit seulement vider le champ, pas fermer la vue.
  */
-export function BookmarkView({ id, open, title, onClose, children }: BookmarkViewProps) {
+export function BookmarkView({
+  id,
+  open,
+  title,
+  onClose,
+  className,
+  children,
+}: BookmarkViewProps) {
   const titleRef = useRef<HTMLHeadingElement>(null)
   const titleId = `${bookmarkViewId(id)}-title`
 
@@ -33,7 +42,7 @@ export function BookmarkView({ id, open, title, onClose, children }: BookmarkVie
   return (
     <section
       id={bookmarkViewId(id)}
-      className="bookmark-view"
+      className={className ? `bookmark-view ${className}` : 'bookmark-view'}
       role="dialog"
       aria-labelledby={titleId}
       hidden={!open}
@@ -47,8 +56,20 @@ export function BookmarkView({ id, open, title, onClose, children }: BookmarkVie
       <h2 id={titleId} ref={titleRef} tabIndex={-1}>
         {title}
       </h2>
-      <button type="button" className="bookmark-view-close" onClick={onClose}>
-        {t('Fermer', 'Close')}
+      {/* Croix seule, meme aspect que les onglets : le libelle passe en
+          aria-label (nom accessible) et title (infobulle). */}
+      <button
+        type="button"
+        className="bookmark-view-close"
+        aria-label={t('Fermer', 'Close')}
+        title={t('Fermer', 'Close')}
+        onClick={onClose}
+      >
+        <span
+          className="bookmark-view-close-icon"
+          aria-hidden="true"
+          style={{ '--icon': `url(${import.meta.env.BASE_URL}icons/x.svg)` } as CSSProperties}
+        />
       </button>
       {children}
     </section>

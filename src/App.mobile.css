@@ -3,13 +3,85 @@
    affichee : pleine largeur, contenu centre. Le scroll vertical reste permis
    en mobile : marges d'origine, plus aerees que le desktop (App.css). */
 @media (max-width: 899px) {
+  /* Titre sur une seule ligne a 390px, a cote du bouton d'aide. */
+  .site-header h1 {
+    font-size: 20px;
+  }
+
   #grimoire {
+    /* Bord haut du livre en mobile : le cadre du canvas y demarre a 75px
+       (--book-frame-top, BookSpread.mobile.css). Mesure a l'oeil sur 390x844. */
+    --book-edge-top: 76px;
+
+    /* Pas de centrage vertical en mobile : le scroll y est permis, le
+       contenu part du haut. */
+    justify-content: flex-start;
     padding: 24px;
   }
 
-  #grimoire .search-bar {
+  #grimoire::after {
+    display: none;
+  }
+
+  /* Ecran etroit : bouton « hors profil » + recherche sur leur propre ligne,
+     en pleine largeur ; les onglets passent dessous, a droite, toujours
+     colles au livre (meme marge basse negative qu'en desktop,
+     --book-edge-top mobile). */
+  #grimoire .toolbar {
+    flex-wrap: wrap;
     gap: 8px;
+    margin-right: 0;
+  }
+
+  #grimoire .search-bar {
+    flex: 1 1 100%;
+    gap: 8px;
+  }
+
+  #grimoire .spell-search {
+    flex: 1;
     width: auto;
-    margin: 0 0 16px;
+  }
+
+  /* Fiche affichee (page de gauche) : marque-pages masques, pour se
+     concentrer sur la lecture. visibility (pas display) : la place reste
+     reservee, la recherche ne saute pas ; et les onglets sortent aussi de
+     l'ordre de tabulation. data-mobile-page pose par App.tsx. */
+  #grimoire .bookmarks {
+    transition:
+      opacity 200ms ease,
+      visibility 200ms;
+  }
+
+  #grimoire[data-mobile-page='left'] .bookmarks {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* La vue couvre une fenetre etroite : marges reduites, croix rapprochee
+     du coin. */
+  #grimoire .bookmark-view {
+    padding: 16px;
+  }
+
+  #grimoire .bookmark-view-close {
+    top: 12px;
+    right: 12px;
+  }
+
+  /* Aide : une seule colonne ; l'ecran etroit impose un scroll interne. */
+  #grimoire .help-view {
+    padding: 16px;
+  }
+
+  #grimoire .help-columns {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 899px) and (prefers-reduced-motion: reduce) {
+  #grimoire .bookmarks {
+    transition: none;
   }
 }

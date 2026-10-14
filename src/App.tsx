@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useSpellList } from './hooks/useSpellList'
 import { useClassList } from './hooks/useClassList'
 import { useClassSpellIndices } from './hooks/useClassSpellIndices'
@@ -14,18 +14,17 @@ import { SpellList } from './components/SpellList'
 import { SpellDetail } from './components/SpellDetail'
 import { Bookmarks } from './components/Bookmarks'
 import { FiltersView } from './components/FiltersView'
-import { SortView } from './components/SortView'
 import { CharacterView } from './components/CharacterView'
 import { SpellbookView } from './components/SpellbookView'
+import { HelpView } from './components/HelpView'
 import { BookSpread } from './components/BookSpread'
 import { MOBILE_QUERY, useMediaQuery } from './hooks/useMediaQuery'
 import type { BookPage } from './hooks/useHorizontalSwipe'
 import { matchesSearch } from './utils/text'
 import { BROWSER_LANGUAGE, t } from './utils/browserLanguage'
 import type { LanguageMode } from './types/language'
-import { bookmarkButtonId, type BookmarkId } from './utils/bookmarks'
+import { bookmarkButtonId, bookmarkViewId, type BookmarkId } from './utils/bookmarks'
 import { DEFAULT_SORT_MODE, sortSpells, type SortMode } from './utils/spellSort'
-import { DevFrame, DevFramesToggle } from './dev/DevFrame'
 import './App.css'
 import './App.mobile.css'
 
@@ -188,67 +187,101 @@ function App() {
   }
 
   return (
-    <main id="grimoire">
-      <DevFrame name="Bookmarks" uses={['state:openView']}>
-        <Bookmarks openView={openView} onToggle={handleToggleView} />
-      </DevFrame>
+    <>
+      <header className="site-header">
+        <h1>{t('Grimoire de sorts', 'Spell grimoire')}</h1>
+        {/* Ouvre l'aide (guide + mentions legales). Meme mecanique que les
+            marque-pages : id pour le retour du focus, aria-controls. */}
+        <button
+          id={bookmarkButtonId('help')}
+          type="button"
+          className="help-button"
+          aria-label={t('Aide et mentions légales', 'Help and legal notice')}
+          title={t('Aide et mentions légales', 'Help and legal notice')}
+          aria-expanded={openView === 'help'}
+          aria-controls={bookmarkViewId('help')}
+          onClick={() => handleToggleView('help')}
+        >
+          <span
+            className="help-button-icon"
+            aria-hidden="true"
+            style={
+              { '--icon': `url(${import.meta.env.BASE_URL}icons/circle-help.svg)` } as CSSProperties
+            }
+          />
+        </button>
+      </header>
 
-      {/* Recherche permanente, sous les marque-pages et au-dessus du livre,
-          sur tous les formats. Hors de BookSpread (pas dans la page de
-          droite) : elle y serait demontee
-          pendant le tournage de page et inerte en mobile. Alignee sur la
-          colonne de la liste par le CSS (App.css, .search-bar). */}
-      <div className="search-bar">
-        <DevFrame name="SpellSearch" uses={['state:search']}>
-          <SpellSearch value={search} onChange={setSearch} />
-        </DevFrame>
+      {/* data-mobile-page : page du livre visible en mobile, lue par le CSS
+          (App.mobile.css) pour masquer les marque-pages pendant la lecture
+          d'une fiche. Sans effet en desktop. */}
+      <main id="grimoire" data-mobile-page={mobilePage}>
+        {/* Barre d'outils au-dessus du livre, alignee sur la colonne de la
+            liste et collee au bord haut du livre (App.css, .toolbar,
+            --book-edge-top). Ordre visuel de gauche a droite : case « hors
+            profil », recherche, marque-pages. Hors de BookSpread : dans la
+            page de droite, la recherche serait demontee pendant le tournage
+            de page et inerte en mobile. Hors du wrapper inert : les
+            marque-pages restent cliquables quand une vue est ouverte. */}
+        {/* inert pendant l'aide : la vue d'aide couvre aussi la barre. */}
+        <div className="toolbar" inert={openView === 'help'}>
+          <div className="search-bar">
+            {/* Acces rapide : se bascule souvent pendant une recherche, donc
+                hors des vues. Icone grimoire + oeil : oeil ouvert = sorts hors
+                profil visibles (grises), oeil barre = masques. aria-pressed :
+                masquage actif. */}
+            {profiles.length > 0 && (
+              <button
+                type="button"
+                className="profile-toggle"
+                aria-pressed={hideOutOfProfile}
+                aria-label={t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
+                title={
+                  hideOutOfProfile
+                    ? t('Afficher les sorts hors profil', 'Show out-of-profile spells')
+                    : t('Masquer les sorts hors profil', 'Hide out-of-profile spells')
+                }
+                onClick={() => setHideOutOfProfile((hidden) => !hidden)}
+              >
+                <span
+                  className="profile-toggle-icon"
+                  aria-hidden="true"
+                  style={
+                    {
+                      '--icon': `url(${import.meta.env.BASE_URL}icons/${
+                        hideOutOfProfile ? 'spellbook-eye-off.svg' : 'spellbook-eye.svg'
+                      })`,
+                    } as CSSProperties
+                  }
+                />
+              </button>
+            )}
 
-        {/* Acces rapide : se bascule souvent pendant une recherche, donc hors des vues. */}
-        {profiles.length > 0 && (
-          <DevFrame
-            name="HideOutOfProfile (App)"
-            uses={['state:hideOutOfProfile', 'usePersonalSpellbook']}
-          >
-            <label>
-              <input
-                type="checkbox"
-                checked={hideOutOfProfile}
-                onChange={(event) => setHideOutOfProfile(event.target.checked)}
-              />{' '}
-              {t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
-            </label>
-          </DevFrame>
-        )}
-      </div>
+            <SpellSearch value={search} onChange={setSearch} />
+          </div>
 
-      {/* Parent commun du livre et des vues (App.css). Les vues sont soeurs de
-          BookSpread, jamais dedans : dans une page elles seraient demontees
-          pendant le tournage, inertes en mobile, et prises par le swipe. */}
-      <div className="book-zone">
-        {/* Livre inerte sous une vue ouverte : ni focus clavier, ni swipe. */}
-        <div inert={openView !== null}>
-          <BookSpread
-            mobilePage={mobilePage}
-            onMobilePageChange={setMobilePage}
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            left={
-              <>
-                {selectedIndex && detailLoading && <p>{t('Chargement du detail du sort...', 'Loading spell details...')}</p>}
-                {detailError && <p role="alert">{detailError}</p>}
-                {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
-                {selectedSpell && (
-                  <DevFrame
-                    name="SpellDetail"
-                    uses={[
-                      'useSpellDetail',
-                      'usePersonalSpellbook',
-                      'useMultiSpellAccess',
-                      'state:language',
-                      'state:selectedIndex',
-                    ]}
-                  >
+          <Bookmarks openView={openView} onToggle={handleToggleView} />
+        </div>
+
+        {/* Parent commun du livre et des vues (App.css). Les vues sont soeurs de
+            BookSpread, jamais dedans : dans une page elles seraient demontees
+            pendant le tournage, inertes en mobile, et prises par le swipe. */}
+        <div className="book-zone">
+
+          {/* Livre inerte sous une vue ouverte : ni focus clavier, ni swipe. */}
+          <div inert={openView !== null}>
+            <BookSpread
+              mobilePage={mobilePage}
+              onMobilePageChange={setMobilePage}
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              left={
+                <>
+                  {selectedIndex && detailLoading && <p>{t('Chargement du detail du sort...', 'Loading spell details...')}</p>}
+                  {detailError && <p role="alert">{detailError}</p>}
+                  {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
+                  {selectedSpell && (
                     <SpellDetail
                       detail={selectedSpell}
                       language={language}
@@ -257,119 +290,117 @@ function App() {
                       onToggleSpellbook={toggleSpellbook}
                       outOfProfile={selectedOutOfProfile}
                     />
-                  </DevFrame>
-                )}
-              </>
-            }
-            right={
-              <>
-                {/* Sur la page elle-meme, pas dans une vue fermee : sinon un
-                    echec de l'API laisse une page vide sans explication. */}
-                {loading && (
-                  <p>
-                    {t('Chargement des sorts...', 'Loading spells...')}
-                  </p>
-                )}
-                {error && <p role="alert">{error}</p>}
-                {/* Sur la page et pas dans la vue Filtres (D4) : ces etats
-                    vident la liste, ils doivent rester visibles vue fermee. */}
-                {classSpellsLoading && (
-                  <p>
-                    {t('Chargement des sorts de la classe...', 'Loading class spells...')}
-                  </p>
-                )}
-                {classSpellsError && <p role="alert">{classSpellsError}</p>}
-                {schoolSpellsLoading && (
-                  <p>
-                    {t("Chargement des sorts de l'ecole...", 'Loading school spells...')}
-                  </p>
-                )}
-                {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
-                {!loading && !error && (
-                  <DevFrame
-                    name="SpellList"
-                    uses={[
-                      'useSpellList',
-                      'state:search',
-                      'state:filtres',
-                      'state:sortMode',
-                      'useClassSpellIndices',
-                      'useSchoolSpellIndices',
-                      'useMultiSpellAccess',
-                      'state:hideOutOfProfile',
-                      'state:selectedIndex',
-                      'state:page',
-                      'useSpellSummaries',
-                    ]}
-                  >
+                  )}
+                </>
+              }
+              right={
+                <>
+                  {/* Sur la page elle-meme, pas dans une vue fermee : sinon un
+                      echec de l'API laisse une page vide sans explication. */}
+                  {loading && (
                     <p>
-                      {sortedSpells.length} / {spells.length} {t('sorts', 'spells')}
+                      {t('Chargement des sorts...', 'Loading spells...')}
                     </p>
-                    <SpellList
-                      spells={pagedSpells}
-                      onSelect={handleSelectSpell}
-                      isAccessible={isAccessible}
-                      summaries={spellSummaries}
-                    />
-                  </DevFrame>
-                )}
-              </>
-            }
+                  )}
+                  {error && <p role="alert">{error}</p>}
+                  {/* Sur la page et pas dans la vue Filtres (D4) : ces etats
+                      vident la liste, ils doivent rester visibles vue fermee. */}
+                  {classSpellsLoading && (
+                    <p>
+                      {t('Chargement des sorts de la classe...', 'Loading class spells...')}
+                    </p>
+                  )}
+                  {classSpellsError && <p role="alert">{classSpellsError}</p>}
+                  {schoolSpellsLoading && (
+                    <p>
+                      {t("Chargement des sorts de l'ecole...", 'Loading school spells...')}
+                    </p>
+                  )}
+                  {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}
+                  {!loading && !error && (
+                    <>
+                      <p>
+                        {sortedSpells.length} / {spells.length} {t('sorts', 'spells')}
+                      </p>
+                      <SpellList
+                        spells={pagedSpells}
+                        onSelect={handleSelectSpell}
+                        isAccessible={isAccessible}
+                        summaries={spellSummaries}
+                      />
+                    </>
+                  )}
+                </>
+              }
+            />
+          </div>
+
+          {/* Toujours montees, masquees par `hidden` : voir BookmarkView. */}
+          <FiltersView
+            open={openView === 'filters'}
+            onClose={closeView}
+            levelFilter={levelFilter}
+            onLevelChange={setLevelFilter}
+            classes={classes}
+            classFilter={classFilter}
+            onClassChange={setClassFilter}
+            schools={schools}
+            schoolFilter={schoolFilter}
+            onSchoolChange={setSchoolFilter}
+            sortMode={sortMode}
+            onSortChange={setSortMode}
+            classListError={classListError}
+            schoolListError={schoolListError}
+          />
+          <CharacterView
+            open={openView === 'character'}
+            onClose={closeView}
+            characters={characters}
+            activeCharacterId={activeCharacterId}
+            onSelectCharacter={setActiveCharacterId}
+            onAddCharacter={addCharacter}
+            onRemoveCharacter={removeCharacter}
+            onRenameCharacter={renameCharacter}
+            spellcastingClasses={spellcastingClasses}
+            spellcastingClassesError={spellcastingClassesError}
+            profiles={profiles}
+            perProfile={perProfile}
+            onSetProfile={setProfileById}
+            onAddProfile={addProfile}
+            onRemoveProfile={removeProfileById}
+          />
+          <SpellbookView
+            open={openView === 'spellbook'}
+            onClose={closeView}
+            spells={personalSpells}
+            allSpells={spells}
+            selectedIndex={selectedIndex}
+            onSelectSpell={handleSelectFromSpellbook}
+            onRemoveSpell={removeFromSpellbook}
+            isAccessible={isAccessible}
           />
         </div>
 
-        {/* Toujours montees, masquees par `hidden` : voir BookmarkView. */}
-        <FiltersView
-          open={openView === 'filters'}
-          onClose={closeView}
-          levelFilter={levelFilter}
-          onLevelChange={setLevelFilter}
-          classes={classes}
-          classFilter={classFilter}
-          onClassChange={setClassFilter}
-          schools={schools}
-          schoolFilter={schoolFilter}
-          onSchoolChange={setSchoolFilter}
-          classListError={classListError}
-          schoolListError={schoolListError}
-        />
-        <SortView
-          open={openView === 'sort'}
-          onClose={closeView}
-          value={sortMode}
-          onChange={setSortMode}
-        />
-        <CharacterView
-          open={openView === 'character'}
-          onClose={closeView}
-          characters={characters}
-          activeCharacterId={activeCharacterId}
-          onSelectCharacter={setActiveCharacterId}
-          onAddCharacter={addCharacter}
-          onRemoveCharacter={removeCharacter}
-          onRenameCharacter={renameCharacter}
-          spellcastingClasses={spellcastingClasses}
-          spellcastingClassesError={spellcastingClassesError}
-          profiles={profiles}
-          perProfile={perProfile}
-          onSetProfile={setProfileById}
-          onAddProfile={addProfile}
-          onRemoveProfile={removeProfileById}
-        />
-        <SpellbookView
-          open={openView === 'spellbook'}
-          onClose={closeView}
-          spells={personalSpells}
-          allSpells={spells}
-          selectedIndex={selectedIndex}
-          onSelectSpell={handleSelectFromSpellbook}
-          onRemoveSpell={removeFromSpellbook}
-          isAccessible={isAccessible}
-        />
-      </div>
+        {/* Aide (guide + mentions legales) : couvre tout #grimoire, barre
+            d'outils comprise, pas seulement le livre (App.css, .help-view). */}
+        <HelpView open={openView === 'help'} onClose={closeView} />
+      </main>
 
-      <DevFramesToggle />
-    </main>
+      {/* Mention de la source (docs/SPECS.md, « Disclaimer ») : l'API est un
+          projet communautaire, pas une source officielle. */}
+      <footer className="site-footer">
+        <p>
+          {t('Données : SRD 5e via ', 'Data: 5e SRD via ')}
+          <a href="https://www.dnd5eapi.co/" target="_blank" rel="noreferrer">
+            dnd5eapi.co
+          </a>
+          {t(
+            ', projet communautaire non affilié à Wizards of the Coast.',
+            ', a community project not affiliated with Wizards of the Coast.',
+          )}
+        </p>
+      </footer>
+    </>
   )
 }
 
