@@ -1,6 +1,6 @@
 # T005 — Réparer l'infobulle et le clavier du bouton grimoire
 
-Statut : à faire
+Statut : fait
 Story : constats B1, B2 · Exigences : [DESIGN-BRIEF.md §4](../DESIGN-BRIEF.md#4-composants) (infobulle sous le bouton), §7
 Dépend de : T004
 Parallélisable : non
@@ -73,3 +73,40 @@ Vérification navigateur : AC-01 à AC-05 (souris émulée pour l'appui long : `
 - `title` du bouton.
 
 ## Notes d'exécution
+
+- Étapes 1 à 3 appliquées (`SpellbookToggle.tsx` : `onClick` + JSDoc ; `App.css` : `top` au lieu de `bottom`, commentaire).
+- `npm run lint` : pass. `npm run build` : pass. Avertissement « chunk > 500 kB » pré-existant, aucun import ajouté.
+- AC-01 à AC-05 : non vérifiés dans le navigateur (vérification réservée au verifier).
+- Point à surveiller en AC-05 (390×844) : `left: 0` inchangé. L'infobulle est ancrée au bord gauche du bouton, `white-space: nowrap`. Si elle dépasse le bord droit, le correctif est horizontal et hors des étapes de cette tâche.
+- Retour 1 appliqué (`App.css`, `#grimoire .spellbook-tooltip` : `left: 50%` + `translate: -50% 0`, `width: max-content`, `max-width: 200px`, `white-space: normal`, `text-align: center`). `npm run lint` : pass. `npm run build` : pass, avertissement chunk pré-existant. AC-05 et AC-06 non vérifiés dans le navigateur.
+
+## Retour de vérification
+
+Retour 1 (2026-10-15). AC-01 à AC-04 validés en navigateur. **AC-05 en échec** : à 390×844, le bouton est à x 181-221, l'infobulle (`left: 0`, `white-space: nowrap`, ~174 px) va jusqu'à x 351-355, alors que la page `.book-page` (overflow auto) s'arrête à x 316. Elle est coupée de 35 à 38 px et ajoute une barre de défilement horizontale à la page.
+
+Correction à appliquer, dans `src/App.css`, règle `#grimoire .spellbook-tooltip` seulement :
+
+1. Remplacer `left: 0;` par :
+
+```css
+  /* Centree sous le bouton : ancree a gauche, elle debordait de la page
+     a droite en mobile (bouton au milieu d'une page de 250px). */
+  left: 50%;
+  translate: -50% 0;
+```
+
+2. Remplacer `white-space: nowrap;` par :
+
+```css
+  /* Retour a la ligne au-dela de 200px (libelle anglais plus long). */
+  width: max-content;
+  max-width: 200px;
+  white-space: normal;
+  text-align: center;
+```
+
+3. Ne rien changer d'autre (position verticale `top: calc(100% + 6px)` conservée).
+
+Critère ajouté :
+
+- [ ] AC-06 : À 390×844, pour « Ajouter… » et « Retirer… » : les bords gauche et droit de l'infobulle sont dans ceux de `.spell-detail-panel`, et `scrollWidth === clientWidth` sur ce panneau pendant l'affichage. À 1440×900, AC-01 toujours vrai.

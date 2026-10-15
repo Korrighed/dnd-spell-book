@@ -326,11 +326,16 @@
   mask: var(--icon) center / contain no-repeat;
 }
 
-/* Infobulle de l'appui maintenu, au-dessus du bouton. */
+/* Infobulle de l'appui maintenu, SOUS le bouton : au-dessus, elle sortait de la
+   page (.book-page, overflow-y: auto) et etait coupee, le bouton etant sur la
+   premiere ligne de la fiche. */
 #grimoire .spellbook-tooltip {
   position: absolute;
-  bottom: calc(100% + 6px);
-  left: 0;
+  top: calc(100% + 6px);
+  /* Centree sous le bouton : ancree a gauche, elle debordait de la page
+     a droite en mobile (bouton au milieu d'une page de 250px). */
+  left: 50%;
+  translate: -50% 0;
   z-index: 3;
   padding: 4px 8px;
   border: 1px solid var(--coffee);
@@ -338,7 +343,11 @@
   background: var(--paper);
   color: #000;
   font-size: 0.85em;
-  white-space: nowrap;
+  /* Retour a la ligne au-dela de 200px (libelle anglais plus long). */
+  width: max-content;
+  max-width: 200px;
+  white-space: normal;
+  text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 

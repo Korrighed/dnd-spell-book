@@ -19,6 +19,7 @@ function iconStyle(file: string): CSSProperties {
  * (survol souris), et s'affiche en infobulle sur un appui maintenu (tactile,
  * ou clic maintenu). Un appui maintenu sert a lire l'infobulle : le relacher
  * ne declenche pas l'action. Clavier (Entree / Espace) : action directe.
+ * Clavier : jamais bloque par un appui long precedent (event.detail === 0).
  */
 export function SpellbookToggle({ inSpellbook, onToggle }: SpellbookToggleProps) {
   const [tooltipVisible, setTooltipVisible] = useState(false)
@@ -72,11 +73,15 @@ export function SpellbookToggle({ inSpellbook, onToggle }: SpellbookToggleProps)
         onPointerCancel={endPress}
         // Appui long en mobile : pas de menu contextuel par-dessus l'infobulle.
         onContextMenu={(event) => event.preventDefault()}
-        onClick={() => {
-          if (suppressClickRef.current) {
-            suppressClickRef.current = false
-            return
-          }
+        onClick={(event) => {
+          // detail === 0 : clic synthetique du clavier (Entree / Espace).
+          // Le clavier agit toujours : un appui long relache HORS du bouton
+          // ne produit pas de click et laissait suppressClickRef a true, ce
+          // qui avalait le prochain Entree.
+          const fromKeyboard = event.detail === 0
+          const suppress = suppressClickRef.current && !fromKeyboard
+          suppressClickRef.current = false
+          if (suppress) return
           onToggle()
         }}
       >
