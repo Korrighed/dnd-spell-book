@@ -1,6 +1,6 @@
 # T008 — Écrire les règles de niveau total et de nom unique
 
-Statut : à faire
+Statut : fait
 Story : US-01, US-03 · Exigences : D-04, D-08 ([DESIGN-BRIEF.md §8](../DESIGN-BRIEF.md#8-décisions-du-2026-10-15-questions-résolues))
 Dépend de : T001
 Parallélisable : oui (aucun fichier existant modifié)
@@ -121,3 +121,6 @@ Vérification navigateur : aucune (modules non branchés).
 - Ajout d'un framework de test.
 
 ## Notes d'exécution
+- Regex de `cleanCharacterName` ecrite avec des echappements de code (plage U+200B a U+200D et U+FEFF) au lieu des caracteres invisibles litteraux du spec : meme comportement, et `no-irregular-whitespace` d'ESLint signale les caracteres litteraux dans une regex.
+- `npm run lint` : pass. `npm run build` : pass (avertissement de taille de chunk, pre-existant, sans lien avec ces modules).
+- AC-02 a AC-05 verifies par lecture du code (valeurs attendues recalculees a la main).
