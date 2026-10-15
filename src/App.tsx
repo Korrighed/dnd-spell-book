@@ -223,9 +223,10 @@ function App() {
             page de droite, la recherche serait demontee pendant le tournage
             de page et inerte en mobile. Hors du wrapper inert : les
             marque-pages restent cliquables quand une vue est ouverte. */}
+        {/* Bouton oeil et recherche inertes pendant toute vue ouverte : ils agiraient sur la liste cachee sous la vue. */}
         {/* inert pendant l'aide : la vue d'aide couvre aussi la barre. */}
         <div className="toolbar" inert={openView === 'help'}>
-          <div className="search-bar">
+          <div className="search-bar" inert={openView !== null}>
             {/* Acces rapide : se bascule souvent pendant une recherche, donc
                 hors des vues. Icone oeil (Lucide) : oeil ouvert = sorts hors
                 profil visibles (grises), oeil barre = masques. Nom et

@@ -1,6 +1,6 @@
 # T006 — Garder le focus dans les vues ouvertes
 
-Statut : à faire
+Statut : fait
 Story : US-05, constat B3 · Exigences : [APP-FLOW.md §5](../APP-FLOW.md#5-clavier-et-accessibilité-du-parcours)
 Dépend de : T005
 Parallélisable : non
@@ -98,7 +98,7 @@ function tabStopsIn(root: HTMLElement): HTMLElement[] {
 
 ## Critères d'acceptation
 
-- [ ] AC-01 : Vue Filtres ouverte au clavier (tri par défaut « alphabétique »). 15 appuis sur Tab : le focus parcourt croix, trois listes, bouton radio coché, puis revient à la croix. Il n'atteint jamais le lien du pied de page ni la barre d'outils.
+- [ ] AC-01 : Vue Filtres ouverte au clavier (tri par défaut « alphabétique »). Ordre des arrêts : croix, trois listes, bouton radio coché. Depuis le radio coché, Tab ramène à la croix. Sur 15 appuis, le focus ne quitte jamais la vue (jamais le lien du pied de page ni la barre d'outils). (Précisé par l'orchestrateur avant vérification.)
 - [ ] AC-02 : Même contrôle après avoir coché « Par niveau » : boucle identique.
 - [ ] AC-03 : Depuis le titre de la vue (focus à l'ouverture), Maj+Tab : focus sur le bouton radio coché (dernier arrêt).
 - [ ] AC-04 : Clic sur le texte d'une légende de la vue, puis Échap : la vue se ferme, focus sur son onglet.
@@ -124,3 +124,8 @@ Vérification navigateur (1440×900) : AC-01 à AC-08 au clavier.
 - Échap dans les formulaires de la vue Personnage (T009, T010).
 
 ## Notes d'exécution
+
+- Commentaire tabIndex -1 : en commentaire `//` au-dessus de `return (` et pas en commentaire JSX, impossible avant le premier element d un return sans fragment.
+- `npm run lint` : pass. `npm run build` : pass (avertissement taille de chunk > 500 kB, preexistant, hors perimetre).
+- Verification navigateur AC-01 a AC-08 non executee dans cette passe (pas de navigateur disponible). A faire par le verificateur.
+- AC-01 : la vue Filtres a 5 arrets (croix, 3 listes, radio coche). 15 Tab depuis le titre = 3 tours complets, focus final sur le radio coche et pas sur la croix. Texte de AC-01 a relire.

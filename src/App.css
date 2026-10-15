@@ -449,8 +449,10 @@
 }
 
 /* Le titre recoit le focus a l'ouverture (BookmarkView) pour que le lecteur
-   d'ecran l'annonce. Ce n'est pas un element interactif : pas d'anneau. */
-#grimoire .bookmark-view h2:focus {
+   d'ecran l'annonce. Ce n'est pas un element interactif : pas d'anneau.
+   La vue elle-meme (tabIndex -1) non plus. */
+#grimoire .bookmark-view h2:focus,
+#grimoire .bookmark-view:focus {
   outline: none;
 }
 

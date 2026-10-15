@@ -15,6 +15,32 @@ interface BookmarkViewProps {
   children: ReactNode
 }
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+/**
+ * Arrets de tabulation de `root`, dans l'ordre du document : elements
+ * visibles seulement, et un seul arret par groupe de boutons radio (le
+ * bouton coche, ou le premier du groupe si aucun ne l'est), comme le
+ * navigateur.
+ */
+function tabStopsIn(root: HTMLElement): HTMLElement[] {
+  const visible = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+    (element) => element.getClientRects().length > 0,
+  )
+  return visible.filter((element) => {
+    if (!(element instanceof HTMLInputElement) || element.type !== 'radio' || !element.name) {
+      return true
+    }
+    const group = visible.filter(
+      (other) =>
+        other instanceof HTMLInputElement && other.type === 'radio' && other.name === element.name,
+    ) as HTMLInputElement[]
+    const checked = group.find((radio) => radio.checked)
+    return element === (checked ?? group[0])
+  })
+}
+
 /**
  * Coquille d'une vue ouverte par un marque-page, affichee par-dessus le livre
  * (App.css : .book-zone / .bookmark-view). Toujours montee : garde l'etat des
@@ -22,6 +48,8 @@ interface BookmarkViewProps {
  * ouvertures, et la cible de aria-controls existe toujours.
  * Escape ecoute sur la vue et pas sur document : Escape dans la recherche
  * doit seulement vider le champ, pas fermer la vue.
+ * Tab et Maj+Tab bouclent dans la vue (non modale au sens ARIA : les onglets
+ * restent cliquables a la souris pour passer d'une vue a l'autre).
  */
 export function BookmarkView({
   id,
@@ -39,6 +67,8 @@ export function BookmarkView({
     if (open) titleRef.current?.focus()
   }, [open])
 
+  // tabIndex -1 : un clic sur du texte de la vue y laisse le focus (sinon il
+  // part sur body et Echap ne ferme plus rien). Pas dans l'ordre de tabulation.
   return (
     <section
       id={bookmarkViewId(id)}
@@ -46,10 +76,29 @@ export function BookmarkView({
       role="dialog"
       aria-labelledby={titleId}
       hidden={!open}
+      tabIndex={-1}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
           event.stopPropagation()
           onClose()
+          return
+        }
+        // Tab boucle dans la vue : sans ca, le focus sortait vers le pied de
+        // page et la barre d'outils, ou Escape ne fermait plus rien.
+        if (event.key !== 'Tab') return
+        const stops = tabStopsIn(event.currentTarget)
+        if (stops.length === 0) return
+        const first = stops[0]
+        const last = stops[stops.length - 1]
+        const active = document.activeElement
+        const atStart =
+          active === first || active === titleRef.current || active === event.currentTarget
+        if (event.shiftKey && atStart) {
+          event.preventDefault()
+          last.focus()
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault()
+          first.focus()
         }
       }}
     >
