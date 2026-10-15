@@ -1,6 +1,6 @@
 # T009 — Créer le formulaire de nom de personnage
 
-Statut : à faire
+Statut : fait
 Story : US-01, US-02, constat B4 · Exigences : D-08, [APP-FLOW.md parcours US-01 et US-02](../APP-FLOW.md#2-parcours-utilisateur)
 Dépend de : T003, T008
 Parallélisable : non
