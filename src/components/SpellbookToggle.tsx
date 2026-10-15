@@ -14,8 +14,8 @@ function iconStyle(file: string): CSSProperties {
 }
 
 /**
- * Bouton compact d'ajout/retrait au grimoire personnel : icone grimoire + « + »
- * ou « - ». Le libelle complet est dans aria-label (lecteur d'ecran) et title
+ * Bouton compact d'ajout/retrait au grimoire personnel : icone Lucide book-plus /
+ * book-minus. Le libelle complet est dans aria-label (lecteur d'ecran) et title
  * (survol souris), et s'affiche en infobulle sur un appui maintenu (tactile,
  * ou clic maintenu). Un appui maintenu sert a lire l'infobulle : le relacher
  * ne declenche pas l'action. Clavier (Entree / Espace) : action directe.
@@ -80,11 +80,10 @@ export function SpellbookToggle({ inSpellbook, onToggle }: SpellbookToggleProps)
           onToggle()
         }}
       >
-        <span className="spellbook-toggle-icon" aria-hidden="true" style={iconStyle('favourite-book.svg')} />
         <span
-          className="spellbook-toggle-sign"
+          className="spellbook-toggle-icon"
           aria-hidden="true"
-          style={iconStyle(inSpellbook ? 'minus.svg' : 'plus.svg')}
+          style={iconStyle(inSpellbook ? 'book-minus.svg' : 'book-plus.svg')}
         />
       </button>
       {tooltipVisible && (

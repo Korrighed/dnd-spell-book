@@ -227,20 +227,16 @@ function App() {
         <div className="toolbar" inert={openView === 'help'}>
           <div className="search-bar">
             {/* Acces rapide : se bascule souvent pendant une recherche, donc
-                hors des vues. Icone grimoire + oeil : oeil ouvert = sorts hors
-                profil visibles (grises), oeil barre = masques. aria-pressed :
-                masquage actif. */}
+                hors des vues. Icone oeil (Lucide) : oeil ouvert = sorts hors
+                profil visibles (grises), oeil barre = masques. Nom et
+                infobulle fixes, l'etat passe par aria-pressed. */}
             {profiles.length > 0 && (
               <button
                 type="button"
                 className="profile-toggle"
                 aria-pressed={hideOutOfProfile}
                 aria-label={t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
-                title={
-                  hideOutOfProfile
-                    ? t('Afficher les sorts hors profil', 'Show out-of-profile spells')
-                    : t('Masquer les sorts hors profil', 'Hide out-of-profile spells')
-                }
+                title={t('Masquer les sorts hors profil', 'Hide out-of-profile spells')}
                 onClick={() => setHideOutOfProfile((hidden) => !hidden)}
               >
                 <span
@@ -249,7 +245,7 @@ function App() {
                   style={
                     {
                       '--icon': `url(${import.meta.env.BASE_URL}icons/${
-                        hideOutOfProfile ? 'spellbook-eye-off.svg' : 'spellbook-eye.svg'
+                        hideOutOfProfile ? 'eye-off.svg' : 'eye.svg'
                       })`,
                     } as CSSProperties
                   }

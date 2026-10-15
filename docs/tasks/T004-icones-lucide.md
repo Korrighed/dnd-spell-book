@@ -1,6 +1,6 @@
 # T004 — Passer toutes les icônes à Lucide
 
-Statut : à faire
+Statut : fait
 Story : constat M4 (front), A4 · Exigences : D-02, D-06 ([DESIGN-BRIEF.md §3 Icônes](../DESIGN-BRIEF.md#icônes))
 Dépend de : T003
 Parallélisable : non
@@ -153,3 +153,9 @@ Vérification navigateur (1440×900 puis 390×844) : AC-03 à AC-07, captures de
 - Toute modification des fichiers SVG téléchargés.
 
 ## Notes d'exécution
+
+- Étapes 1 à 11 exécutées. Téléchargement d'abord dans le scratchpad (11 fichiers, en-tête `lucide-static v1.57.0` vérifié), copie dans `public/icons/` ensuite : aucun écrasement partiel si le réseau échoue.
+- `npm run lint` : pass. `npm run build` : pass. Avertissement de taille de chunk (> 500 kB) : non introduit par ce lot, aucun import de bibliothèque ajouté.
+- Étape 10 : seule référence restante dans `src/` : `book-minus.svg` (AC-02 OK). Hors `src/`, références aux anciens noms dans `docs/DESIGN-BRIEF.md`, `docs/SPRINT-4-*.md` : non modifiées (docs hors périmètre).
+- Vérification navigateur (AC-03 à AC-07, 1440×900 et 390×844, captures) : NON exécutée, aucun outil navigateur côté agent. À faire par le verifier.
+- Reste à nettoyer (hors étapes) : `gap: 2px` dans `#grimoire .spellbook-toggle` (App.css) n'a plus d'effet, un seul enfant.

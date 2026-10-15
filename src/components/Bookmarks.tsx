@@ -18,14 +18,13 @@ interface BookmarksProps {
 const BOOKMARKS: Record<TabBookmarkId, { icon: string; label: string }> = {
   filters: { icon: 'funnel.svg', label: t('Filtres et tri', 'Filters and sort') },
   character: { icon: 'user-round-cog.svg', label: t('Personnage', 'Character') },
-  spellbook: { icon: 'favourite-book.svg', label: t('Grimoire personnel', 'Personal spellbook') },
+  spellbook: { icon: 'book-heart.svg', label: t('Grimoire personnel', 'Personal spellbook') },
 }
 
 /**
  * Rangee de trois marque-pages, identiques sur desktop et mobile.
  * aria-expanded : la vue liee est ouverte. aria-controls : id de cette vue
  * (toujours presente dans le DOM, masquee par `hidden`).
- * Aucun style ici : position, forme et couleur viendront dans la branche CSS.
  */
 export function Bookmarks({ openView, onToggle }: BookmarksProps) {
   return (

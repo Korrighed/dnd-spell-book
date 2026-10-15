@@ -130,7 +130,7 @@
   margin: 16px 0;
 }
 
-/* ===== Barre d'outils : case « hors profil », recherche, marque-pages =====
+/* ===== Barre d'outils : bouton « hors profil », recherche, marque-pages =====
    Une seule ligne au-dessus de la page de droite, calee a droite sur la
    colonne de la liste (--spell-list-right). Marge basse negative de
    --book-edge-top : .book-zone remonte sous la barre, si bien que le bas de
@@ -238,8 +238,8 @@
 }
 
 /* Bouton « sorts hors profil » : rond papier comme la recherche, icone
-   grimoire + oeil (public/icons/spellbook-eye*.svg). Actif (masquage) :
-   Caput Mortuum, comme un onglet ouvert. */
+   Lucide eye / eye-off. Actif (masquage) : Caput Mortuum, comme un onglet
+   ouvert. */
 #grimoire .profile-toggle {
   display: grid;
   place-items: center;
@@ -275,9 +275,9 @@
 }
 
 /* ===== Fiche de sort (page de gauche, papier) ===== */
-/* Bouton grimoire personnel (SpellbookToggle) : icone grimoire + « + » / « - »,
-   sur la meme ligne que le toggle FR / EN. Plein (Caput Mortuum) pour
-   ajouter, en contour quand le sort est deja dans le grimoire. */
+/* Bouton grimoire personnel (SpellbookToggle) : icone Lucide book-plus /
+   book-minus, sur la meme ligne que le toggle FR / EN. Plein (Caput
+   Mortuum) pour ajouter, en contour quand le sort est deja dans le grimoire. */
 #grimoire .spellbook-toggle-wrap {
   position: relative;
   display: inline-block;
@@ -318,21 +318,12 @@
   background: var(--accent-bg);
 }
 
-#grimoire .spellbook-toggle-icon,
-#grimoire .spellbook-toggle-sign {
+#grimoire .spellbook-toggle-icon {
   display: block;
+  width: 22px;
+  height: 22px;
   background-color: currentColor;
   mask: var(--icon) center / contain no-repeat;
-}
-
-#grimoire .spellbook-toggle-icon {
-  width: 20px;
-  height: 20px;
-}
-
-#grimoire .spellbook-toggle-sign {
-  width: 14px;
-  height: 14px;
 }
 
 /* Infobulle de l'appui maintenu, au-dessus du bouton. */

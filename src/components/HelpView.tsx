@@ -56,8 +56,8 @@ export function HelpView({ open, onClose }: HelpViewProps) {
             </li>
             <li>
               <span className="help-icons">
-                <MaskIcon file="spellbook-eye.svg" />
-                <MaskIcon file="spellbook-eye-off.svg" />
+                <MaskIcon file="eye.svg" />
+                <MaskIcon file="eye-off.svg" />
               </span>
               <span>{t(
                 'Afficher ou masquer les sorts hors profil (bouton visible dès qu’un personnage a une classe).',
@@ -66,7 +66,7 @@ export function HelpView({ open, onClose }: HelpViewProps) {
             </li>
             <li>
               <span className="help-icons">
-                <MaskIcon file="favourite-book.svg" />
+                <MaskIcon file="book-heart.svg" />
               </span>
               <span>{t(
                 'Grimoire : les sorts que vous avez ajoutés.',
@@ -75,12 +75,12 @@ export function HelpView({ open, onClose }: HelpViewProps) {
             </li>
             <li>
               <span className="help-icons">
-                <MaskIcon file="plus.svg" />
-                <MaskIcon file="minus.svg" />
+                <MaskIcon file="book-plus.svg" />
+                <MaskIcon file="book-minus.svg" />
               </span>
               <span>{t(
-                'Sur une fiche, « + » ajoute le sort au grimoire et « − » l’en retire. Maintenez le bouton appuyé pour afficher son libellé.',
-                'On a spell sheet, "+" adds the spell to the spellbook and "−" removes it. Press and hold the button to show its label.',
+                'Sur une fiche, ce bouton ajoute le sort au grimoire ou l’en retire. Maintenez-le appuyé pour afficher son libellé.',
+                'On a spell sheet, this button adds the spell to the spellbook or removes it. Press and hold it to show its label.',
               )}</span>
             </li>
             <li>
