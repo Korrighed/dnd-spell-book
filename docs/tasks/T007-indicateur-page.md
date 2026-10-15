@@ -1,6 +1,6 @@
 # T007 — Afficher la page courante à côté du compteur
 
-Statut : à faire
+Statut : fait
 Story : US-04 · Exigences : D-03, [APP-FLOW.md parcours US-04](../APP-FLOW.md#parcours-us-04--savoir-où-lon-est-dans-la-liste)
 Dépend de : T006
 Parallélisable : non
@@ -92,3 +92,8 @@ Vérification navigateur : AC-01 à AC-06.
 - Barre d'outils.
 
 ## Notes d'exécution
+
+- Étapes 1 à 3 appliquées sur les 3 fichiers cibles. Aucun autre fichier modifié.
+- `npm run lint` : pass. `npm run build` (tsc -b + vite build) : pass. Avertissement de taille de chunk (> 500 kB) pré-existant, lié à three.js, hors périmètre.
+- Écart mineur : le compteur était aux lignes 319-321 (et non 320-324) au moment de l'exécution. Contenu identique à l'étape 1.
+- Vérification navigateur AC-01 à AC-06 non effectuée : `npm run dev` réservé au vérificateur. Points à contrôler : AC-05 (la ligne ne doit pas passer à la ligne à 390px) et la zone `aria-live` présente après le tournage.

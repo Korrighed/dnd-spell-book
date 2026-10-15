@@ -65,7 +65,7 @@ Règles :
 | T004 | Passer toutes les icônes à Lucide | D-02, D-06, A4 | `public/icons/*`, `src/App.tsx`, `src/App.css`, `src/components/{Bookmarks,SpellbookToggle,HelpView,PageTurnZone}.tsx`, `src/components/PageTurnZone.css` | T003 | | fait |
 | T005 | Réparer l'infobulle et le clavier du bouton grimoire | B1, B2 | `src/components/SpellbookToggle.tsx`, `src/App.css` | T004 | | fait |
 | T006 | Garder le focus dans les vues ouvertes | B3, US-05 | `src/components/BookmarkView.tsx`, `src/App.tsx`, `src/App.css` | T005 | | fait |
-| T007 | Afficher la page courante à côté du compteur | US-04, D-03 | `src/App.tsx`, `src/components/BookSpread.tsx`, `src/index.css` | T006 | | à faire |
+| T007 | Afficher la page courante à côté du compteur | US-04, D-03 | `src/App.tsx`, `src/components/BookSpread.tsx`, `src/index.css` | T006 | | fait |
 | T008 | Écrire les règles de niveau total et de nom unique | D-04, D-08 | `src/utils/characterLevels.ts`, `src/utils/characterName.ts` (créés) | T001 | [P] | à faire |
 | T009 | Créer le formulaire de nom de personnage | US-01, US-02, B4 | `src/components/CharacterNameForm.tsx` (créé) | T003, T008 | | à faire |
 | T010 | Refondre le sélecteur de personnage en pastilles | US-01, US-02, D-05 | `src/components/CharacterSelector.tsx`, `src/components/CharacterSelector.css` | T009 | | à faire |
@@ -119,3 +119,4 @@ Commit de début de lot : `0fc3b92` (commit des documents, branche `feature/css`
 | T003 | `022ecce` | 2026-10-15 | 1 retour (titre coupé en plein mot à 390 px) ; AC-07 reformulé par l'orchestrateur |
 | T004 | `e652acf` | 2026-10-15 | pass au premier passage |
 | T005 | `8039daa` | 2026-10-15 | 1 retour (infobulle coupée à droite à 390 px) |
+| T006 | `8dddb52` | 2026-10-15 | pass ; AC-01 précisé avant vérification |

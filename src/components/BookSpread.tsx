@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { BookCanvas, type BookCanvasHandle } from './BookCanvas'
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery'
 import { useHorizontalSwipe, type BookPage } from '../hooks/useHorizontalSwipe'
+import { t } from '../utils/browserLanguage'
 import { PageTurnZone } from './PageTurnZone'
 import './BookSpread.css'
 import './BookSpread.mobile.css'
@@ -102,6 +103,12 @@ export function BookSpread({
             className="book-page spell-list-panel"
             inert={isMobile && mobilePage !== 'right'}
           >
+            {/* Annonce du numero de page aux lecteurs d'ecran. Toujours
+                montee (hors de la porte isTurning) : une zone aria-live
+                recreee avec son contenu n'est en general pas annoncee. */}
+            <p className="visually-hidden" aria-live="polite">
+              {t(`Page ${page + 1} sur ${totalPages}`, `Page ${page + 1} of ${totalPages}`)}
+            </p>
             {/* Masque le temps de l'animation : simule la page qui cache son
                 contenu en tournant. */}
             {!isTurning && right}

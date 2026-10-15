@@ -318,6 +318,8 @@ function App() {
                     <>
                       <p>
                         {sortedSpells.length} / {spells.length} {t('sorts', 'spells')}
+                        {' · '}
+                        {t('page', 'page')} {page + 1} / {totalPages}
                       </p>
                       <SpellList
                         spells={pagedSpells}
