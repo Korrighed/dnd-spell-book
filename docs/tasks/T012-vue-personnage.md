@@ -1,6 +1,6 @@
 # T012 — Assembler la vue Personnage (sections, total, clés)
 
-Statut : à faire
+Statut : fait
 Story : US-03, constat B5 · Exigences : D-04, [DESIGN-BRIEF.md §4](../DESIGN-BRIEF.md#vue-personnage--maquette), [APP-FLOW.md parcours US-03](../APP-FLOW.md#parcours-us-03--classes-et-multiclasse)
 Dépend de : T011
 Parallélisable : non
@@ -166,3 +166,8 @@ Vérification navigateur : AC-01 à AC-07 à 1440×900, puis AC-01 et AC-03 à 3
 - Modifier les données enregistrées au-delà de 20.
 
 ## Notes d'exécution
+
+- Étapes 1 à 5 appliquées (CharacterView.tsx, App.css). Aucun autre fichier touché.
+- `npm run lint` : pass. `npm run build` : pass, avec l'avertissement vite « chunk > 500 kB » (hors périmètre T012).
+- Vérification navigateur (AC-01 à AC-07, 1440×900 et 390×844) non exécutée par l'exécutant : à faire par le vérificateur.
+- Carte d'ajout : `maxSelectableLevel` non transmis (conforme à l'étape 3). Sans effet visible : cette carte n'a pas de liste « Niveau ».

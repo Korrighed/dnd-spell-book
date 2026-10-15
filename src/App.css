@@ -574,6 +574,23 @@
   background: none;
 }
 
+/* Titres de section des vues (Personnages, Classes). La vue d'aide a sa
+   propre regle plus bas (meme specificite, declaree apres : elle gagne). */
+#grimoire .bookmark-view h3 {
+  margin: 0 0 8px;
+  color: var(--caput-mortuum);
+  font-size: 20px;
+}
+
+#grimoire .character-total {
+  margin: 0 0 12px;
+}
+
+#grimoire .character-total--over {
+  color: var(--caput-mortuum);
+  font-weight: 700;
+}
+
 /* ===== Vue d'aide =====
    Une vraie vue, pas une feuille posee sur le livre : elle couvre tout
    #grimoire (barre d'outils et livre), sans cadre ni ombre, sur le meme

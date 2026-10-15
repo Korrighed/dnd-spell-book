@@ -1,7 +1,13 @@
+import { useEffect, useRef } from 'react'
 import type { ClassListItem } from '../api/classes'
 import type { ProfileSpellcastingInfo } from '../hooks/useMultiSpellAccess'
 import type { SpellcasterProfile } from '../hooks/usePersonalSpellbook'
 import { t } from '../utils/browserLanguage'
+import {
+  MAX_TOTAL_CHARACTER_LEVEL,
+  maxLevelForProfile,
+  totalSpecifiedLevel,
+} from '../utils/characterLevels'
 import { BookmarkView } from './BookmarkView'
 import { CharacterSelector } from './CharacterSelector'
 import { SpellcasterProfileForm } from './SpellcasterProfileForm'
@@ -27,7 +33,11 @@ interface CharacterViewProps {
   onRemoveProfile: (id: string) => void
 }
 
-/** Choix du personnage actif + un formulaire par classe + « ajouter une classe ». */
+/**
+ * Section Personnages (CharacterSelector) puis section Classes : niveau total
+ * plafonne a 20 (D-04), une carte par classe (key = profile.id : l'etat local
+ * d'une carte ne glisse pas sur sa voisine apres un retrait), puis la carte d'ajout.
+ */
 export function CharacterView({
   open,
   onClose,
@@ -45,6 +55,24 @@ export function CharacterView({
   onAddProfile,
   onRemoveProfile,
 }: CharacterViewProps) {
+  const totalLevel = totalSpecifiedLevel(profiles)
+  const overCap = totalLevel > MAX_TOTAL_CHARACTER_LEVEL
+  const classesRef = useRef<HTMLElement>(null)
+  // Index de la carte retiree : apres le rendu, le focus va sur la carte
+  // qui prend sa place (ou la carte d'ajout), sinon il tomberait sur <body>.
+  const focusCardIndex = useRef<number | null>(null)
+  useEffect(() => {
+    const index = focusCardIndex.current
+    if (index === null) return
+    focusCardIndex.current = null
+    const cards = classesRef.current ? Array.from(classesRef.current.querySelectorAll('fieldset')) : []
+    if (cards.length === 0) return
+    const card = cards[Math.min(index, cards.length - 1)]
+    // Liste « Classe » d'abord, jamais le bouton Retirer : deux Entree
+    // retireraient deux classes d'affilee.
+    card.querySelector<HTMLSelectElement>('select')?.focus()
+  })
+
   return (
     <BookmarkView
       id="character"
@@ -61,31 +89,52 @@ export function CharacterView({
         onRemove={onRemoveCharacter}
         onRename={onRenameCharacter}
       />
-      {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
-      {profiles.map((profile, index) => (
+      <section ref={classesRef} className="character-classes" aria-labelledby="character-classes-title">
+        <h3 id="character-classes-title">{t('Classes', 'Classes')}</h3>
+        <p className={overCap ? 'character-total character-total--over' : 'character-total'}>
+          {overCap
+            ? t(
+                `Niveau total : ${totalLevel} / ${MAX_TOTAL_CHARACTER_LEVEL}, réduisez un niveau`,
+                `Total level: ${totalLevel} / ${MAX_TOTAL_CHARACTER_LEVEL}, lower a level`,
+              )
+            : t(
+                `Niveau total : ${totalLevel} / ${MAX_TOTAL_CHARACTER_LEVEL}`,
+                `Total level: ${totalLevel} / ${MAX_TOTAL_CHARACTER_LEVEL}`,
+              )}
+        </p>
+        {spellcastingClassesError && <p role="alert">{spellcastingClassesError}</p>}
+        {profiles.map((profile, index) => (
+          <SpellcasterProfileForm
+            key={profile.id}
+            classes={spellcastingClasses}
+            profile={profile}
+            maxSelectableLevel={maxLevelForProfile(profiles, profile.id)}
+            maxSpellLevel={perProfile[index].maxSpellLevel}
+            subclassSpellGrants={perProfile[index].subclassSpellGrants}
+            loading={perProfile[index].loading}
+            error={perProfile[index].error}
+            onChange={(next) => {
+              if (next) {
+                onSetProfile(profile.id, next)
+              } else {
+                focusCardIndex.current = index
+                onRemoveProfile(profile.id)
+              }
+            }}
+          />
+        ))}
         <SpellcasterProfileForm
           classes={spellcastingClasses}
-          profile={profile}
-          maxSpellLevel={perProfile[index].maxSpellLevel}
-          subclassSpellGrants={perProfile[index].subclassSpellGrants}
-          loading={perProfile[index].loading}
-          error={perProfile[index].error}
-          onChange={(next) =>
-            next ? onSetProfile(profile.id, next) : onRemoveProfile(profile.id)
-          }
+          profile={null}
+          maxSpellLevel={null}
+          subclassSpellGrants={null}
+          loading={false}
+          error={null}
+          onChange={(next) => {
+            if (next) onAddProfile(next)
+          }}
         />
-      ))}
-      <SpellcasterProfileForm
-        classes={spellcastingClasses}
-        profile={null}
-        maxSpellLevel={null}
-        subclassSpellGrants={null}
-        loading={false}
-        error={null}
-        onChange={(next) => {
-          if (next) onAddProfile(next)
-        }}
-      />
+      </section>
     </BookmarkView>
   )
 }
