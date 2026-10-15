@@ -21,6 +21,11 @@ interface SpellcasterProfileFormProps {
   error: string | null
   /** `null` : retire ce bloc (classe deselectionnee ou bouton Effacer). */
   onChange: (profile: SpellcasterProfile | null) => void
+  /**
+   * Plus haut niveau proposable : plafond de niveau total deduit en amont
+   * (src/utils/characterLevels.ts). Defaut : MAX_CHARACTER_LEVEL.
+   */
+  maxSelectableLevel?: number
 }
 
 const CHARACTER_LEVELS = Array.from(
@@ -44,6 +49,7 @@ export function SpellcasterProfileForm({
   loading,
   error,
   onChange,
+  maxSelectableLevel = MAX_CHARACTER_LEVEL,
 }: SpellcasterProfileFormProps) {
   const {
     subclasses,
@@ -71,96 +77,127 @@ export function SpellcasterProfileForm({
   const blockClass = classes.find((cls) => cls.index === profile?.classIndex)
   const blockLabel = blockClass ? t(blockClass.nameFr, blockClass.name) : t('nouvelle classe', 'new class')
 
+  // Le niveau actuel reste toujours proposable, meme au-dela du plafond
+  // (donnees anciennes) : sinon la liste afficherait une valeur absente.
+  const levelOptions = CHARACTER_LEVELS.filter(
+    (level) => level <= maxSelectableLevel || level === profile?.characterLevel,
+  )
+  const capReached = profile !== null && !hasLevel && maxSelectableLevel === 0
+
+  function accessText(): string {
+    if (!hasLevel) {
+      return t(
+        'Sorts accessibles : tous les niveaux (niveau non précisé)',
+        'Accessible spells: all levels (level unspecified)',
+      )
+    }
+    if (maxSpellLevel === null) return t('Sorts accessibles : inconnu', 'Accessible spells: unknown')
+    if (maxSpellLevel === 0) {
+      return t(
+        'Sorts accessibles : aucun emplacement de sort à ce niveau',
+        'Accessible spells: no spell slot at this level',
+      )
+    }
+    return t(
+      `Sorts accessibles : jusqu'au niveau ${maxSpellLevel}`,
+      `Accessible spells: up to level ${maxSpellLevel}`,
+    )
+  }
+
+  const title = profile ? blockLabel : t('Ajouter une classe (multiclasse)', 'Add a class (multiclass)')
+
   return (
-    <fieldset className="spellcaster-profile">
-      <legend>{profile ? blockLabel : t('Nouvelle classe', 'New class')}</legend>
-      <label>
-        {t('Classe', 'Class')}{' '}
-        <select
-          value={profile?.classIndex ?? ''}
-          onChange={(event) => {
-            const classIndex = event.target.value
-            // Changer de classe conserve le niveau, mais efface la sous-classe :
-            // elle est propre a l'ancienne classe. Retirer la classe retire ce bloc.
-            // `id` : conserve celui du bloc existant ; pour un nouveau bloc (profile
-            // null), la valeur est ignoree, addProfile assigne le vrai id.
-            onChange(
-              classIndex
-                ? {
-                    id: profile?.id ?? '',
-                    classIndex,
-                    characterLevel: profile?.characterLevel ?? null,
-                    subclassIndex: null,
-                    subclassFeatureIndex: null,
-                  }
-                : null,
-            )
-          }}
-        >
-          <option value="">{t('Aucune classe', 'No class')}</option>
-          {classes.map((cls) => (
-            <option key={cls.index} value={cls.index}>
-              {t(cls.nameFr, cls.name)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button
-        type="button"
-        aria-label={t(`Deselectionner la classe (${blockLabel})`, `Unselect class (${blockLabel})`)}
-        disabled={!profile}
-        onClick={() => onChange(null)}
-      >
-        &times;
-      </button>{' '}
-      <label>
-        {t('Niveau', 'Level')}{' '}
-        <select
-          value={profile?.characterLevel ?? ''}
-          disabled={!profile}
-          onChange={(event) => {
-            if (!profile) return
-            const raw = event.target.value
-            const characterLevel = raw ? Number(raw) : null
-            // Repasser sous le seuil de deblocage retire la sous-classe :
-            // le personnage ne l'a pas encore a ce niveau.
-            const stillUnlocked = characterLevel === null || characterLevel >= subclassUnlockLevel
-            onChange({
-              ...profile,
-              characterLevel,
-              subclassIndex: stillUnlocked ? profile.subclassIndex : null,
-              subclassFeatureIndex: stillUnlocked ? profile.subclassFeatureIndex : null,
-            })
-          }}
-        >
-          <option value="">{t('Niveau max', 'Max level')}</option>
-          {CHARACTER_LEVELS.map((level) => (
-            <option key={level} value={level}>
-              {level}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button
-        type="button"
-        aria-label={t(`Deselectionner le niveau (${blockLabel})`, `Unselect level (${blockLabel})`)}
-        disabled={!hasLevel}
-        onClick={() => profile && onChange({ ...profile, characterLevel: null })}
-      >
-        &times;
-      </button>{' '}
-      {/*
-        Le bloc reste visible tant que le profil a deja une sous-classe choisie,
-        meme si la liste fraiche echoue ou est encore en chargement : sinon le
-        dropdown ET son bouton de retrait disparaissent, alors que les sorts
-        qu'elle accorde restent appliques en arriere-plan (rien pour les voir
-        ni les retirer). L'option courante est alors affichee par son index
-        brut, faute de mieux (nom localise indisponible sans la liste).
-      */}
-      {subclassUnlocked && (subclasses.length > 0 || profile?.subclassIndex) && (
-        <>
+    <fieldset className={profile ? 'spellcaster-profile' : 'spellcaster-profile spellcaster-profile--add'}>
+      {/* Legende pour le nom accessible du groupe ; titre visible dans
+          l'en-tete, a cote du bouton Retirer (une legende ne se place pas
+          de facon fiable dans une grille ou un flex). */}
+      <legend className="visually-hidden">{title}</legend>
+      <div className="spellcaster-profile-header">
+        <p className="spellcaster-profile-title" aria-hidden="true">
+          {title}
+        </p>
+        {profile && (
+          <button
+            type="button"
+            className="view-button"
+            aria-label={t(`Retirer la classe ${blockLabel}`, `Remove class ${blockLabel}`)}
+            onClick={() => onChange(null)}
+          >
+            {t('Retirer', 'Remove')}
+          </button>
+        )}
+      </div>
+
+      <div className="spellcaster-profile-fields">
+        <label>
+          {t('Classe', 'Class')}
+          <select
+            value={profile?.classIndex ?? ''}
+            onChange={(event) => {
+              const classIndex = event.target.value
+              // Changer de classe conserve le niveau, mais efface la sous-classe :
+              // elle est propre a l'ancienne classe. Retirer la classe retire ce bloc.
+              // `id` : conserve celui du bloc existant ; pour un nouveau bloc (profile
+              // null), la valeur est ignoree, addProfile assigne le vrai id.
+              onChange(
+                classIndex
+                  ? {
+                      id: profile?.id ?? '',
+                      classIndex,
+                      characterLevel: profile?.characterLevel ?? null,
+                      subclassIndex: null,
+                      subclassFeatureIndex: null,
+                    }
+                  : null,
+              )
+            }}
+          >
+            {profile === null && <option value="">{t('Choisir une classe', 'Choose a class')}</option>}
+            {classes.map((cls) => (
+              <option key={cls.index} value={cls.index}>
+                {t(cls.nameFr, cls.name)}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {profile && (
           <label>
-            {t('Sous-classe', 'Subclass')}{' '}
+            {t('Niveau', 'Level')}
+            <select
+              value={profile.characterLevel ?? ''}
+              onChange={(event) => {
+                if (!profile) return
+                const raw = event.target.value
+                const characterLevel = raw ? Number(raw) : null
+                // Repasser sous le seuil de deblocage retire la sous-classe :
+                // le personnage ne l'a pas encore a ce niveau.
+                const stillUnlocked = characterLevel === null || characterLevel >= subclassUnlockLevel
+                onChange({
+                  ...profile,
+                  characterLevel,
+                  subclassIndex: stillUnlocked ? profile.subclassIndex : null,
+                  subclassFeatureIndex: stillUnlocked ? profile.subclassFeatureIndex : null,
+                })
+              }}
+            >
+              <option value="">{t('Niveau non précisé (tous les sorts)', 'Unspecified level (all spells)')}</option>
+              {levelOptions.map((level) => (
+                <option key={level} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* Le bloc reste visible tant que le profil a deja une sous-classe
+            choisie, meme si la liste fraiche echoue ou charge encore : sinon
+            les sorts qu'elle accorde resteraient appliques sans moyen de la
+            voir ni de la retirer. */}
+        {subclassUnlocked && (subclasses.length > 0 || profile?.subclassIndex) && (
+          <label>
+            {t('Sous-classe', 'Subclass')}
             <select
               value={profile?.subclassIndex ?? ''}
               onChange={(event) => {
@@ -182,44 +219,18 @@ export function SpellcasterProfileForm({
                   )}
             </select>
           </label>
-          <button
-            type="button"
-            aria-label={t(`Deselectionner la sous-classe (${blockLabel})`, `Unselect subclass (${blockLabel})`)}
-            disabled={!profile?.subclassIndex}
-            onClick={() =>
-              profile && onChange({ ...profile, subclassIndex: null, subclassFeatureIndex: null })
-            }
-          >
-            &times;
-          </button>{' '}
-          {subclasses.length === 0 && (
-            <p role="alert">
-              {subclassesError
-                ? t(
-                    `Liste des sous-classes indisponible (${subclassesError})`,
-                    `Subclass list unavailable (${subclassesError})`,
-                  )
-                : subclassesLoading
-                  ? t('Chargement de la liste des sous-classes...', 'Loading subclass list...')
-                  : t(
-                      'Sous-classe enregistree introuvable dans la liste actuelle.',
-                      'Saved subclass not found in the current list.',
-                    )}
-            </p>
-          )}
-        </>
-      )}
-      {profile?.subclassIndex && subclassFeatureOptions.length > 0 && (
-        <>
+        )}
+
+        {profile?.subclassIndex && subclassFeatureOptions.length > 0 && (
           <label>
-            {t('Terrain', 'Terrain')}{' '}
+            {t('Terrain', 'Terrain')}
             <select
               value={profile.subclassFeatureIndex ?? ''}
               onChange={(event) =>
                 onChange({ ...profile, subclassFeatureIndex: event.target.value || null })
               }
             >
-              <option value="">{t('Non precise', 'Unspecified')}</option>
+              <option value="">{t('Non précisé', 'Unspecified')}</option>
               {subclassFeatureOptions.map((option) => (
                 <option key={option.index} value={option.index}>
                   {t(option.nameFr, option.name)}
@@ -227,26 +238,32 @@ export function SpellcasterProfileForm({
               ))}
             </select>
           </label>
-          <button
-            type="button"
-            aria-label={t(`Deselectionner le terrain (${blockLabel})`, `Unselect terrain (${blockLabel})`)}
-            disabled={!profile.subclassFeatureIndex}
-            onClick={() => onChange({ ...profile, subclassFeatureIndex: null })}
-          >
-            &times;
-          </button>{' '}
-        </>
+        )}
+      </div>
+
+      {subclassUnlocked && subclasses.length === 0 && profile?.subclassIndex && (
+        subclassesLoading && !subclassesError ? (
+          <p role="status">{t('Chargement de la liste des sous-classes…', 'Loading subclass list…')}</p>
+        ) : (
+          <p role="alert">
+            {subclassesError
+              ? t(
+                  `Liste des sous-classes indisponible (${subclassesError})`,
+                  `Subclass list unavailable (${subclassesError})`,
+                )
+              : t(
+                  'Sous-classe enregistrée introuvable dans la liste actuelle.',
+                  'Saved subclass not found in the current list.',
+                )}
+          </p>
+        )
       )}
-      <button type="button" disabled={!profile} onClick={() => onChange(null)}>
-        {t('Effacer', 'Clear')}
-      </button>
-      {profile && loading && <p>{t('Calcul des sorts accessibles...', 'Computing accessible spells...')}</p>}
+      {capReached && (
+        <p>{t('Niveau total de 20 atteint : seul « non précisé » reste possible.', 'Total level 20 reached: only “unspecified” is left.')}</p>
+      )}
+      {profile && loading && <p role="status">{t('Calcul des sorts accessibles…', 'Computing accessible spells…')}</p>}
       {profile && error && <p role="alert">{error}</p>}
-      {profile && !loading && !error && (
-        <p>
-          {t('Niveau de sort max :', 'Max spell level:')} {hasLevel ? maxSpellLevel : t('tous', 'all')}
-        </p>
-      )}
+      {profile && !loading && !error && <p className="spellcaster-profile-access">{accessText()}</p>}
     </fieldset>
   )
 }

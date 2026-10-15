@@ -1,6 +1,6 @@
 # T011 — Refondre le formulaire de classe en carte
 
-Statut : à faire
+Statut : fait
 Story : US-03 · Exigences : D-04, [DESIGN-BRIEF.md §4](../DESIGN-BRIEF.md#vue-personnage--maquette), [APP-FLOW.md parcours US-03](../APP-FLOW.md#parcours-us-03--classes-et-multiclasse)
 Dépend de : T008, T010
 Parallélisable : non
@@ -329,3 +329,7 @@ Vérification navigateur : AC-01 à AC-08 et AC-10, 1440×900 et 390×844. Le pl
 - La validation du niveau total dans le hook.
 
 ## Notes d'exécution
+
+- Niveau (`onChange`) : `if (!profile) return` conservé, car présent dans le fichier actuel (l. 122) et absent du bloc fourni à l'étape 2. Comportement inchangé, `npm run build` passe.
+- Commentaire du prop `onChange` (`SpellcasterProfileForm.tsx`, l. 22) : mentionne encore « bouton Effacer », supprimé. Non modifié (hors étapes).
+- Vérification navigateur (AC-01 à AC-08, AC-10) non effectuée par l'exécutant : à faire par le verifier.
