@@ -1,6 +1,6 @@
 # T002 — Ajouter les tokens de couleur et corriger les contrastes
 
-Statut : à faire
+Statut : fait
 Story : constats A1, A3 · Exigences : D-01 ([DESIGN-BRIEF.md §3](../DESIGN-BRIEF.md#couleurs))
 Dépend de : T001
 Parallélisable : non

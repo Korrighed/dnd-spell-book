@@ -35,6 +35,14 @@
   /* Papier clair des vues, derive du Tan (meme teinte, plus lumineux) : le
      Tan pur donnerait un contraste trop faible au texte grise hors profil. */
   --paper: #f3ead9;
+  /* Nuances derivees (docs/DESIGN.md, docs/DESIGN-BRIEF.md) :
+     --slate-gray-text : Slate Gray assombri pour le TEXTE hors profil
+     (4.59:1 sur --paper ; Slate Gray pur : 3.82:1, sous le seuil AA).
+     --caput-mortuum-hover : survol des boutons Caput Mortuum pleins.
+     --paper-light : fond des champs et des cartes dans les vues. */
+  --slate-gray-text: #576b82;
+  --caput-mortuum-hover: #7a2a2f;
+  --paper-light: #fffaf0;
 
   /* Encre sur la texture : Coffee assombri. Le Coffee pur (~3.4:1 sur ce
      papier de ton moyen) manquerait de contraste pour du petit texte. */
@@ -173,13 +181,13 @@ p {
   color: var(--text-h);
 }
 
-/* Sorts hors du profil du lanceur : Slate Gray reserve par la charte. Les enfants heritent.
+/* Sorts hors du profil du lanceur : Slate Gray assombri (--slate-gray-text, contraste AA). Les enfants heritent.
    Selecteurs prefixes : .spell-list li (0,1,1) est charge apres ce fichier et gagnerait a egalite. */
 .spell-list li.out-of-profile,
 .personal-spellbook li.out-of-profile,
 .spell-detail.out-of-profile,
 .spell-detail.out-of-profile h2 {
-  color: var(--slate-gray);
+  color: var(--slate-gray-text);
 }
 
 .out-of-profile-label {

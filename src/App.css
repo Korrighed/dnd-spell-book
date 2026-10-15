@@ -42,7 +42,10 @@
 }
 
 .site-footer a {
-  color: var(--tan);
+  /* --paper et non Tan : Tan sur le bandeau voile ne fait que ~3.9:1
+     (mesure sur la texture), --paper ~6.1:1. Souligne : c'est un lien. */
+  color: var(--paper);
+  text-decoration: underline;
 }
 
 /* Titre a gauche, bouton d'aide a droite. */
@@ -178,11 +181,11 @@
 }
 
 #grimoire .bookmark:hover {
-  background: #7a2a2f;
+  background: var(--caput-mortuum-hover);
 }
 
 #grimoire .bookmark[aria-expanded='true'] {
-  background: #7a2a2f;
+  background: var(--caput-mortuum-hover);
   box-shadow: inset 0 -3px 0 var(--tan);
 }
 
@@ -260,7 +263,7 @@
 }
 
 #grimoire .profile-toggle:hover {
-  background: #fffaf0;
+  background: var(--paper-light);
 }
 
 #grimoire .profile-toggle[aria-pressed='true'] {
@@ -309,7 +312,7 @@
 }
 
 #grimoire .spellbook-toggle:hover {
-  background: #7a2a2f;
+  background: var(--caput-mortuum-hover);
 }
 
 #grimoire .spellbook-toggle[data-in-spellbook] {
@@ -420,7 +423,7 @@
    redefinis pour le papier : CharacterSelector, le formulaire de profil et
    le grimoire s'adaptent sans toucher a leur propre CSS. */
 #grimoire .bookmark-view {
-  --bg: #fffaf0;
+  --bg: var(--paper-light);
   --text: var(--coffee);
   --text-h: #000;
   --border: rgba(111, 77, 56, 0.35);
@@ -476,7 +479,7 @@
 }
 
 #grimoire .bookmark-view-close:hover {
-  background: #7a2a2f;
+  background: var(--caput-mortuum-hover);
 }
 
 #grimoire .bookmark-view select {
