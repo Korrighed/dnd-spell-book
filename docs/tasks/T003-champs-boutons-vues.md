@@ -1,6 +1,6 @@
 # T003 — Unifier les champs et boutons des vues
 
-Statut : à faire
+Statut : fait
 Story : constat M1 (architecte), A2, zoom iOS, titre mobile recouvert · Exigences : [DESIGN-BRIEF.md §4](../DESIGN-BRIEF.md#4-composants)
 Dépend de : T002
 Parallélisable : non
@@ -170,3 +170,18 @@ Note pour le vérificateur : entre T003 et T010/T011, les boutons de la vue Pers
 - La géométrie du livre (`--book-*`, `--spell-list-*`).
 
 ## Notes d'exécution
+
+- Retour 1 appliqué : `overflow-wrap: break-word` dans `src/App.css` (`#grimoire .bookmark-view h2`), `font-size: 24px` ajouté dans `src/App.mobile.css` (`h2` mobile). `npm run lint` et `npm run build` passent. AC-07 non vérifié en navigateur (à faire par le vérificateur).
+
+## Retour de vérification
+
+Retour 1 (2026-10-15). Vérificateur : `pass` sur les AC, mais défaut majeur introduit par l'étape 7 : à 390×844, le titre « PERSONNAGE » se coupe en plein mot (« PERSONNAG / E »). Cause : `padding-right: 60px` réduit la boîte du titre (~226 px), le titre est en 30 px, et `overflow-wrap: anywhere` autorise la coupure dans le mot.
+
+Correction à appliquer, sans rien changer d'autre :
+
+1. `src/App.css`, règle `#grimoire .bookmark-view h2` : remplacer `overflow-wrap: anywhere;` par `overflow-wrap: break-word;` (ne coupe un mot que s'il ne tient sur aucune ligne, et ne réduit pas la largeur minimale du titre).
+2. `src/App.mobile.css`, règle `#grimoire .bookmark-view h2` du bloc `@media (max-width: 899px)` (celle qui porte `padding-right: 60px`) : ajouter `font-size: 24px;`.
+
+Critère ajouté :
+
+- [x] AC-07 (corrigé par l'orchestrateur après le 2e passage) : À 390×844, vues Personnage, Filtres et Grimoire : aucun mot du titre coupé, titre non recouvert par la croix. Un retour à la ligne entre deux mots est accepté (« Grimoire personnel (0) » sur deux lignes). Constaté par le vérificateur : Personnage et Filtres sur une ligne, Grimoire sur deux lignes coupées entre les mots, croix à x 295 pour un texte qui finit au plus à x 258.

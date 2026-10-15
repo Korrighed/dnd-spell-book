@@ -69,6 +69,13 @@
     right: 12px;
   }
 
+  /* Croix a 12px du bord, 40px de large : marge de securite pour le
+     titre (recouvrement observe en revue a 390px). */
+  #grimoire .bookmark-view h2 {
+    padding-right: 60px;
+    font-size: 24px;
+  }
+
   /* Aide : une seule colonne ; l'ecran etroit impose un scroll interne. */
   #grimoire .help-view {
     padding: 16px;

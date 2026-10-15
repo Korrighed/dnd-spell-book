@@ -68,7 +68,7 @@ export function FiltersView({
       {classListError && <p role="alert">{classListError}</p>}
       {schoolListError && <p role="alert">{schoolListError}</p>}
 
-      <fieldset>
+      <fieldset className="filters-sort">
         <legend>{t('Trier la liste', 'Sort the list')}</legend>
         {SORT_OPTIONS.map((option) => (
           <label key={option.mode}>

@@ -130,12 +130,6 @@
   margin: 16px 0;
 }
 
-#grimoire input[type='search'],
-#grimoire select {
-  padding: 8px 12px;
-  font-size: 16px;
-}
-
 /* ===== Barre d'outils : case « hors profil », recherche, marque-pages =====
    Une seule ligne au-dessus de la page de droite, calee a droite sur la
    colonne de la liste (--spell-list-right). Marge basse negative de
@@ -451,6 +445,7 @@
   padding-right: 56px;
   color: var(--caput-mortuum);
   font-size: 30px;
+  overflow-wrap: break-word;
 }
 
 /* Le titre recoit le focus a l'ouverture (BookmarkView) pour que le lecteur
@@ -482,17 +477,90 @@
   background: var(--caput-mortuum-hover);
 }
 
-#grimoire .bookmark-view select {
+/* Champs des vues (filtres, personnage) : une seule source de style.
+   16px minimum : en dessous, iOS zoome la page au focus. 44px : cible
+   tactile. Bordure Coffee : >= 3:1 sur le papier (WCAG 1.4.11). */
+#grimoire .bookmark-view select,
+#grimoire .bookmark-view input[type='text'] {
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 12px;
   border: 1px solid var(--coffee);
-  border-radius: 4px;
-  background: var(--bg);
+  border-radius: 6px;
+  background: var(--paper-light);
   color: #000;
   font: inherit;
+  font-size: 16px;
 }
 
-#grimoire .bookmark-view fieldset {
-  border: 1px solid var(--border);
-  border-radius: 4px;
+#grimoire .bookmark-view select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tri de la liste (FiltersView) : groupe de boutons radio encadre. */
+#grimoire .filters-sort {
+  border: 1px solid var(--coffee);
+  border-radius: 6px;
+}
+
+/* Boutons texte des vues. Principal : plein Caput Mortuum (comme les
+   onglets). Secondaire : contour Coffee. */
+#grimoire .view-button {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--coffee);
+  border-radius: 6px;
+  background: none;
+  color: #000;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#grimoire .view-button:hover:not(:disabled) {
+  border-color: var(--caput-mortuum);
+}
+
+#grimoire .view-button--primary {
+  border-color: var(--caput-mortuum);
+  background: var(--caput-mortuum);
+  color: var(--tan);
+}
+
+#grimoire .view-button--primary:hover:not(:disabled) {
+  background: var(--caput-mortuum-hover);
+}
+
+/* Bouton icone seule (renommer, supprimer) : 44x44, icone Coffee en masque. */
+#grimoire .icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--coffee);
+  cursor: pointer;
+}
+
+#grimoire .icon-button:hover:not(:disabled) {
+  background: var(--accent-bg);
+}
+
+#grimoire .icon-button .mask-icon {
+  width: 24px;
+  height: 24px;
+}
+
+#grimoire .view-button:disabled,
+#grimoire .icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Dans la vue, le grimoire n'a plus besoin de son cadre teinte : la feuille
