@@ -68,7 +68,7 @@ Règles :
 | T007 | Afficher la page courante à côté du compteur | US-04, D-03 | `src/App.tsx`, `src/components/BookSpread.tsx`, `src/index.css` | T006 | | fait |
 | T008 | Écrire les règles de niveau total et de nom unique | D-04, D-08 | `src/utils/characterLevels.ts`, `src/utils/characterName.ts` (créés) | T001 | [P] | fait |
 | T009 | Créer le formulaire de nom de personnage | US-01, US-02, B4 | `src/components/CharacterNameForm.tsx` (créé) | T003, T008 | | fait |
-| T010 | Refondre le sélecteur de personnage en pastilles | US-01, US-02, D-05 | `src/components/CharacterSelector.tsx`, `src/components/CharacterSelector.css` | T009 | | à faire |
+| T010 | Refondre le sélecteur de personnage en pastilles | US-01, US-02, D-05 | `src/components/CharacterSelector.tsx`, `src/components/CharacterSelector.css` | T009 | | fait |
 | T011 | Refondre le formulaire de classe en carte | US-03, D-04 | `src/components/SpellcasterProfileForm.tsx`, `src/components/SpellcasterProfileForm.css` | T008, T010 | | à faire |
 | T012 | Assembler la vue Personnage (sections, total, clés) | US-03, B5 | `src/components/CharacterView.tsx`, `src/App.css` | T011 | | à faire |
 | T013 | Nommer le personnage dans le titre du grimoire | D-07 | `src/components/SpellbookView.tsx`, `src/App.tsx` | T012 | | à faire |
@@ -122,3 +122,4 @@ Commit de début de lot : `0fc3b92` (commit des documents, branche `feature/css`
 | T006 | `8dddb52` | 2026-10-15 | pass ; AC-01 précisé avant vérification |
 | T007 | `1a30bac` | 2026-10-15 | pass au premier passage |
 | T008 | `6b6f297` | 2026-10-15 | pass, fonctions exécutées (13 assertions) |
+| T009 | `bca79a4` | 2026-10-15 | pass (lecture, composant non branché) |

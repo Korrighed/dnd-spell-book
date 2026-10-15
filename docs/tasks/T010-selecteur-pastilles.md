@@ -1,6 +1,6 @@
 # T010 — Refondre le sélecteur de personnage en pastilles
 
-Statut : à faire
+Statut : fait
 Story : US-01, US-02, constat B4 · Exigences : D-05, D-08, [DESIGN-BRIEF.md §4 maquette](../DESIGN-BRIEF.md#vue-personnage--maquette), [APP-FLOW.md §2-3](../APP-FLOW.md#2-parcours-utilisateur)
 Dépend de : T009
 Parallélisable : non
@@ -389,3 +389,10 @@ Vérification navigateur : AC-01 à AC-10, à 1440×900 et 390×844 (AC-09). Vid
 - Titre `h3` en Caput Mortuum : T012.
 
 ## Notes d'exécution
+
+- Étapes 1 à 3 appliquées. `CharacterSelector.tsx` et `CharacterSelector.css` identiques octet pour octet aux blocs de la tâche (diff vérifié).
+- `CharacterView.tsx` : ajout de `open={open}` sur `<CharacterSelector />`, rien d'autre.
+- `npm run lint` : pass (aucun problème).
+- `npm run build` : pass (`tsc -b` + `vite build`). Avertissement « chunk > 500 kB » : non bloquant, bundle three.js, sans lien avec ce changement.
+- Vérification navigateur AC-01 à AC-10 (1440×900 et 390×844) : non exécutée par l'exécutant, à faire par le verifier.
+- Écart documentaire, non bloquant : `docs/APP-FLOW.md` §2 US-02 indique « ses sorts ? » et un `title` sur la corbeille désactivée. La tâche (AC-07, AC-08) et le code utilisent « ses classes et ses sorts ? » et un texte visible. Le code suit la tâche. `APP-FLOW.md` non modifié (hors fichiers cibles).

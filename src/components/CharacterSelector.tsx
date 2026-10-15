@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { isCharacterNameTaken } from '../utils/characterName'
 import { t } from '../utils/browserLanguage'
+import { CharacterNameForm } from './CharacterNameForm'
+import { MaskIcon } from './MaskIcon'
 import './CharacterSelector.css'
 
 interface CharacterListItem {
@@ -8,6 +11,8 @@ interface CharacterListItem {
 }
 
 interface CharacterSelectorProps {
+  /** Vue Personnage visible. Fermee : tout formulaire en cours est abandonne. */
+  open: boolean
   characters: CharacterListItem[]
   activeCharacterId: string
   onSelect: (id: string) => void
@@ -16,8 +21,21 @@ interface CharacterSelectorProps {
   onRename: (id: string, name: string) => void
 }
 
-/** Un personnage = un grimoire complet (sorts sauvegardes + classes). */
+type Mode = 'view' | 'create' | 'rename' | 'confirm-delete'
+type FocusTarget = 'active-chip' | 'plus' | 'pencil' | 'trash' | 'cancel-delete'
+
+function chipDomId(id: string): string {
+  return `character-chip-${id}`
+}
+
+/**
+ * Personnages en pastilles (le personnage actif est enfonce), creation,
+ * renommage et suppression en place. Un seul mode a la fois
+ * (docs/APP-FLOW.md, §3). Plus de window.confirm : confirmation dans la vue
+ * (D-05).
+ */
 export function CharacterSelector({
+  open,
   characters,
   activeCharacterId,
   onSelect,
@@ -25,92 +43,185 @@ export function CharacterSelector({
   onRemove,
   onRename,
 }: CharacterSelectorProps) {
-  const [newName, setNewName] = useState('')
-  const activeCharacter = characters.find((character) => character.id === activeCharacterId)
-
-  // Brouillon local : evite d'ecrire dans le stockage partage a chaque frappe
-  // (un `storage` event par caractere tape, et une fenetre de collision entre
-  // onglets elargie d'autant). Resynchronise pendant le rendu (pas un effet)
-  // quand le personnage actif change, selon le pattern React recommande pour
-  // ajuster un etat local a partir d'une prop qui change.
-  const [nameDraft, setNameDraft] = useState(activeCharacter?.name ?? '')
-  const [trackedCharacterId, setTrackedCharacterId] = useState(activeCharacterId)
-  if (trackedCharacterId !== activeCharacterId) {
-    setTrackedCharacterId(activeCharacterId)
-    setNameDraft(activeCharacter?.name ?? '')
+  const [mode, setMode] = useState<Mode>('view')
+  // Vue fermee : abandon du formulaire en cours. Ajustement pendant le rendu
+  // (pas un effet), meme motif que les autres composants du projet.
+  if (!open && mode !== 'view') {
+    setMode('view')
   }
 
-  function commitRename() {
-    const trimmed = nameDraft.trim()
-    // Un nom vide viderait le libelle dans le menu deroulant : on garde le nom existant.
-    if (trimmed && trimmed !== activeCharacter?.name) {
-      onRename(activeCharacterId, trimmed)
-    } else {
-      setNameDraft(activeCharacter?.name ?? '')
+  const plusRef = useRef<HTMLButtonElement>(null)
+  const pencilRef = useRef<HTMLButtonElement>(null)
+  const trashRef = useRef<HTMLButtonElement>(null)
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null)
+  // Cible du focus apres un changement de mode, appliquee apres le rendu :
+  // l'element vise (nouvelle pastille, crayon...) n'existe qu'a ce moment-la.
+  const pendingFocus = useRef<FocusTarget | null>(null)
+  useEffect(() => {
+    const target = pendingFocus.current
+    if (target === null) return
+    pendingFocus.current = null
+    if (target === 'active-chip') {
+      document.getElementById(chipDomId(activeCharacterId))?.focus()
+      return
     }
+    const refs = {
+      plus: plusRef,
+      pencil: pencilRef,
+      trash: trashRef,
+      'cancel-delete': cancelDeleteRef,
+    }
+    refs[target].current?.focus()
+  })
+
+  const activeName = characters.find((character) => character.id === activeCharacterId)?.name ?? ''
+  const onlyOne = characters.length <= 1
+
+  function backToView(focus: FocusTarget) {
+    pendingFocus.current = focus
+    setMode('view')
+  }
+
+  function renderActive() {
+    if (mode === 'rename') {
+      return (
+        <CharacterNameForm
+          label={t('Nouveau nom', 'New name')}
+          initialName={activeName}
+          submitLabel={t('Valider', 'Confirm')}
+          isTaken={(name) => isCharacterNameTaken(characters, name, activeCharacterId)}
+          onSubmit={(name) => {
+            if (name !== activeName) onRename(activeCharacterId, name)
+            backToView('pencil')
+          }}
+          onCancel={() => backToView('pencil')}
+        />
+      )
+    }
+    if (mode === 'confirm-delete') {
+      return (
+        <div
+          className="character-confirm"
+          role="group"
+          aria-label={t('Confirmer la suppression', 'Confirm deletion')}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.stopPropagation()
+              backToView('trash')
+            }
+          }}
+        >
+          <p>
+            {t(
+              `Supprimer « ${activeName} », ses classes et ses sorts ?`,
+              `Delete "${activeName}", their classes and their spells?`,
+            )}
+          </p>
+          <button
+            type="button"
+            className="view-button view-button--primary"
+            onClick={() => {
+              onRemove(activeCharacterId)
+              backToView('active-chip')
+            }}
+          >
+            {t('Supprimer', 'Delete')}
+          </button>
+          <button
+            ref={cancelDeleteRef}
+            type="button"
+            className="view-button"
+            onClick={() => backToView('trash')}
+          >
+            {t('Annuler', 'Cancel')}
+          </button>
+        </div>
+      )
+    }
+    return (
+      <>
+        <p className="character-active-name">{activeName}</p>
+        <button
+          ref={pencilRef}
+          type="button"
+          className="icon-button"
+          aria-label={t('Renommer le personnage', 'Rename character')}
+          title={t('Renommer le personnage', 'Rename character')}
+          onClick={() => setMode('rename')}
+        >
+          <MaskIcon file="pencil.svg" />
+        </button>
+        <button
+          ref={trashRef}
+          type="button"
+          className="icon-button"
+          aria-label={t('Supprimer le personnage', 'Delete character')}
+          title={t('Supprimer le personnage', 'Delete character')}
+          disabled={onlyOne}
+          onClick={() => {
+            pendingFocus.current = 'cancel-delete'
+            setMode('confirm-delete')
+          }}
+        >
+          <MaskIcon file="trash-2.svg" />
+        </button>
+        {onlyOne && (
+          <p className="character-hint">
+            {t('Il faut garder au moins un personnage.', 'At least one character is required.')}
+          </p>
+        )}
+      </>
+    )
   }
 
   return (
     <div className="character-selector">
-      <label>
-        {t('Personnage', 'Character')}{' '}
-        <select value={activeCharacterId} onChange={(event) => onSelect(event.target.value)}>
-          {characters.map((character) => (
-            <option key={character.id} value={character.id}>
-              {character.name}
-            </option>
-          ))}
-        </select>
-      </label>{' '}
-      <button
-        type="button"
-        aria-label={t('Supprimer ce personnage', 'Delete this character')}
-        disabled={characters.length <= 1}
-        onClick={() => {
-          // Suppression definitive (sorts + classes du personnage), pas de corbeille :
-          // seule action de ce composant qui merite une confirmation bloquante.
-          const name = activeCharacter?.name ?? ''
-          if (window.confirm(t(`Supprimer le personnage « ${name} » ?`, `Delete character "${name}"?`))) {
-            onRemove(activeCharacterId)
-          }
-        }}
-      >
-        {t('Supprimer', 'Delete')}
-      </button>{' '}
-      <label>
-        {t('Renommer', 'Rename')}{' '}
-        <input
-          type="text"
-          value={nameDraft}
-          onChange={(event) => setNameDraft(event.target.value)}
-          onBlur={commitRename}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              commitRename()
-              event.currentTarget.blur()
-            }
+      <h3>{t('Personnages', 'Characters')}</h3>
+      <div className="character-chips" role="group" aria-label={t('Personnages', 'Characters')}>
+        {characters.map((character) => (
+          <button
+            key={character.id}
+            id={chipDomId(character.id)}
+            type="button"
+            className="character-chip"
+            aria-pressed={character.id === activeCharacterId}
+            title={character.name}
+            onClick={() => {
+              setMode('view')
+              onSelect(character.id)
+            }}
+          >
+            <span className="character-chip-name">{character.name}</span>
+          </button>
+        ))}
+        <button
+          ref={plusRef}
+          type="button"
+          className="character-chip character-chip--add"
+          aria-label={t('Nouveau personnage', 'New character')}
+          title={t('Nouveau personnage', 'New character')}
+          aria-expanded={mode === 'create'}
+          onClick={() => setMode('create')}
+        >
+          <MaskIcon file="plus.svg" />
+        </button>
+      </div>
+
+      {mode === 'create' && (
+        <CharacterNameForm
+          label={t('Nom du nouveau personnage', 'New character name')}
+          initialName=""
+          submitLabel={t('Créer', 'Create')}
+          isTaken={(name) => isCharacterNameTaken(characters, name)}
+          onSubmit={(name) => {
+            onAdd(name)
+            backToView('active-chip')
           }}
+          onCancel={() => backToView('plus')}
         />
-      </label>{' '}
-      <label>
-        {t('Nouveau personnage', 'New character')}{' '}
-        <input
-          type="text"
-          value={newName}
-          placeholder={t('Nom', 'Name')}
-          onChange={(event) => setNewName(event.target.value)}
-        />
-      </label>{' '}
-      <button
-        type="button"
-        disabled={!newName.trim()}
-        onClick={() => {
-          onAdd(newName.trim())
-          setNewName('')
-        }}
-      >
-        {t('Ajouter', 'Add')}
-      </button>
+      )}
+
+      <div className="character-active">{renderActive()}</div>
     </div>
   )
 }

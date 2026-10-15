@@ -77,7 +77,7 @@ flowchart LR
 | 1 | Clic sur le crayon | Le nom devient un champ prérempli, texte sélectionné, avec `Valider` et `Annuler`. | — |
 | 2 | Entrée ou `Valider` | `renameCharacter` appelé **une seule fois**. Retour à l'affichage du nom, focus sur le crayon. | Nom vide ou pris par un autre personnage : `Valider` désactivé, message si pris. Nom identique : pas d'appel, retour à l'affichage. |
 | 3 | Échap ou `Annuler` | Ancien nom conservé, focus sur le crayon. La vue reste ouverte. | — |
-| 4 | Clic sur la corbeille | La rangée d'actions devient `Supprimer « Gandalf » et ses sorts ? [Supprimer] [Annuler]`, focus sur `Annuler` (D-05). | Un seul personnage : corbeille désactivée, avec `title` « Il faut garder au moins un personnage ». |
+| 4 | Clic sur la corbeille | La rangée d'actions devient `Supprimer « Gandalf », ses classes et ses sorts ? [Supprimer] [Annuler]`, focus sur `Annuler` (D-05). | Un seul personnage : corbeille désactivée, et texte visible « Il faut garder au moins un personnage. » sous les boutons. |
 | 5 | `Supprimer` | `removeCharacter` : le premier personnage restant devient actif, focus sur sa pastille. | — |
 | 6 | `Annuler` ou Échap | Retour à l'affichage, focus sur la corbeille. La vue reste ouverte. | — |
 

@@ -114,7 +114,7 @@ CLASSES
 
 - Création : la pastille « + » remplace la rangée d'actions par un formulaire `[Nom ____] [Créer] [Annuler]`. Entrée crée, Échap annule sans fermer la vue.
 - Renommage : le crayon remplace le nom par `[Nom ____] [Valider] [Annuler]`. Mêmes touches.
-- Suppression : la corbeille remplace la rangée d'actions par `Supprimer « Gandalf » et ses sorts ? [Supprimer] [Annuler]`. Ici, `Supprimer` est un bouton principal (Caput Mortuum). Échap annule sans fermer la vue. Plus de `window.confirm`.
+- Suppression : la corbeille remplace la rangée d'actions par `Supprimer « Gandalf », ses classes et ses sorts ? [Supprimer] [Annuler]`. Ici, `Supprimer` est un bouton principal (Caput Mortuum). Échap annule sans fermer la vue. Plus de `window.confirm`.
 - Noms :
   - 40 caractères maximum (`maxLength`), espaces de début et de fin retirés, nom vide refusé ;
   - nom déjà pris par un **autre** personnage refusé, sans tenir compte des majuscules ni des accents (`normalizeForSearch`, `src/utils/text.ts`). Message sous le champ : « Ce nom est déjà pris. » (`role="alert"`). Les doublons déjà enregistrés ne sont pas modifiés.

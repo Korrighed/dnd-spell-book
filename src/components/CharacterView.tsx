@@ -53,6 +53,7 @@ export function CharacterView({
       onClose={onClose}
     >
       <CharacterSelector
+        open={open}
         characters={characters}
         activeCharacterId={activeCharacterId}
         onSelect={onSelectCharacter}
