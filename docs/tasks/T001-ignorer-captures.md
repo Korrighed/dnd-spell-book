@@ -1,6 +1,6 @@
 # T001 — Ignorer les captures de test
 
-Statut : à faire
+Statut : fait
 Story : hygiène du dépôt · Exigences : —
 Dépend de : aucune
 Parallélisable : non
@@ -55,3 +55,5 @@ Vérification navigateur : aucune (pas d'impact visible).
 - Suppression de fichiers.
 
 ## Notes d'exécution
+
+- Règle `.playwright-mcp/` ajoutée en fin de `.gitignore` (3 lignes, CRLF). `git check-ignore .playwright-mcp/test.png` confirme l'ignorage.

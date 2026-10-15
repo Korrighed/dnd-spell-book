@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Captures des tests navigateur (Playwright MCP)
+.playwright-mcp/

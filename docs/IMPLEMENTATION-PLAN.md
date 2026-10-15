@@ -59,7 +59,7 @@ Règles :
 
 | ID | Tâche | Story / constat | Fichiers cibles | Dépend de | [P] | Statut |
 |---|---|---|---|---|---|---|
-| T001 | Ignorer les captures de test | hygiène | `.gitignore` | — | | à faire |
+| T001 | Ignorer les captures de test | hygiène | `.gitignore` | — | | fait |
 | T002 | Ajouter les tokens de couleur et corriger les contrastes | A1, A3, D-01 | `src/index.css`, `src/App.css` | T001 | | à faire |
 | T003 | Unifier les champs et boutons des vues | M1 archi, A2, iOS | `src/App.css`, `src/App.mobile.css`, `src/components/FiltersView.tsx`, `src/components/CharacterSelector.css`, `src/components/SpellcasterProfileForm.css` | T002 | | à faire |
 | T004 | Passer toutes les icônes à Lucide | D-02, D-06, A4 | `public/icons/*`, `src/App.tsx`, `src/App.css`, `src/components/{Bookmarks,SpellbookToggle,HelpView,PageTurnZone}.tsx`, `src/components/PageTurnZone.css` | T003 | | à faire |
@@ -110,7 +110,7 @@ Ordre d'exécution retenu : T001 → T002 → … → T013, dans l'ordre des num
 
 ## 8. Suivi
 
-Commit de début de lot : à noter au lancement de T001.
+Commit de début de lot : `0fc3b92` (commit des documents, branche `feature/css`).
 
 | Tâche | Commit | Vérifié le | Remarque |
 |---|---|---|---|
