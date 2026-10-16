@@ -20,18 +20,20 @@ flowchart TD
   Livre -->|onglet Personnage| Perso[Vue Personnage]
   Livre -->|onglet Grimoire| Grim[Vue Grimoire]
   Livre -->|bouton ?| Aide
-  Filtres -->|croix ou Échap| Livre
-  Perso -->|croix ou Échap| Livre
-  Grim -->|croix ou Échap| Livre
-  Aide -->|croix ou Échap| Livre
+  Filtres -->|fermeture| Livre
+  Perso -->|fermeture| Livre
+  Grim -->|fermeture| Livre
+  Aide -->|fermeture| Livre
   Grim -->|choix d'un sort| Livre
 ```
+
+Fermeture d'une vue : son onglet (ou le bouton ?) touché de nouveau, ou Échap. En plus : la croix en desktop, le glisser vers le bas en mobile (§4).
 
 | Écran / vue | Rôle | Accès depuis |
 |---|---|---|
 | Livre | Fiche (page gauche), liste paginée (page droite) | Arrivée |
 | Vue Personnage | Choix, création, renommage, suppression du personnage, gestion de ses classes | Onglet Personnage |
-| Vue Filtres, vue Grimoire, Aide | Inchangées dans ce lot, sauf le comportement clavier commun (US-05) | Onglets, bouton ? |
+| Vue Filtres, vue Grimoire, Aide | Contenu inchangé dans ce lot. Comportement clavier commun (US-05), présentation mobile en panneau (§4) | Onglets, bouton ? |
 
 ## 2. Parcours utilisateur
 
@@ -139,10 +141,29 @@ Les états Création et Renommage s'excluent : en ouvrir un ferme l'autre sans e
 
 | Point du parcours | Desktop | Mobile |
 |---|---|---|
+| Page | Pas de défilement horizontal | Pas de défilement horizontal, vue ouverte comprise |
+| Barre d'outils | Une ligne : œil, recherche, onglets | Une ligne : œil, recherche (place restante), onglets |
+| Fiche affichée (page gauche) | Barre d'outils visible | Œil, recherche et onglets masqués (place gardée, le livre ne saute pas) |
+| Vues (Filtres, Personnage, Grimoire, Aide) | Feuille posée sur le livre ; l'aide couvre la zone du livre | Panneau sur toute la largeur de l'écran, du dessous des onglets jusqu'au bas de l'écran |
+| Fermer une vue | Croix, onglet, Échap | Glisser vers le bas (poignée ou titre), onglet ou bouton ?, Échap. Pas de croix |
 | Pastilles | Une ligne, retour à la ligne si besoin | Retour à la ligne, aucun défilement horizontal |
 | Cartes de classe | Champs côte à côte | Champs empilés |
-| Titre de la vue | — | Non recouvert par la croix |
 | Indicateur de page | Ligne du compteur | Ligne du compteur, sur une ligne dans 250 px |
+
+Panneau mobile, geste de fermeture :
+
+```mermaid
+stateDiagram-v2
+  [*] --> Ouvert: onglet ou bouton ?
+  Ouvert --> Glisse: appui sur la poignée ou le titre
+  Glisse --> Glisse: le panneau suit le doigt (vers le bas seulement)
+  Glisse --> Ouvert: relâché à 100 px ou moins
+  Glisse --> Ferme: relâché au-delà de 100 px (sortie par le bas)
+  Ouvert --> Ferme: onglet ou ? touché de nouveau, ou Échap
+  Ferme --> [*]
+```
+
+Le contenu du panneau garde son défilement normal : seuls la poignée et le titre déclenchent le glisser.
 
 ## 5. Clavier et accessibilité du parcours
 
@@ -151,6 +172,7 @@ Les états Création et Renommage s'excluent : en ouvrir un ferme l'autre sans e
 - Échap :
   - dans un formulaire de création ou de renommage : annule ce formulaire seulement ;
   - ailleurs dans la vue : ferme la vue, focus rendu à l'onglet (existant).
+- Mobile : le glisser vers le bas a toujours une alternative en un seul appui (onglet ou bouton ?), et Échap au clavier. La poignée est décorative (`aria-hidden`).
 - Pastilles : `<button aria-pressed>` dans un groupe nommé « Personnages ».
 - Après choix d'un sort depuis le grimoire en mobile : focus sur le titre de la fiche, pas sur l'onglet masqué (B7, mineur, hors lot sauf avis contraire).
 

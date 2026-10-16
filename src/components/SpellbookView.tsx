@@ -5,9 +5,16 @@ import { t } from '../utils/browserLanguage'
 import { BookmarkView } from './BookmarkView'
 import { PersonalSpellbookPanel } from './PersonalSpellbookPanel'
 
+/** « de Gandalf », « d'Elminster » : elision devant une voyelle ou un h. */
+function frenchOf(name: string): string {
+  return /^[aeiouyhàâäéèêëîïôöùûüœæ]/i.test(name) ? `d’${name}` : `de ${name}`
+}
+
 interface SpellbookViewProps {
   open: boolean
   onClose: () => void
+  /** Nom du personnage actif, affiche dans le titre. */
+  characterName: string
   spells: PersonalSpell[]
   allSpells: SpellListItem[]
   selectedIndex: string | null
@@ -17,10 +24,11 @@ interface SpellbookViewProps {
   isAccessible: SpellAccessCheck | null
 }
 
-/** Liste du grimoire du personnage actif. Le compteur est dans le titre de la vue. */
+/** Liste du grimoire du personnage actif. Titre : nom du personnage et compteur (D-07). */
 export function SpellbookView({
   open,
   onClose,
+  characterName,
   spells,
   allSpells,
   selectedIndex,
@@ -28,11 +36,17 @@ export function SpellbookView({
   onRemoveSpell,
   isAccessible,
 }: SpellbookViewProps) {
+  // Repli si aucun nom (ne devrait pas arriver : un personnage par defaut
+  // existe toujours et un nom vide est refuse).
+  const heading = characterName
+    ? t(`Grimoire ${frenchOf(characterName)}`, `${characterName}'s spellbook`)
+    : t('Grimoire personnel', 'Personal spellbook')
+
   return (
     <BookmarkView
       id="spellbook"
       open={open}
-      title={`${t('Grimoire personnel', 'Personal spellbook')} (${spells.length})`}
+      title={`${heading} (${spells.length})`}
       onClose={onClose}
     >
       <PersonalSpellbookPanel

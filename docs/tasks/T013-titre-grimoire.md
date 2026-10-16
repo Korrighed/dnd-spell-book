@@ -66,3 +66,11 @@ Vérification navigateur : AC-01 à AC-04 à 1440×900.
 - Afficher le nom ailleurs (onglet, barre d'outils).
 
 ## Notes d'exécution
+
+- Étapes 1 et 2 appliquées (`SpellbookView.tsx`, `App.tsx`). Aucun autre fichier touché.
+- `npm run lint` : pass.
+- `npm run build` : pass (exit 0). Avertissement « chunk > 500 kB » pré-existant (bundle three.js), non lié à cette tâche.
+- AC-01 à AC-04 (navigateur, 1440×900) : non vérifiés par l'exécutant, à faire par le vérificateur.
+- Point de vigilance : `?? ''` dans `App.tsx` n'est pas atteignable en usage normal (`usePersonalSpellbook` garantit un `activeCharacterId` valide). Si atteint, le titre serait « Grimoire de  (N) ».
+- `frenchOf` élide devant tout `h` : pas de distinction h muet / h aspiré. Conforme à l'étape 1, limite connue.
+- Hors périmètre laissé tel quel : libellé « Grimoire personnel » dans `src/components/Bookmarks.tsx` (barre d'outils).

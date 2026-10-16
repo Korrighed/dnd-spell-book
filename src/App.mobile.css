@@ -23,62 +23,124 @@
     display: none;
   }
 
-  /* Ecran etroit : bouton « hors profil » + recherche sur leur propre ligne,
-     en pleine largeur ; les onglets passent dessous, a droite, toujours
-     colles au livre (meme marge basse negative qu'en desktop,
-     --book-edge-top mobile). */
+  /* Ecran etroit : bouton « hors profil », recherche et onglets sur une
+     seule ligne, la recherche prend la place restante (~130px a 390px).
+     Onglets toujours colles au livre (meme marge basse negative qu'en
+     desktop, --book-edge-top mobile). */
   #grimoire .toolbar {
-    flex-wrap: wrap;
     gap: 8px;
     margin-right: 0;
   }
 
   #grimoire .search-bar {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
+    min-width: 0;
     gap: 8px;
   }
 
   #grimoire .spell-search {
     flex: 1;
+    min-width: 0;
     width: auto;
   }
 
-  /* Fiche affichee (page de gauche) : marque-pages masques, pour se
-     concentrer sur la lecture. visibility (pas display) : la place reste
-     reservee, la recherche ne saute pas ; et les onglets sortent aussi de
-     l'ordre de tabulation. data-mobile-page pose par App.tsx. */
+  /* Champ etroit : moins de marge interne, place au texte saisi. */
+  #grimoire .spell-search input[type='search'] {
+    padding-right: 36px;
+    padding-left: 12px;
+  }
+
+  #grimoire .spell-search-icon {
+    right: 10px;
+  }
+
+  /* Fiche affichee (page de gauche) : recherche, bouton oeil et marque-pages
+     masques, ils ne servent qu'a la liste. visibility (pas display) : la
+     place reste reservee, le livre ne saute pas ; et ces controles sortent
+     aussi de l'ordre de tabulation. data-mobile-page pose par App.tsx. */
+  #grimoire .search-bar,
   #grimoire .bookmarks {
     transition:
       opacity 200ms ease,
       visibility 200ms;
   }
 
+  #grimoire[data-mobile-page='left'] .search-bar,
   #grimoire[data-mobile-page='left'] .bookmarks {
     opacity: 0;
     visibility: hidden;
   }
 
-  /* La vue couvre une fenetre etroite : marges reduites, croix rapprochee
-     du coin. */
+  /* Toutes les vues (onglets et aide) : panneau bord a bord, sur toute la
+     largeur de l'ecran. Du dessous des onglets jusqu'au bas de l'ecran
+     (--sheet-height, calcule par BookmarkView.tsx a l'ouverture ; repli :
+     bas du livre). 50vw : la vue sort de son ancre, plus etroite que
+     l'ecran. On le ferme en tirant la poignee ou le titre vers le bas. */
   #grimoire .bookmark-view {
-    padding: 16px;
+    left: calc(50% - 50vw);
+    right: calc(50% - 50vw);
+    bottom: auto;
+    height: var(--sheet-height, calc(100% - var(--book-edge-top)));
+    padding: 0 16px 16px;
+    border-top: 2px solid var(--coffee);
+    border-width: 2px 0 0;
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.35);
+    /* Retour en place ou sortie par le bas apres le glissement. */
+    transition: transform 200ms ease;
   }
 
-  #grimoire .bookmark-view-close {
-    top: 12px;
-    right: 12px;
+  /* Pendant le glissement, la vue suit le doigt sans delai. */
+  #grimoire .bookmark-view.is-dragging {
+    transition: none;
   }
 
-  /* Croix a 12px du bord, 40px de large : marge de securite pour le
-     titre (recouvrement observe en revue a 390px). */
+  /* Poignee collee en haut du panneau, meme quand le contenu defile. Marges
+     negatives : fond papier sur toute la largeur (padding de la vue). */
+  #grimoire .bookmark-view-handle {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0 -16px;
+    padding: 10px 0 14px;
+    background: var(--paper);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  #grimoire .bookmark-view-handle::before {
+    content: '';
+    width: 44px;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--coffee);
+    opacity: 0.5;
+  }
+
+  /* Le titre sert aussi de poignee : pas de defilement du navigateur dessus. */
+  #grimoire .bookmark-view-drag-title {
+    touch-action: none;
+    cursor: grab;
+  }
+
+  /* Pas de croix sur le panneau : on le ferme en le tirant vers le bas, en
+     touchant de nouveau son onglet ou le bouton « ? » (toujours visibles
+     au-dessus), ou avec Echap. Titre sur toute la largeur. */
+  #grimoire .bookmark-view .bookmark-view-close {
+    display: none;
+  }
+
   #grimoire .bookmark-view h2 {
-    padding-right: 60px;
     font-size: 24px;
   }
 
-  /* Aide : une seule colonne ; l'ecran etroit impose un scroll interne. */
+  /* Aide : ancree sur #grimoire (pas sur .book-zone), elle part sous la
+     barre d'outils (padding haut de #grimoire + hauteur des onglets), comme
+     les autres vues. Une seule colonne ; scroll interne. */
   #grimoire .help-view {
-    padding: 16px;
+    top: calc(24px + var(--bookmark-height));
   }
 
   #grimoire .help-columns {
@@ -88,7 +150,9 @@
 }
 
 @media (max-width: 899px) and (prefers-reduced-motion: reduce) {
-  #grimoire .bookmarks {
+  #grimoire .search-bar,
+  #grimoire .bookmarks,
+  #grimoire .bookmark-view {
     transition: none;
   }
 }

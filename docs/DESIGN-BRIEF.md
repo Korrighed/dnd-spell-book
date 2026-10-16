@@ -130,7 +130,7 @@ CLASSES
 | Point de rupture | Comportement |
 |---|---|
 | Desktop (> 899 px) | Pastilles sur une ligne, retour à la ligne si besoin. Cartes de classe pleine largeur de la vue. Indicateur de page sur la ligne du compteur. |
-| Mobile (≤ 899 px) | Pastilles à la ligne (pas de défilement horizontal de la page). Champs d'une carte empilés, un par ligne. Le titre de la vue garde une marge à droite égale à la croix (44 px + 8 px) : la croix ne le recouvre plus. Indicateur sur une ligne dans la colonne de 250 px (à vérifier : 3 chiffres + 2 chiffres). |
+| Mobile (≤ 899 px) | Pastilles à la ligne (pas de défilement horizontal de la page). Champs d'une carte empilés, un par ligne. Vues en panneau pleine largeur, sans croix, fermées en glissant vers le bas (détail : [APP-FLOW.md §4](APP-FLOW.md#4-desktop--mobile)). Indicateur sur une ligne dans la colonne de 250 px (à vérifier : 3 chiffres + 2 chiffres). |
 
 Aucune largeur de vue ne doit provoquer de défilement horizontal, quel que soit le nom saisi (corrige B4).
 

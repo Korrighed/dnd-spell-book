@@ -125,3 +125,4 @@ Commit de début de lot : `0fc3b92` (commit des documents, branche `feature/css`
 | T009 | `bca79a4` | 2026-10-15 | pass (lecture, composant non branché) |
 | T010 | `1bf1d78` | 2026-10-15 | pass au premier passage |
 | T011 | `6149fb8` | 2026-10-15 | pass ; 2 écarts mineurs acceptés (garde inutile, commentaire « Effacer ») |
+| T012 | `26691b2` | 2026-10-15 | pass au premier passage |

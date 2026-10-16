@@ -127,6 +127,14 @@
   }
 }
 
+/* Header et footer s'etendent sur 100vw, qui compte la barre de
+   defilement verticale : la page depassait de quelques px et defilait de
+   gauche a droite. clip sur html (et pas seulement body) : coupe aussi sur
+   Safari iOS, qui ignore l'overflow de body. */
+html {
+  overflow-x: clip;
+}
+
 body {
   margin: 0;
   /* Le canvas du livre est etire (scaleX, BookCanvas.tsx) et deborde de #root : sans

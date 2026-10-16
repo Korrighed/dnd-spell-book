@@ -186,6 +186,8 @@ function App() {
     if (window.matchMedia(MOBILE_QUERY).matches) setMobilePage('left')
   }
 
+  const activeCharacterName = characters.find((character) => character.id === activeCharacterId)?.name ?? ''
+
   return (
     <>
       <header className="site-header">
@@ -371,6 +373,7 @@ function App() {
           <SpellbookView
             open={openView === 'spellbook'}
             onClose={closeView}
+            characterName={activeCharacterName}
             spells={personalSpells}
             allSpells={spells}
             selectedIndex={selectedIndex}
