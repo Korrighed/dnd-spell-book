@@ -1,6 +1,6 @@
 # Plan d'implémentation — finitions feature/css, pagination, vue Personnage
 
-Statut : brouillon
+Statut : terminé (2026-10-16)
 Couvre : US-01 … US-05 ([APP-FLOW.md](APP-FLOW.md)), décisions D-01 … D-08 ([DESIGN-BRIEF.md](DESIGN-BRIEF.md)), constats de revue du 2026-10-15 (B1–B5, A1–A4)
 Branche : `feature/css` (exception au `CLAUDE.md` décidée le 2026-10-15, voir §2)
 
@@ -41,7 +41,7 @@ Corriger les défauts majeurs de la branche (bouton grimoire, clavier dans les v
 | 3 | Branche de travail | Rester sur `feature/css`. Fusion dans `dev` à la fin du lot, après accord explicite. | Décision utilisateur du 2026-10-15 : lot surtout visuel, dans la continuité de la branche. Exception assumée au `CLAUDE.md` (pas de `feature/*`). |
 | 4 | Tests automatisés | Aucun framework de test dans le projet. Vérification : lint, build, navigateur (`workflow:verifier`). | Pas d'ajout d'outillage dans ce lot. |
 | 5 | Commits | Faits par l'orchestrateur seulement, un par tâche, après `pass` du vérificateur. Format du `CLAUDE.md` projet : `type(scope): phrase résumé.` puis une ligne `- …` par ajout. Jamais de `Co-Authored-By`. Ajout explicite des fichiers (pas de `git add -A`). | Le `CLAUDE.md` projet prime sur toute autre consigne d'attribution. |
-| 6 | Retours de la revue QA du plan (2026-10-15) | Intégrés dans T001, T003, T004, T006, T008, T010, T011, T012. Non retenus : annonce « Page 1 sur 1 » pendant le chargement (T007, acceptée), élision devant un h aspiré (T013, acceptée), saut direct à une page (hors lot). | Voir chaque fichier de tâche. |
+| 6 | Retours de la revue QA du plan (2026-10-15) | Intégrés dans T001, T003, T004, T006, T008, T010, T011, T012. Non retenus : annonce « Page 1 sur 1 » pendant le chargement (T007, acceptée), élision devant un h aspiré (T013, acceptée), saut direct à une page (hors lot). | Voir les fichiers de tâche (historique git, commit `e31d70b`). |
 
 ## 3. Phases
 
@@ -71,9 +71,10 @@ Règles :
 | T010 | Refondre le sélecteur de personnage en pastilles | US-01, US-02, D-05 | `src/components/CharacterSelector.tsx`, `src/components/CharacterSelector.css` | T009 | | fait |
 | T011 | Refondre le formulaire de classe en carte | US-03, D-04 | `src/components/SpellcasterProfileForm.tsx`, `src/components/SpellcasterProfileForm.css` | T008, T010 | | fait |
 | T012 | Assembler la vue Personnage (sections, total, clés) | US-03, B5 | `src/components/CharacterView.tsx`, `src/App.css` | T011 | | fait |
-| T013 | Nommer le personnage dans le titre du grimoire | D-07 | `src/components/SpellbookView.tsx`, `src/App.tsx` | T012 | | à faire |
+| T013 | Nommer le personnage dans le titre du grimoire | D-07 | `src/components/SpellbookView.tsx`, `src/App.tsx` | T012 | | fait |
+| T014 | Remplacer le favicon par le livre au cœur | demande directe, hors plan | `public/favicon.svg` | — | [P] | fait |
 
-Fichier détaillé de chaque tâche : `docs/tasks/Txxx-slug.md`. Exécutants : `workflow:executor` (T001), `workflow:back` (T008), `workflow:front` (les autres).
+Les fichiers détaillés de chaque tâche (`docs/tasks/Txxx-slug.md`) ont été retirés à la fin du lot. Ils restent consultables dans l'historique git (dernier état : commit `e31d70b`). Exécutants : `workflow:executor` (T001), `workflow:back` (T008), `workflow:front` (les autres).
 
 ## 5. Graphe de dépendances
 
@@ -126,3 +127,7 @@ Commit de début de lot : `0fc3b92` (commit des documents, branche `feature/css`
 | T010 | `1bf1d78` | 2026-10-15 | pass au premier passage |
 | T011 | `6149fb8` | 2026-10-15 | pass ; 2 écarts mineurs acceptés (garde inutile, commentaire « Effacer ») |
 | T012 | `26691b2` | 2026-10-15 | pass au premier passage |
+| T013 | `e31d70b` | 2026-10-16 | repli « Grimoire personnel » ajouté si aucun nom |
+| T014 | `e31d70b` | 2026-10-16 | — |
+
+Hors plan, même commit `e31d70b` : présentation mobile des vues en panneau pleine largeur (glisser pour fermer, sans croix), barre d'outils sur une ligne masquée sur la fiche, suppression du défilement horizontal. Détail : [APP-FLOW.md §4](APP-FLOW.md#4-desktop--mobile).
