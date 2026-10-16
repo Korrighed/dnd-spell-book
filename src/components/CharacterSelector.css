@@ -1,0 +1,89 @@
+.character-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--coffee);
+}
+
+.character-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.character-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 16em;
+  padding: 8px 16px;
+  border: 1px solid var(--coffee);
+  border-radius: 999px;
+  background: var(--paper-light);
+  color: #000;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.character-chip:hover {
+  border-color: var(--caput-mortuum);
+}
+
+.character-chip[aria-pressed='true'] {
+  border-color: var(--caput-mortuum);
+  background: var(--caput-mortuum);
+  color: var(--tan);
+}
+
+/* Nom long : coupe par des points de suspension, nom complet en title. */
+.character-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.character-chip--add {
+  width: 44px;
+  padding: 0;
+  color: var(--coffee);
+}
+
+.character-active,
+.character-confirm,
+.character-name-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.character-active-name {
+  min-width: 0;
+  font-size: 1.2em;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.character-name-form input {
+  flex: 1 1 14em;
+  min-width: 0;
+}
+
+.character-name-error,
+.character-hint {
+  flex-basis: 100%;
+}
+
+.character-name-error {
+  color: var(--caput-mortuum);
+}
+
+.character-hint {
+  font-size: 0.9em;
+}

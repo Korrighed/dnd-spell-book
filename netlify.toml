@@ -1,0 +1,8 @@
+# Publication Netlify : build Vite standard, site statique dans dist/.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Meme version majeure que l'environnement de dev (Node 22).
+  NODE_VERSION = "22"

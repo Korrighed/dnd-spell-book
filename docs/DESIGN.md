@@ -14,6 +14,16 @@ Remplace la palette précédente (trop proche de l'identité visuelle D&D offici
 
 Rôles à confirmer une fois le wireframe posé — notés ici seulement à titre indicatif pour ne pas partir d'une page blanche.
 
+Nuances dérivées, en variables dans `src/index.css` (détail et contrastes : [DESIGN-BRIEF.md](DESIGN-BRIEF.md#couleurs)) :
+
+| Variable | Hex | Dérivée de | Rôle |
+|---|---|---|---|
+| `--paper` | `#F3EAD9` | Tan éclairci | Papier des vues |
+| `--paper-light` | `#FFFAF0` | Tan très éclairci | Fond des champs et cartes |
+| `--ink` | `#2E2019` | Coffee assombri | Texte courant sur la texture |
+| `--slate-gray-text` | `#576B82` | Slate Gray assombri | **Texte** hors profil : Slate Gray pur fait 3,82:1 sur `--paper`, sous le seuil AA de 4,5:1 (décision D-01, 2026-10-15) |
+| `--caput-mortuum-hover` | `#7A2A2F` | Caput Mortuum éclairci | Survol des boutons pleins |
+
 ## Typographie
 
 Choix final : deux polices sombres, cohérentes avec un rendu de grimoire, tout en restant lisibles.
@@ -23,14 +33,14 @@ Choix final : deux polices sombres, cohérentes avec un rendu de grimoire, tout 
 | Titres | [OLDWEST](https://www.fontspace.com/oldwest-font-f167915) | `.otf` | Freeware, libre d'usage personnel et commercial | `src/assets/fonts/Oldwest-4nDgB.otf` |
 | Texte courant | [TimeBurner](https://www.fontspace.com/timeburner-font-f15111) | `.ttf` (Regular + Bold) | Freeware, libre d'usage commercial, sans attribution requise | `src/assets/fonts/Timeburner-xJB8.ttf`, `TimeburnerBold-peGR.ttf` |
 
-Fichiers présents dans le repo. Reste à déclarer les `@font-face` dans `src/index.css`.
+Fichiers présents dans le repo, `@font-face` déclarés dans `src/index.css`.
 
 ## Icônes
 
 Librairie unique pour toutes les icônes d'interface : [Lucide](https://lucide.dev/icons/). Choix fait pour garder un style cohérent (traits fins, uniformes) sur tous les boutons/icônes (filtre, langue, ajout au grimoire perso, etc.).
 
-- Package React : `lucide-react` (pas encore installé au 2026-08-28).
-- Icônes en SVG, couleur héritée du CSS (`currentColor`) — facile à aligner sur la palette ci-dessus.
+- Pas de package : fichiers SVG copiés tels quels depuis `lucide-static` 1.57.0 (licence ISC, `https://unpkg.com/lucide-static@1.57.0/icons/<nom>.svg`) dans `public/icons/`, sans retouche.
+- Affichage en masque CSS (`mask: var(--icon)`, `background-color: currentColor`) : la couleur vient du CSS, donc de la palette ci-dessus.
 - Ne pas mélanger avec d'autres sets d'icônes (Font Awesome, Heroicons, etc.) pour rester cohérent.
 
 ## Prompt logo SVG

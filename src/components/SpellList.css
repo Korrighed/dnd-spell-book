@@ -6,6 +6,7 @@
 
 .spell-list li {
   border-bottom: 1px solid var(--border);
+  color: var(--text-h);
 }
 
 .spell-list li button {
@@ -21,13 +22,29 @@
   cursor: pointer;
 }
 
+/* Nom long (ex. « Agrandissement/Rapetissement ») : passe a la ligne au lieu
+   de deborder de la page, surtout en mobile (colonne de 250px). */
+.spell-list .name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .spell-list .level {
-  color: var(--text);
   width: 60px;
   flex-shrink: 0;
 }
 
-.spell-list .name-en {
+.spell-list .extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
   color: var(--text);
-  font-style: italic;
+  font-size: 0.85em;
+}
+
+.spell-list .extra > span:not(:last-child)::after {
+  content: '·';
+  margin-left: 8px;
+  color: var(--border);
 }

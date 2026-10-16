@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Captures des tests navigateur (Playwright MCP)
+.playwright-mcp/
+
+# Netlify CLI (lien local vers le site)
+.netlify

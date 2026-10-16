@@ -1,75 +1,158 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* Polices de la charte (docs/DESIGN.md) : OLDWEST pour les titres, TimeBurner
+   pour le texte courant. font-display: swap : le texte reste lisible (police
+   systeme) le temps du chargement. */
+@font-face {
+  font-family: 'Oldwest';
+  src: url('./assets/fonts/Oldwest-4nDgB.otf') format('opentype');
+  font-display: swap;
+}
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+@font-face {
+  font-family: 'TimeBurner';
+  src: url('./assets/fonts/Timeburner-xJB8.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TimeBurner';
+  src: url('./assets/fonts/TimeburnerBold-peGR.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Palette de la charte (docs/DESIGN.md). Un seul theme : la page est un
+   vieux papier (texture public/assets/fond.webp, ton moyen), le texte pose
+   dessus est a l'encre foncee. Les roles (--bg, --text...) sont redefinis
+   localement sur les vues (App.css, .bookmark-view) : les composants qui s'y
+   affichent s'adaptent sans toucher a leur propre CSS. */
+:root {
+  --space-cadet: #25344f;
+  --slate-gray: #617891;
+  --tan: #d5b893;
+  --coffee: #6f4d38;
+  --caput-mortuum: #632024;
+  /* Papier clair des vues, derive du Tan (meme teinte, plus lumineux) : le
+     Tan pur donnerait un contraste trop faible au texte grise hors profil. */
+  --paper: #f3ead9;
+  /* Nuances derivees (docs/DESIGN.md, docs/DESIGN-BRIEF.md) :
+     --slate-gray-text : Slate Gray assombri pour le TEXTE hors profil
+     (4.59:1 sur --paper ; Slate Gray pur : 3.82:1, sous le seuil AA).
+     --caput-mortuum-hover : survol des boutons Caput Mortuum pleins.
+     --paper-light : fond des champs et des cartes dans les vues. */
+  --slate-gray-text: #576b82;
+  --caput-mortuum-hover: #7a2a2f;
+  --paper-light: #fffaf0;
+
+  /* Encre sur la texture : Coffee assombri. Le Coffee pur (~3.4:1 sur ce
+     papier de ton moyen) manquerait de contraste pour du petit texte. */
+  --ink: #2e2019;
+
+  --bg: var(--tan);
+  --text: var(--ink);
+  --text-h: #000;
+  --border: rgba(111, 77, 56, 0.35);
+  --accent: var(--caput-mortuum);
+  --accent-bg: rgba(99, 32, 36, 0.12);
+  --accent-border: var(--caput-mortuum);
+  --focus: var(--caput-mortuum);
+
+  --sans: 'TimeBurner', system-ui, sans-serif;
+  --heading: 'Oldwest', Georgia, serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 15.05px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
-  background: var(--bg);
+  /* Texture en WebP pour le web (1920px, qualite 50, ~85 Ko) a partir de
+     public/assets/fond.jpg (6.5 Mo, non charge). Couleur Tan en attendant
+     l'image. fixed : le papier ne defile pas avec la page. */
+  background: var(--bg) url('/assets/fond.webp') center / cover fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    font-size: 13.6px;
   }
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 95vw;
+  max-width: 1600px;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
+/* Grand ecran (21" a 100 %, ~1920px CSS de large). Toutes les dimensions en
+   px sont calees sur le 15" (~1536px CSS) : sans ca, tout parait 1.25x plus
+   petit et il faut zoomer le navigateur a 125 %. Un seul facteur d'echelle
+   plutot qu'un second jeu de valeurs : une seule source de verite, le livre
+   3D et les pages HTML grandissent ensemble (pas de desynchronisation, voir
+   docs/SPRINT-3-RENDU-3D-RESPONSIVE.md). Largeur et hauteur divisees par le
+   facteur : zoom les multiplie ensuite, la largeur INTERNE reste celle du 15"
+   (95vw de 1536 = 1459px). Seuil entre les deux largeurs CSS (1536 / 1920). */
+@media (min-width: 1728px) {
+  #root {
+    --screen-scale: 1.25;
+    zoom: var(--screen-scale);
+    width: calc(95vw / var(--screen-scale));
+    max-width: none;
+    min-height: calc(100svh / var(--screen-scale));
+  }
 }
 
+/* Hauteur FIXE de la page en desktop, quand l'ecran est assez haut pour tout
+   contenir (header + barre + livre + footer + debordement du canvas, ~731px
+   sans l'espace de centrage de #grimoire::after, voir App.css). #root ne grandit plus avec son contenu :
+   l'espace de centrage se comprime au lieu de provoquer un scroll. Plus bas
+   que le seuil, le contenu ne tient de toute facon pas : hauteur minimale et
+   scroll normal, comme avant. Seuil x1.25 (914px) sous le zoom grand ecran,
+   les media queries lisant la hauteur d'ecran reelle. */
+@media (min-width: 900px) and (max-width: 1727px) and (min-height: 731px) {
+  #root {
+    height: 100svh;
+  }
+}
+
+@media (min-width: 1728px) and (min-height: 914px) {
+  #root {
+    height: calc(100svh / var(--screen-scale));
+  }
+}
+
+/* Header et footer s'etendent sur 100vw, qui compte la barre de
+   defilement verticale : la page depassait de quelques px et defilait de
+   gauche a droite. clip sur html (et pas seulement body) : coupe aussi sur
+   Safari iOS, qui ignore l'overflow de body. */
+html {
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  /* Le canvas du livre est etire (scaleX, BookCanvas.tsx) et deborde de #root : sans
+     ca, barre de defilement horizontale. clip plutot que hidden : coupe au
+     bord du viewport sans creer de conteneur de defilement. */
+  overflow-x: clip;
+}
+
+/* OLDWEST n'a que des capitales, et pas de capitales accentuees : sans
+   uppercase, un « e » accentue tombe sur la police de secours en minuscule
+   (« LéGALES »). En uppercase, la police de secours fournit au moins un
+   « É » majuscule, coherent avec le reste du titre. */
 h1,
-h2 {
+h2,
+h3 {
   font-family: var(--heading);
   font-weight: 500;
+  text-transform: uppercase;
   color: var(--text-h);
 }
 
@@ -95,17 +178,40 @@ p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
+/* Focus clavier toujours visible, en Caput Mortuum (--focus). */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Texte normal en --text-h : le gris est reserve aux sorts hors profil. */
+.spell-detail {
   color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* Sorts hors du profil du lanceur : Slate Gray assombri (--slate-gray-text, contraste AA). Les enfants heritent.
+   Selecteurs prefixes : .spell-list li (0,1,1) est charge apres ce fichier et gagnerait a egalite. */
+.spell-list li.out-of-profile,
+.personal-spellbook li.out-of-profile,
+.spell-detail.out-of-profile,
+.spell-detail.out-of-profile h2 {
+  color: var(--slate-gray-text);
+}
+
+.out-of-profile-label {
+  font-size: 0.85em;
+}
+
+/* Texte reserve aux lecteurs d'ecran : present dans l'arbre
+   d'accessibilite, invisible a l'ecran. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
