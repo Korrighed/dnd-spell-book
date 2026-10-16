@@ -14,6 +14,7 @@ interface SpellLevelFilterProps {
 export function SpellLevelFilter({ value, onChange }: SpellLevelFilterProps) {
   return (
     <select
+      aria-label={t('Niveau de sort', 'Spell level')}
       value={value ?? 'all'}
       onChange={(event) => {
         const raw = event.target.value

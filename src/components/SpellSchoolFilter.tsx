@@ -10,6 +10,7 @@ interface SpellSchoolFilterProps {
 export function SpellSchoolFilter({ schools, value, onChange }: SpellSchoolFilterProps) {
   return (
     <select
+      aria-label={t('Ecole de magie', 'School of magic')}
       value={value ?? 'all'}
       onChange={(event) => {
         const raw = event.target.value

@@ -5,11 +5,18 @@
    heritage - inutile de le poser sur .book-page, il faut viser directement
    les elements qui ont deja un color explicite).
    :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
-   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md). */
+   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md).
+   .spellbook-toggle n'est plus vise ici : il a ses propres couleurs de charte
+   (App.css), le noir le rendait illisible sur son fond Caput Mortuum. */
 #grimoire .spell-detail:not(.out-of-profile),
-#grimoire .spell-detail:not(.out-of-profile) h2,
-#grimoire .spell-detail .spellbook-toggle {
+#grimoire .spell-detail:not(.out-of-profile) h2 {
   color: #000;
+}
+
+/* Nom de sort long en OLDWEST (capitales larges) : passe a la ligne au lieu
+   de deborder de la page, surtout en mobile. */
+#grimoire .spell-detail h2 {
+  overflow-wrap: anywhere;
 }
 
 /* Position et taille de la page de gauche (fiche de sort), independantes de
@@ -17,7 +24,9 @@
    jamais la liste, ni le canvas du livre (voir BookSpread.css). */
 .spell-detail-panel {
   position: absolute;
-  top: var(--spell-detail-top, 90px);
+  /* 90 - 50.22 : suit le retrait de la bande vide au-dessus du canvas
+     (BookSpread.css, --book-frame-top). */
+  top: var(--spell-detail-top, 39.78px);
   left: var(--spell-detail-left, 90px);
   /* Largeur derivee des marges pour eviter tout chevauchement avec
      .spell-list-panel : left + width + width(liste) + right doit toujours
@@ -29,13 +38,4 @@
      au-dela, quelle que soit sa longueur. */
   /* max-width: var(--spell-detail-max-width, 635px); */
   /* max-height: var(--spell-detail-max-height, 580px); */
-}
-
-/* Meme convention que .dev-frames .book-spread-canvas (BookSpread.css) :
-   visible seulement avec le bouton "Afficher les cadres dev". Bleu pour
-   la distinguer du canvas (rouge) et de la liste (verte). Montre la boite
-   REELLE (avec le plafond max-*), meme sans contenu pour la remplir. */
-.dev-frames .spell-detail-panel {
-  outline: 2px dashed dodgerblue;
-  outline-offset: -2px;
 }

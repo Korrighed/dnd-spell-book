@@ -2,6 +2,7 @@ import type { SpellDetail as SpellDetailData, SpellTexts } from '../api/spellDet
 import type { LanguageMode } from '../types/language'
 import { Bilingual, BilingualParagraphs } from './Bilingual'
 import { LanguageToggle } from './LanguageToggle'
+import { SpellbookToggle } from './SpellbookToggle'
 import { BROWSER_LANGUAGE, t } from '../utils/browserLanguage'
 
 interface SpellDetailProps {
@@ -52,16 +53,10 @@ export function SpellDetail({
 
       <LanguageToggle value={language} onChange={onLanguageChange} />
 
-      <button
-        type="button"
-        className="spellbook-toggle"
-        aria-pressed={inSpellbook}
-        onClick={() => onToggleSpellbook(mechanics.index)}
-      >
-        {inSpellbook
-          ? t('Retirer du grimoire personnel', 'Remove from personal spellbook')
-          : t('Ajouter au grimoire personnel', 'Add to personal spellbook')}
-      </button>
+      <SpellbookToggle
+        inSpellbook={inSpellbook}
+        onToggle={() => onToggleSpellbook(mechanics.index)}
+      />
 
       <h2>
         <Bilingual mode={language} fr={fr.name} en={en.name} />
