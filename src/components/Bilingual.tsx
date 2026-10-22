@@ -7,13 +7,7 @@ interface BilingualProps {
 }
 
 export function Bilingual({ mode, fr, en }: BilingualProps) {
-  if (mode === 'fr') return <>{fr}</>
-  if (mode === 'en') return <>{en}</>
-  return (
-    <>
-      {fr} <em>{en}</em>
-    </>
-  )
+  return <>{mode === 'fr' ? fr : en}</>
 }
 
 interface BilingualParagraphsProps {
@@ -23,13 +17,12 @@ interface BilingualParagraphsProps {
 }
 
 export function BilingualParagraphs({ mode, fr, en }: BilingualParagraphsProps) {
+  const paragraphs = mode === 'fr' ? fr : en
   return (
     <>
-      {mode !== 'en' && fr.map((paragraph, i) => <p key={`fr-${i}`}>{paragraph}</p>)}
-      {mode !== 'fr' &&
-        en.map((paragraph, i) => (
-          <p key={`en-${i}`}>{mode === 'both' ? <em>{paragraph}</em> : paragraph}</p>
-        ))}
+      {paragraphs.map((paragraph, i) => (
+        <p key={`${mode}-${i}`}>{paragraph}</p>
+      ))}
     </>
   )
 }

@@ -46,8 +46,8 @@ La fiche affiche le texte `higher_level` tel quel, sans sélecteur. Spécificati
 
 ### Langue
 
-- Toggle par page de sort : FR, EN, ou FR+EN simultané.
-- Le mode FR+EN nécessite un layout empilé ou côte-à-côte pour chaque champ texte concerné (`name`, `desc`, `higher_level`, etc.).
+- Toggle par page de sort : FR ou EN (le mode FR+EN simultané a été retiré le 2026-10-22, jugé inutile).
+- Seules la portée et la taille de la zone d'effet affichent deux unités, celle de la langue choisie en premier : `18 m (60 ft)` en FR, `60 ft (18 m)` en EN. Ratios de jeu : 1 ft = 0,3 m, 1 mile = 1,5 km.
 
 ## Ordre de développement
 

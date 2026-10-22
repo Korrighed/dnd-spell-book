@@ -9,7 +9,7 @@ Grimoire des sorts de Donjons & Dragons (5e édition, SRD 2014) présenté comme
 - Livre 3D (Three.js) avec animation de tournage de page. Page gauche : fiche du sort. Page droite : liste paginée des 319 sorts.
 - Recherche par nom en français ou en anglais, tolérante aux accents et aux pluriels.
 - Filtres par niveau, classe et école de magie. Tri alphabétique ou par niveau.
-- Fiche de sort en français, en anglais, ou les deux côte à côte.
+- Fiche de sort en français ou en anglais. Portée et zone d'effet dans les deux unités (mètres et pieds).
 - Personnages : plusieurs personnages, chacun avec ses classes (multiclasse, sous-classes, niveau total ≤ 20). Les sorts hors de portée du personnage sont grisés ou masqués.
 - Grimoire personnel par personnage, enregistré dans le navigateur.
 - Interface en français ou en anglais selon la langue du navigateur.

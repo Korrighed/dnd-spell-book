@@ -8,7 +8,6 @@ interface LanguageToggleProps {
 const OPTIONS: { mode: LanguageMode; label: string }[] = [
   { mode: 'fr', label: 'FR' },
   { mode: 'en', label: 'EN' },
-  { mode: 'both', label: 'FR+EN' },
 ]
 
 export function LanguageToggle({ value, onChange }: LanguageToggleProps) {

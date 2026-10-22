@@ -352,7 +352,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Toggle FR / EN / FR+EN : boutons segmentes sur le papier. */
+/* Toggle FR / EN : boutons segmentes sur le papier. */
 #grimoire .language-toggle {
   display: inline-flex;
   margin-bottom: 8px;

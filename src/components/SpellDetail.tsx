@@ -5,6 +5,7 @@ import { Bilingual, BilingualParagraphs } from './Bilingual'
 import { LanguageToggle } from './LanguageToggle'
 import { SpellbookToggle } from './SpellbookToggle'
 import { BROWSER_LANGUAGE, t } from '../utils/browserLanguage'
+import { formatFeet, formatRange } from '../utils/distance'
 
 interface SpellDetailProps {
   detail: SpellDetailData
@@ -73,84 +74,91 @@ export function SpellDetail({
         <Bilingual mode={language} fr={fr.name} en={en.name} />
       </h2>
 
-      <p>
-        {t('Niveau', 'Level')} {mechanics.level} — <Bilingual mode={language} fr={fr.school} en={en.school} />
-      </p>
-      <p>
-        {t('Classes :', 'Classes:')}{' '}
-        <Bilingual mode={language} fr={fr.classes.join(', ')} en={en.classes.join(', ')} />
-      </p>
-      <p>
-        {t("Temps d'incantation :", 'Casting time:')}{' '}
-        <Bilingual mode={language} fr={fr.castingTime} en={en.castingTime} />
-      </p>
-      <p>
-        {t('Portée :', 'Range:')} <Bilingual mode={language} fr={fr.range} en={en.range} />
-      </p>
-      <p>
-        {t('Durée :', 'Duration:')} <Bilingual mode={language} fr={fr.duration} en={en.duration} />
-      </p>
-      <p>
-        {t('Composants :', 'Components:')} {mechanics.components.join(', ')}
-        {en.material && (
-          <>
-            {' '}
-            — <Bilingual mode={language} fr={fr.material ?? en.material} en={en.material} />
-          </>
-        )}
-      </p>
-      <p>
-        {t('Rituel :', 'Ritual:')} {mechanics.ritual ? t('Oui', 'Yes') : t('Non', 'No')} —{' '}
-        {t('Concentration :', 'Concentration:')}{' '}
-        {mechanics.concentration ? t('Oui', 'Yes') : t('Non', 'No')}
-      </p>
-
-      {mechanics.damage && (
-        <p>
-          {t('Dégâts :', 'Damage:')} {damageValue}
-          {mechanics.damage.typeIndex && (
+      {/* En-tete en liste : une information par puce. Rituel et Concentration
+          n'apparaissent que si le sort les a. */}
+      <ul className="spell-facts">
+        <li>
+          <strong>{t('Niveau :', 'Level:')}</strong> {mechanics.level} —{' '}
+          <Bilingual mode={language} fr={fr.school} en={en.school} />
+        </li>
+        <li>
+          <strong>{t('Classes :', 'Classes:')}</strong>{' '}
+          <Bilingual mode={language} fr={fr.classes.join(', ')} en={en.classes.join(', ')} />
+        </li>
+        <li>
+          <strong>{t("Temps d'incantation :", 'Casting time:')}</strong>{' '}
+          <Bilingual mode={language} fr={fr.castingTime} en={en.castingTime} />
+        </li>
+        <li>
+          <strong>{t('Portée :', 'Range:')}</strong> {formatRange(en.range, fr.range, language)}
+        </li>
+        <li>
+          <strong>{t('Durée :', 'Duration:')}</strong>{' '}
+          <Bilingual mode={language} fr={fr.duration} en={en.duration} />
+        </li>
+        <li>
+          <strong>{t('Composants :', 'Components:')}</strong> {mechanics.components.join(', ')}
+          {en.material && (
             <>
               {' '}
-              <Bilingual
-                mode={language}
-                fr={damageTypeLabel(fr, mechanics.damage.typeIndex)}
-                en={damageTypeLabel(en, mechanics.damage.typeIndex)}
-              />
+              — <Bilingual mode={language} fr={fr.material ?? en.material} en={en.material} />
             </>
           )}
-        </p>
-      )}
-
-      {en.dcType && (
-        <p>
-          {t('Jet de sauvegarde :', 'Saving throw:')}{' '}
-          <Bilingual mode={language} fr={fr.dcType ?? en.dcType} en={en.dcType} />
-          {mechanics.dcSuccess && (
-            <>
-              {' '}(
-              <Bilingual
-                mode={language}
-                fr={DC_SUCCESS_FR[mechanics.dcSuccess] ?? mechanics.dcSuccess}
-                en={mechanics.dcSuccess}
-              />
-              )
-            </>
-          )}
-        </p>
-      )}
-
-      {mechanics.areaOfEffect && (
-        <p>
-          {t("Zone d'effet :", 'Area of effect:')}{' '}
-          <Bilingual
-            mode={language}
-            fr={(AOE_LABELS_FR[mechanics.areaOfEffect.type] ?? mechanics.areaOfEffect.type).toLowerCase()}
-            en={mechanics.areaOfEffect.type}
-          />
-          , {mechanics.areaOfEffect.sizeMeters} m (
-          {mechanics.areaOfEffect.sizeFeet} ft)
-        </p>
-      )}
+        </li>
+        {mechanics.ritual && (
+          <li>
+            <strong>{t('Rituel', 'Ritual')}</strong>
+          </li>
+        )}
+        {mechanics.concentration && (
+          <li>
+            <strong>{t('Concentration', 'Concentration')}</strong>
+          </li>
+        )}
+        {mechanics.damage && (
+          <li>
+            <strong>{t('Dégâts :', 'Damage:')}</strong> {damageValue}
+            {mechanics.damage.typeIndex && (
+              <>
+                {' '}
+                <Bilingual
+                  mode={language}
+                  fr={damageTypeLabel(fr, mechanics.damage.typeIndex)}
+                  en={damageTypeLabel(en, mechanics.damage.typeIndex)}
+                />
+              </>
+            )}
+          </li>
+        )}
+        {en.dcType && (
+          <li>
+            <strong>{t('Jet de sauvegarde :', 'Saving throw:')}</strong>{' '}
+            <Bilingual mode={language} fr={fr.dcType ?? en.dcType} en={en.dcType} />
+            {mechanics.dcSuccess && (
+              <>
+                {' '}(
+                <Bilingual
+                  mode={language}
+                  fr={DC_SUCCESS_FR[mechanics.dcSuccess] ?? mechanics.dcSuccess}
+                  en={mechanics.dcSuccess}
+                />
+                )
+              </>
+            )}
+          </li>
+        )}
+        {mechanics.areaOfEffect && (
+          <li>
+            <strong>{t("Zone d'effet :", 'Area of effect:')}</strong>{' '}
+            <Bilingual
+              mode={language}
+              fr={(AOE_LABELS_FR[mechanics.areaOfEffect.type] ?? mechanics.areaOfEffect.type).toLowerCase()}
+              en={mechanics.areaOfEffect.type}
+            />
+            , {formatFeet(mechanics.areaOfEffect.sizeFeet, language)}
+          </li>
+        )}
+      </ul>
 
       <div>
         <h3>{t('Description', 'Description')}</h3>

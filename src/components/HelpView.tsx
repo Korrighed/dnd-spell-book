@@ -88,8 +88,8 @@ export function HelpView({ open, onClose }: HelpViewProps) {
                 <MaskIcon file="circle-arrow-right.svg" />
               </span>
               <span>{t(
-                'Touchez un sort pour lire sa fiche (français, anglais ou les deux). Les flèches tournent les pages ; sur téléphone, glissez pour passer de la liste à la fiche.',
-                'Tap a spell to read its sheet (French, English or both). The arrows turn the pages; on a phone, swipe between the list and the sheet.',
+                'Touchez un sort pour lire sa fiche (en français ou en anglais). Les flèches tournent les pages ; sur téléphone, glissez pour passer de la liste à la fiche.',
+                'Tap a spell to read its sheet (in French or English). The arrows turn the pages; on a phone, swipe between the list and the sheet.',
               )}</span>
             </li>
           </ul>

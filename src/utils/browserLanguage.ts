@@ -1,6 +1,6 @@
 /**
  * Langue d'affichage deduite du navigateur, pour tout le texte d'interface :
- * une seule langue s'affiche, jamais un melange FR/EN. Le toggle FR/EN/FR+EN
+ * une seule langue s'affiche, jamais un melange FR/EN. Le toggle FR/EN
  * explicite reste propre au contenu de SpellDetail.
  */
 export type BrowserLanguage = 'fr' | 'en'
@@ -20,7 +20,7 @@ export const BROWSER_LANGUAGE: BrowserLanguage = detectBrowserLanguage()
 /**
  * Texte d'interface dans la langue du navigateur : une seule langue affichee,
  * jamais les deux. Le contenu des fiches de sort garde son propre toggle
- * FR/EN/FR+EN (SpellDetail).
+ * FR/EN (SpellDetail).
  */
 export function t(fr: string, en: string): string {
   return BROWSER_LANGUAGE === 'fr' ? fr : en

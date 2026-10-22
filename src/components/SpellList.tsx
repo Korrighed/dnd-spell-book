@@ -17,7 +17,7 @@ interface SpellListProps {
 
 // Une seule langue par ligne, deduite du navigateur (BROWSER_LANGUAGE, partagee
 // avec le tri) : contrairement a SpellDetail, la liste n'a pas de toggle FR/EN
-// explicite, donc pas de FR+EN mixe possible ici.
+// explicite.
 export function SpellList({ spells, onSelect, isAccessible, summaries }: SpellListProps) {
   return (
     <ul className="spell-list">
