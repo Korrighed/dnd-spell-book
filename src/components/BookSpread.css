@@ -85,3 +85,21 @@
   position: relative;
   height: 100%;
 }
+
+/* Pages HTML masquees tant que le livre 3D n'est pas charge (BookSpread,
+   data-book-ready), puis fondu court. visibility : rien de focusable ni de
+   lu par les lecteurs d'ecran pendant l'attente. */
+.book-spread-pages {
+  transition: opacity 300ms ease-out;
+}
+
+.book-spread[data-book-ready='false'] .book-spread-pages {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-spread-pages {
+    transition: none;
+  }
+}

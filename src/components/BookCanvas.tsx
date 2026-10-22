@@ -65,9 +65,11 @@ interface SpellbookModelProps {
       (le modele est charge en Suspense, donc pas disponible au premier rendu
       de BookCanvas). */
   onActionsReady: (actions: AnimationActions) => void
+  /** Modele charge et monte dans la scene (voir BookCanvasProps.onReady). */
+  onReady?: () => void
 }
 
-function SpellbookModel({ rotationDeg, onActionsReady }: SpellbookModelProps) {
+function SpellbookModel({ rotationDeg, onActionsReady, onReady }: SpellbookModelProps) {
   const groupRef = useRef<THREE.Group>(null)
   const { scene, animations } = useGLTF(MODEL_PATH)
   const { actions } = useAnimations(animations, groupRef)
@@ -80,6 +82,11 @@ function SpellbookModel({ rotationDeg, onActionsReady }: SpellbookModelProps) {
   useEffect(() => {
     onActionsReady(actions)
   }, [actions, onActionsReady])
+
+  // Monte seulement une fois useGLTF resolu (Suspense) : le livre est la.
+  useEffect(() => {
+    onReady?.()
+  }, [onReady])
 
   return (
     <group ref={groupRef} rotation={rotation}>
@@ -119,7 +126,15 @@ function RefitOnChange({ trigger }: { trigger: unknown }) {
  * Expose playNext/playPrevious (ref imperatif) : le pilotage des clips
  * d'animation (tournage de page) est dans le hook usePageTurnAnimation.
  */
-export const BookCanvas = forwardRef<BookCanvasHandle>(function BookCanvas(_props, ref) {
+interface BookCanvasProps {
+  /** Appele une fois le modele 3D charge : BookSpread n'affiche les pages qu'a ce moment. */
+  onReady?: () => void
+}
+
+export const BookCanvas = forwardRef<BookCanvasHandle, BookCanvasProps>(function BookCanvas(
+  { onReady },
+  ref,
+) {
   const isMobile = useMediaQuery(MOBILE_QUERY)
   const pageTurn = usePageTurnAnimation()
 
@@ -161,7 +176,11 @@ export const BookCanvas = forwardRef<BookCanvasHandle>(function BookCanvas(_prop
         <Suspense fallback={null}>
           <Bounds fit clip observe margin={margin}>
             <RefitOnChange trigger={refitTrigger} />
-            <SpellbookModel rotationDeg={{ x, y, z }} onActionsReady={pageTurn.setActions} />
+            <SpellbookModel
+              rotationDeg={{ x, y, z }}
+              onActionsReady={pageTurn.setActions}
+              onReady={onReady}
+            />
           </Bounds>
         </Suspense>
       </Canvas>

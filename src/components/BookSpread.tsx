@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { BookCanvas, type BookCanvasHandle } from './BookCanvas'
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery'
 import { useHorizontalSwipe, type BookPage } from '../hooks/useHorizontalSwipe'
@@ -53,6 +53,11 @@ export function BookSpread({
   // page) : `right` est recalcule des le `onPageChange`, avant meme la fin
   // de l'animation.
   const [isTurning, setIsTurning] = useState(false)
+  // Pages invisibles tant que le modele 3D n'est pas charge : le texte et la
+  // liste HTML arrivaient avant le livre et flottaient sur le fond. Les
+  // donnees (App) se chargent pendant ce temps.
+  const [bookReady, setBookReady] = useState(false)
+  const handleBookReady = useCallback(() => setBookReady(true), [])
 
   // Joue l'animation de tournage de page a CHAQUE changement de `page`, peu
   // importe la source (boutons Precedent/Suivant, zones de clic sur les
@@ -84,10 +89,15 @@ export function BookSpread({
   const canGoPrevious = page > 0
 
   return (
-    <div className="book-spread" data-mobile-page={mobilePage} {...swipeHandlers}>
+    <div
+      className="book-spread"
+      data-mobile-page={mobilePage}
+      data-book-ready={bookReady}
+      {...swipeHandlers}
+    >
       <div className="book-spread-strip" ref={stripRef}>
         <div className="book-spread-canvas">
-          <BookCanvas ref={bookCanvasRef} />
+          <BookCanvas ref={bookCanvasRef} onReady={handleBookReady} />
         </div>
         <div className="book-spread-pages">
           {/* inert : la page hors ecran n'est ni lue par les lecteurs d'ecran
