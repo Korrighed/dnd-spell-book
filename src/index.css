@@ -1,6 +1,4 @@
-/* Polices de la charte (docs/DESIGN.md) : OLDWEST pour les titres, TimeBurner
-   pour le texte courant. font-display: swap : le texte reste lisible (police
-   systeme) le temps du chargement. */
+/* Polices de la charte (docs/DESIGN.md). */
 @font-face {
   font-family: 'Oldwest';
   src: url('./assets/fonts/Oldwest-4nDgB.otf') format('opentype');
@@ -21,31 +19,20 @@
   font-display: swap;
 }
 
-/* Palette de la charte (docs/DESIGN.md). Un seul theme : la page est un
-   vieux papier (texture public/assets/fond.webp, ton moyen), le texte pose
-   dessus est a l'encre foncee. Les roles (--bg, --text...) sont redefinis
-   localement sur les vues (App.css, .bookmark-view) : les composants qui s'y
-   affichent s'adaptent sans toucher a leur propre CSS. */
+/* Palette de la charte (docs/DESIGN.md). Les roles (--bg, --text...) sont
+   redefinis sur les vues (App.css, .bookmark-view). */
 :root {
   --space-cadet: #25344f;
   --slate-gray: #617891;
   --tan: #d5b893;
   --coffee: #6f4d38;
   --caput-mortuum: #632024;
-  /* Papier clair des vues, derive du Tan (meme teinte, plus lumineux) : le
-     Tan pur donnerait un contraste trop faible au texte grise hors profil. */
   --paper: #f3ead9;
-  /* Nuances derivees (docs/DESIGN.md) :
-     --slate-gray-text : Slate Gray assombri pour le TEXTE hors profil
-     (4.59:1 sur --paper ; Slate Gray pur : 3.82:1, sous le seuil AA).
-     --caput-mortuum-hover : survol des boutons Caput Mortuum pleins.
-     --paper-light : fond des champs et des cartes dans les vues. */
+  /* Texte hors profil : Slate Gray assombri, contraste AA sur --paper. */
   --slate-gray-text: #576b82;
   --caput-mortuum-hover: #7a2a2f;
   --paper-light: #fffaf0;
-
-  /* Encre sur la texture : Coffee assombri. Le Coffee pur (~3.4:1 sur ce
-     papier de ton moyen) manquerait de contraste pour du petit texte. */
+  /* Encre sur la texture du fond. */
   --ink: #2e2019;
 
   --bg: var(--tan);
@@ -65,9 +52,6 @@
   letter-spacing: 0.18px;
   color-scheme: light;
   color: var(--text);
-  /* Texture en WebP pour le web (1920px, qualite 50, ~85 Ko) a partir de
-     public/assets/fond.jpg (6.5 Mo, non charge). Couleur Tan en attendant
-     l'image. fixed : le papier ne defile pas avec la page. */
   background: var(--bg) url('/assets/fond.webp') center / cover fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -90,17 +74,10 @@
   box-sizing: border-box;
 }
 
-/* Mise a l'echelle desktop. Toutes les dimensions en px sont calees sur le
-   15" (1536px CSS de large) : sans facteur, la fiche et la liste se
-   chevauchent sous ~1490px (portables 1280-1440px), et la liste glisse a
-   droite du livre au-dela de 1536px (elle est ancree a droite, le canvas a
-   gauche). Un seul facteur d'echelle plutot qu'un second jeu de valeurs :
-   une seule source de verite, le livre 3D et les pages HTML changent de
-   taille ensemble (pas de desynchronisation, voir BookSpread.css).
-   --screen-scale = largeur d'ecran / 1536, pose sur <html> par
-   utils/screenScale.ts (aucune unite CSS ne divise une largeur par une
-   autre). Largeur INTERNE fixe, celle du 15" (95vw de 1536 = 1459.2px) :
-   zoom la ramene a 95vw a l'ecran, quelle que soit la largeur. */
+/* Mise a l'echelle : toutes les cotes en px sont calees sur un ecran de
+   reference (1536px en desktop, 390px en mobile). #root garde la largeur
+   interne de cet ecran (95 %) et le zoom l'adapte a l'ecran reel.
+   --screen-scale est pose par utils/screenScale.ts. */
 @media (min-width: 900px) {
   #root {
     zoom: var(--screen-scale, 1);
@@ -110,12 +87,6 @@
   }
 }
 
-/* Meme principe en mobile, cale sur un telephone de 390px : le canvas 3D et
-   les pages sont en px fixes, la bande qui glisse d'une page a l'autre en %
-   de l'ecran (BookSpread.mobile.css). Sans facteur, les deux se decalaient
-   des que la largeur differait de 390px. Largeur interne fixe (95vw de 390
-   = 370.5px). --screen-scale = largeur / 390, plafonne a 1.3 sur tablette
-   (utils/screenScale.ts) : au-dela, colonne centree. */
 @media (max-width: 899px) {
   #root {
     zoom: var(--screen-scale, 1);
@@ -125,40 +96,26 @@
   }
 }
 
-/* Hauteur FIXE de la page en desktop, quand l'ecran est assez haut pour tout
-   contenir (header + barre + livre + footer + debordement du canvas, ~731px
-   internes sans l'espace de centrage de #grimoire::after, voir App.css).
-   #root ne grandit plus avec son contenu : l'espace de centrage se comprime
-   au lieu de provoquer un scroll. Plus bas que le seuil, le contenu ne tient
-   de toute facon pas : hauteur minimale et scroll normal. Hauteur interne =
-   hauteur d'ecran / (largeur / 1536) >= 731 <=> largeur / hauteur <=
-   1536 / 731 : un simple rapport d'aspect. */
+/* Desktop : hauteur fixe quand tout tient a l'ecran (~731px internes),
+   soit un rapport largeur / hauteur <= 1536 / 731. Sinon, scroll normal. */
 @media (min-width: 900px) and (max-aspect-ratio: 1536 / 731) {
   #root {
     height: calc(100svh / var(--screen-scale, 1));
   }
 }
 
-/* Header et footer s'etendent sur 100vw, qui compte la barre de
-   defilement verticale : la page depassait de quelques px et defilait de
-   gauche a droite. clip sur html (et pas seulement body) : coupe aussi sur
-   Safari iOS, qui ignore l'overflow de body. */
+/* clip sur html aussi : Safari iOS ignore l'overflow de body. */
 html {
   overflow-x: clip;
 }
 
 body {
   margin: 0;
-  /* Le canvas du livre est etire (scaleX, BookCanvas.tsx) et deborde de #root : sans
-     ca, barre de defilement horizontale. clip plutot que hidden : coupe au
-     bord du viewport sans creer de conteneur de defilement. */
+  /* Le canvas etire du livre deborde de #root. */
   overflow-x: clip;
 }
 
-/* OLDWEST n'a que des capitales, et pas de capitales accentuees : sans
-   uppercase, un « e » accentue tombe sur la police de secours en minuscule
-   (« LéGALES »). En uppercase, la police de secours fournit au moins un
-   « É » majuscule, coherent avec le reste du titre. */
+/* uppercase obligatoire : OLDWEST n'a ni minuscules ni capitales accentuees. */
 h1,
 h2,
 h3 {
@@ -190,19 +147,17 @@ p {
   margin: 0;
 }
 
-/* Focus clavier toujours visible, en Caput Mortuum (--focus). */
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
-/* Texte normal en --text-h : le gris est reserve aux sorts hors profil. */
 .spell-detail {
   color: var(--text-h);
 }
 
-/* Sorts hors du profil du lanceur : Slate Gray assombri (--slate-gray-text, contraste AA). Les enfants heritent.
-   Selecteurs prefixes : .spell-list li (0,1,1) est charge apres ce fichier et gagnerait a egalite. */
+/* Sorts hors profil. Selecteurs prefixes : .spell-list li est charge apres
+   ce fichier et gagnerait a specificite egale. */
 .spell-list li.out-of-profile,
 .personal-spellbook li.out-of-profile,
 .spell-detail.out-of-profile,
@@ -214,8 +169,7 @@ p {
   font-size: 0.85em;
 }
 
-/* Texte reserve aux lecteurs d'ecran : present dans l'arbre
-   d'accessibilite, invisible a l'ecran. */
+/* Texte reserve aux lecteurs d'ecran. */
 .visually-hidden {
   position: absolute;
   width: 1px;

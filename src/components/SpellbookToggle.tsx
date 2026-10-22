@@ -6,7 +6,6 @@ interface SpellbookToggleProps {
   onToggle: () => void
 }
 
-/** Duree d'appui avant d'afficher l'infobulle (ms). */
 const LONG_PRESS_MS = 450
 
 function iconStyle(file: string): CSSProperties {
@@ -14,17 +13,13 @@ function iconStyle(file: string): CSSProperties {
 }
 
 /**
- * Bouton compact d'ajout/retrait au grimoire personnel : icone Lucide book-plus /
- * book-minus. Le libelle complet est dans aria-label (lecteur d'ecran) et title
- * (survol souris), et s'affiche en infobulle sur un appui maintenu (tactile,
- * ou clic maintenu). Un appui maintenu sert a lire l'infobulle : le relacher
- * ne declenche pas l'action. Clavier (Entree / Espace) : action directe.
- * Clavier : jamais bloque par un appui long precedent (event.detail === 0).
+ * Ajout / retrait au grimoire personnel. Un appui maintenu affiche le libelle
+ * en infobulle, sans declencher l'action.
  */
 export function SpellbookToggle({ inSpellbook, onToggle }: SpellbookToggleProps) {
   const [tooltipVisible, setTooltipVisible] = useState(false)
   const timerRef = useRef<number | null>(null)
-  // Vrai si l'appui en cours a affiche l'infobulle : le clic qui suit est ignore.
+  // L'appui a affiche l'infobulle : le clic qui suit est ignore.
   const suppressClickRef = useRef(false)
   const tooltipId = useId()
   const label = inSpellbook
@@ -38,7 +33,6 @@ export function SpellbookToggle({ inSpellbook, onToggle }: SpellbookToggleProps)
     }
   }
 
-  // Timer encore en attente au demontage (changement de sort pendant l'appui).
   useEffect(
     () => () => {
       if (timerRef.current !== null) window.clearTimeout(timerRef.current)
@@ -71,13 +65,9 @@ export function SpellbookToggle({ inSpellbook, onToggle }: SpellbookToggleProps)
         onPointerUp={endPress}
         onPointerLeave={endPress}
         onPointerCancel={endPress}
-        // Appui long en mobile : pas de menu contextuel par-dessus l'infobulle.
         onContextMenu={(event) => event.preventDefault()}
         onClick={(event) => {
-          // detail === 0 : clic synthetique du clavier (Entree / Espace).
-          // Le clavier agit toujours : un appui long relache HORS du bouton
-          // ne produit pas de click et laissait suppressClickRef a true, ce
-          // qui avalait le prochain Entree.
+          // detail === 0 : clavier (Entree / Espace), qui agit toujours.
           const fromKeyboard = event.detail === 0
           const suppress = suppressClickRef.current && !fromKeyboard
           suppressClickRef.current = false

@@ -1,14 +1,6 @@
-/* ===== Header et footer du site =====
-   Hauteurs comptees au plus juste : la page entiere (header + barre + livre
-   + footer) doit tenir sans scroll a window.innerHeight = 785 (voir
-   BookSpread.css). */
-/* Bandeaux en papier bleu (public/assets/fondfooterheader.webp, WebP 1920px
-   qualite 50, ~72 Ko, depuis le .jpg de 1.6 Mo). Voile Space Cadet par-dessus :
-   le bleu moyen de la texture seul donne un contraste trop faible au texte
-   (~2.5:1 pour le Caput Mortuum) ; voile + texte papier clair = lisible.
-   Pleine largeur d'ecran : #root ne fait que 95vw, la marge negative etend
-   le bandeau jusqu'aux bords. 50vw divise par --screen-scale : sous le zoom
-   desktop de #root (index.css), la demi-largeur d'ecran en px internes. */
+/* ===== Header et footer ===== */
+/* Pleine largeur d'ecran malgre #root a 95vw. 50vw divise par --screen-scale :
+   demi-largeur d'ecran en px internes sous le zoom de #root (index.css). */
 .site-header,
 .site-footer {
   margin-inline: calc(50% - 50vw / var(--screen-scale, 1));
@@ -33,8 +25,6 @@
   line-height: 1.2;
 }
 
-/* margin-top: auto : colle en bas de #root (flex colonne, min-height 100svh)
-   quand le contenu est plus court que l'ecran. */
 .site-footer {
   margin-top: auto;
   padding-block: 8px;
@@ -43,20 +33,17 @@
 }
 
 .site-footer a {
-  /* --paper et non Tan : Tan sur le bandeau voile ne fait que ~3.9:1
-     (mesure sur la texture), --paper ~6.1:1. Souligne : c'est un lien. */
   color: var(--paper);
   text-decoration: underline;
 }
 
-/* Titre a gauche, bouton d'aide a droite. */
 .site-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-/* Bouton « ? » : icone Tan sans fond, discret sur le bandeau. */
+/* Bouton « ? » d'aide. */
 .help-button {
   display: grid;
   place-items: center;
@@ -87,40 +74,26 @@
   mask: var(--icon) center / contain no-repeat;
 }
 
-/* Focus sur les bandeaux bleus : le Caput Mortuum y serait invisible. */
 .site-header,
 .site-footer {
   --focus: var(--tan);
 }
 
-/* Desktop : marges verticales reduites pour que la page tienne sans scroll
-   (canvas du livre cale sur window.innerHeight = 785, voir BookSpread.css).
-   Mobile : voir App.mobile.css. */
 #grimoire {
-  /* Bord haut du livre DESSINE, mesure depuis le haut de .book-zone : le
-     canvas laisse une marge autour du modele 3D (margin, BookCanvas.tsx). A
-     reajuster ici si le cadrage du livre change. Mobile : App.mobile.css. */
+  /* Bord haut du livre dessine dans le canvas, depuis le haut de .book-zone.
+     Depend du cadrage (margin, BookCanvas.tsx). Mobile : App.mobile.css. */
   --book-edge-top: 22px;
-  /* Le canvas du livre deborde sous .book-zone (cadre de 631px dans une zone
-     de 578px) : bas du livre DESSINE a ~29px sous le bas de la zone. Mesure
-     a 1536x785, meme dependance au cadrage que --book-edge-top. */
+  /* Debordement du livre dessine sous .book-zone. */
   --book-overflow-bottom: 29px;
   --bookmark-height: 40px;
 
-  /* Livre centre verticalement entre header et footer : #grimoire prend
-     toute la hauteur libre (#root est en flex colonne) et centre son
-     contenu. Voir .book-zone pour la compensation qui centre le livre
-     DESSINE et non les boites CSS. */
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: center;
-  /* Autorise #grimoire a etre plus petit que son contenu (hauteur fixe de
-     #root, index.css) : c'est ce qui laisse #grimoire::after se comprimer. */
   min-height: 0;
   padding: 8px 24px;
   text-align: left;
-  /* Ancre de la vue d'aide (.help-view), qui couvre tout #grimoire. */
   position: relative;
 }
 
@@ -132,12 +105,8 @@
 }
 
 /* ===== Barre d'outils : bouton « hors profil », recherche, marque-pages =====
-   Une seule ligne au-dessus de la page de droite, calee a droite sur la
-   colonne de la liste (--spell-list-right). Marge basse negative de
-   --book-edge-top : .book-zone remonte sous la barre, si bien que le bas de
-   la barre (le bas des onglets, element le plus haut de la ligne) tombe
-   pile sur le bord haut du livre DESSINE dans le canvas. Au-dessus du canvas
-   (z-index), sinon le canvas capterait les clics. Mobile : App.mobile.css. */
+   Alignee sur la colonne de la liste. La marge basse negative colle le bas
+   des onglets au bord haut du livre dessine. z-index : au-dessus du canvas. */
 #grimoire .toolbar {
   position: relative;
   z-index: 11;
@@ -148,10 +117,7 @@
   margin: 0 var(--spell-list-right) calc(-1 * var(--book-edge-top)) auto;
 }
 
-/* Marque-pages : onglets Caput Mortuum (charte : « accent / element
-   interactif, marque-page ») colles au livre, comme sur la maquette
-   (docs/Maquettes/SpellBookV2.png). Coins hauts arrondis, bas droit : un
-   onglet qui sort du livre. */
+/* Marque-pages : onglets colles au livre. */
 #grimoire .bookmarks {
   display: flex;
   gap: 6px;
@@ -168,7 +134,6 @@
   background: var(--caput-mortuum);
   color: var(--tan);
   cursor: pointer;
-  /* Ligne Tan en bas : la tranche de l'onglet. Pleine quand la vue est ouverte. */
   box-shadow: inset 0 -2px 0 rgba(213, 184, 147, 0.35);
   transition:
     background-color 150ms ease,
@@ -184,8 +149,7 @@
   box-shadow: inset 0 -3px 0 var(--tan);
 }
 
-/* Icone SVG en masque : prend currentColor (Tan). L'URL vient du composant
-   (--icon), le fichier reste dans public/icons. */
+/* Icones SVG en masque CSS : couleur = currentColor, URL dans --icon. */
 #grimoire .bookmark-icon,
 #grimoire .spell-search-icon,
 #grimoire .bookmark-view-close-icon {
@@ -196,21 +160,19 @@
   mask: var(--icon) center / contain no-repeat;
 }
 
-/* Case « hors profil » puis champ de recherche, sur la meme ligne, a gauche
-   des marque-pages. */
 #grimoire .search-bar {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-/* Champ en pilule papier, icone loupe-livre a droite (maquette). */
 #grimoire .spell-search {
   position: relative;
   width: 300px;
   color: var(--coffee);
 }
 
+/* 16px minimum : en dessous, iOS zoome la page au focus. */
 #grimoire .spell-search input[type='search'] {
   display: block;
   box-sizing: border-box;
@@ -238,9 +200,7 @@
   pointer-events: none;
 }
 
-/* Bouton « sorts hors profil » : rond papier comme la recherche, icone
-   Lucide eye / eye-off. Actif (masquage) : Caput Mortuum, comme un onglet
-   ouvert. */
+/* Bouton œil « masquer les sorts hors profil ». */
 #grimoire .profile-toggle {
   display: grid;
   place-items: center;
@@ -275,10 +235,8 @@
   mask: var(--icon) center / contain no-repeat;
 }
 
-/* ===== Fiche de sort (page de gauche, papier) ===== */
-/* Bouton grimoire personnel (SpellbookToggle) : icone Lucide book-plus /
-   book-minus, sur la meme ligne que le toggle FR / EN. Plein (Caput
-   Mortuum) pour ajouter, en contour quand le sort est deja dans le grimoire. */
+/* ===== Fiche de sort ===== */
+/* Bouton d'ajout / retrait du grimoire personnel (SpellbookToggle). */
 #grimoire .spellbook-toggle-wrap {
   position: relative;
   display: inline-block;
@@ -327,14 +285,10 @@
   mask: var(--icon) center / contain no-repeat;
 }
 
-/* Infobulle de l'appui maintenu, SOUS le bouton : au-dessus, elle sortait de la
-   page (.book-page, overflow-y: auto) et etait coupee, le bouton etant sur la
-   premiere ligne de la fiche. */
+/* Infobulle de l'appui maintenu, centree sous le bouton. */
 #grimoire .spellbook-tooltip {
   position: absolute;
   top: calc(100% + 6px);
-  /* Centree sous le bouton : ancree a gauche, elle debordait de la page
-     a droite en mobile (bouton au milieu d'une page de 250px). */
   left: 50%;
   translate: -50% 0;
   z-index: 3;
@@ -344,7 +298,6 @@
   background: var(--paper);
   color: #000;
   font-size: 0.85em;
-  /* Retour a la ligne au-dela de 200px (libelle anglais plus long). */
   width: max-content;
   max-width: 200px;
   white-space: normal;
@@ -352,7 +305,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Toggle FR / EN : boutons segmentes sur le papier. */
+/* Toggle FR / EN. */
 #grimoire .language-toggle {
   display: inline-flex;
   margin-bottom: 8px;
@@ -385,38 +338,27 @@
   color: var(--paper);
 }
 
-/* Focus sur le papier : Caput Mortuum, le Tan y serait invisible. */
 #grimoire .book-page,
 #grimoire .bookmark-view {
   --focus: var(--caput-mortuum);
 }
 
-/* Parent commun du livre et des vues de marque-page : sert d'ancre a
-   .bookmark-view (position: absolute). */
+/* Ancre des vues de marque-page (position: absolute). */
 #grimoire .book-zone {
   position: relative;
 }
 
-/* Centrage du livre DESSINE : cet espace sous le livre rattrape le
-   debordement du canvas (--book-overflow-bottom) et equilibre la barre
-   d'outils qui occupe --bookmark-height au-dessus du livre. Sans lui, c'est
-   l'ensemble barre + livre qui serait centre, livre trop bas.
-   flex-shrink 1 : quand la hauteur manque (ecran bas), l'espace se comprime
-   au lieu de provoquer un scroll ; le livre est alors un peu plus bas que le
-   centre exact. */
+/* Espace sous le livre : centre le livre dessine (et non barre + livre).
+   Se comprime sur un ecran bas au lieu de provoquer un scroll. */
 #grimoire::after {
   content: '';
   flex: 0 1 calc(var(--book-overflow-bottom) + var(--bookmark-height));
-  /* Jamais moins que le debordement du canvas : le livre ne mord pas sur le
-     footer. */
   min-height: var(--book-overflow-bottom);
 }
 
 /* ===== Vues des marque-pages =====
    Feuille de papier posee sur le livre. Jamais de `display` ici : il
-   ecraserait l'attribut `hidden` qui ferme la vue. Les roles de couleur sont
-   redefinis pour le papier : CharacterSelector, le formulaire de profil et
-   le grimoire s'adaptent sans toucher a leur propre CSS. */
+   ecraserait l'attribut `hidden` qui ferme la vue. */
 #grimoire .bookmark-view {
   --bg: var(--paper-light);
   --text: var(--coffee);
@@ -425,7 +367,6 @@
   --accent-bg: rgba(99, 32, 36, 0.12);
 
   position: absolute;
-  /* Part du bord du livre : les onglets semblent tenir la feuille. */
   inset: var(--book-edge-top) 0 0;
   z-index: 10;
   box-sizing: border-box;
@@ -442,23 +383,19 @@
 
 #grimoire .bookmark-view h2 {
   margin: 0 0 16px;
-  /* Place pour la croix (40px) en haut a droite. */
+  /* Place pour la croix. */
   padding-right: 56px;
   color: var(--caput-mortuum);
   font-size: 30px;
   overflow-wrap: break-word;
 }
 
-/* Le titre recoit le focus a l'ouverture (BookmarkView) pour que le lecteur
-   d'ecran l'annonce. Ce n'est pas un element interactif : pas d'anneau.
-   La vue elle-meme (tabIndex -1) non plus. */
+/* Focus programmatique a l'ouverture (BookmarkView) : pas d'anneau. */
 #grimoire .bookmark-view h2:focus,
 #grimoire .bookmark-view:focus {
   outline: none;
 }
 
-/* Croix encadree, meme aspect que les onglets (carre Caput Mortuum, icone
-   Tan en masque, public/icons/x.svg). */
 #grimoire .bookmark-view-close {
   position: absolute;
   top: 20px;
@@ -480,9 +417,7 @@
   background: var(--caput-mortuum-hover);
 }
 
-/* Champs des vues (filtres, personnage) : une seule source de style.
-   16px minimum : en dessous, iOS zoome la page au focus. 44px : cible
-   tactile. Bordure Coffee : >= 3:1 sur le papier (WCAG 1.4.11). */
+/* Champs des vues. 16px minimum (zoom iOS au focus), 44px de cible tactile. */
 #grimoire .bookmark-view select,
 #grimoire .bookmark-view input[type='text'] {
   box-sizing: border-box;
@@ -502,14 +437,12 @@
   cursor: not-allowed;
 }
 
-/* Tri de la liste (FiltersView) : groupe de boutons radio encadre. */
 #grimoire .filters-sort {
   border: 1px solid var(--coffee);
   border-radius: 6px;
 }
 
-/* Boutons texte des vues. Principal : plein Caput Mortuum (comme les
-   onglets). Secondaire : contour Coffee. */
+/* Boutons texte des vues : secondaire par defaut, --primary plein. */
 #grimoire .view-button {
   box-sizing: border-box;
   min-height: 44px;
@@ -537,7 +470,7 @@
   background: var(--caput-mortuum-hover);
 }
 
-/* Bouton icone seule (renommer, supprimer) : 44x44, icone Coffee en masque. */
+/* Bouton icone seule (renommer, supprimer). */
 #grimoire .icon-button {
   display: inline-grid;
   place-items: center;
@@ -566,8 +499,6 @@
   cursor: not-allowed;
 }
 
-/* Dans la vue, le grimoire n'a plus besoin de son cadre teinte : la feuille
-   de papier sert deja de cadre. */
 #grimoire .bookmark-view .personal-spellbook {
   margin: 0;
   padding: 0;
@@ -575,8 +506,7 @@
   background: none;
 }
 
-/* Titres de section des vues (Personnages, Classes). La vue d'aide a sa
-   propre regle plus bas (meme specificite, declaree apres : elle gagne). */
+/* Titres de section des vues. La vue d'aide a sa propre regle plus bas. */
 #grimoire .bookmark-view h3 {
   margin: 0 0 8px;
   color: var(--caput-mortuum);
@@ -593,10 +523,7 @@
 }
 
 /* ===== Vue d'aide =====
-   Une vraie vue, pas une feuille posee sur le livre : elle couvre tout
-   #grimoire (barre d'outils et livre), sans cadre ni ombre, sur le meme
-   papier que les autres vues. Deux colonnes (guide | mentions legales) :
-   tout tient sans scroll en desktop. */
+   Couvre tout #grimoire, barre d'outils comprise. Deux colonnes en desktop. */
 #grimoire .help-view {
   inset: 0;
   z-index: 12;
@@ -618,8 +545,6 @@
   margin-top: 4px;
 }
 
-/* Guide : chaque fonction precedee de son icone, celle qu'on voit dans
-   l'interface (MaskIcon). Colonne d'icones de largeur fixe : textes alignes. */
 #grimoire .help-list {
   list-style: none;
   padding: 0;
@@ -639,7 +564,7 @@
   color: var(--caput-mortuum);
 }
 
-/* Icone SVG en masque CSS (composant MaskIcon) : couleur = currentColor. */
+/* Icone SVG en masque CSS (composant MaskIcon). */
 .mask-icon {
   display: block;
   width: 22px;

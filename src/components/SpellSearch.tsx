@@ -19,7 +19,6 @@ export function SpellSearch({ value, onChange }: SpellSearchProps) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
-      {/* Decorative, meme technique de masque que les marque-pages (App.css). */}
       <span
         className="spell-search-icon"
         aria-hidden="true"

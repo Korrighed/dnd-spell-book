@@ -80,10 +80,7 @@ interface RawClassDetail {
   spellcasting?: unknown
 }
 
-/**
- * Garde les classes qui lancent des sorts. L'API n'expose le bloc `spellcasting`
- * que sur ces classes : barbare, guerrier, moine et roublard en sont depourvus.
- */
+/** Classes qui lancent des sorts : celles qui ont un bloc `spellcasting`. */
 export async function fetchSpellcastingClassIndices(
   classIndices: string[],
 ): Promise<Set<string>> {

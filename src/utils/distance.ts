@@ -1,10 +1,6 @@
 import type { LanguageMode } from '../types/language'
 
-/**
- * Ratios de jeu, pas de conversion physique : 1 case = 5 ft = 1,50 m (x 0,3)
- * et 1 mile = 1,5 km. Ce sont ceux de l'API dans ses traductions fr-FR
- * (60 feet -> 18 metres, 1 mile -> 1,5 km, 500 miles -> 750 km).
- */
+/** Ratios de jeu de l'API, pas de conversion physique. */
 const METERS_PER_FOOT = 0.3
 const KM_PER_MILE = 1.5
 
@@ -27,10 +23,8 @@ export function formatFeet(feet: number, mode: LanguageMode): string {
 }
 
 /**
- * Portee d'un sort dans les deux unites, lue sur le texte anglais de l'API
- * (« 60 feet », « 1 mile », « 500 miles ») : seul format chiffre qu'elle
- * renvoie. Portee sans distance (Self, Touch, Sight, Special, Unlimited) :
- * texte de l'API dans la langue choisie, tel quel.
+ * Portee dans les deux unites, lue sur le texte anglais (« 60 feet », « 1 mile »).
+ * Sans distance (Self, Touch...) : texte de l'API dans la langue choisie.
  */
 export function formatRange(rangeEn: string, rangeFr: string, mode: LanguageMode): string {
   const feet = /^(\d+) feet$/.exec(rangeEn)

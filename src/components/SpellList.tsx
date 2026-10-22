@@ -11,13 +11,10 @@ interface SpellListProps {
   onSelect: (index: string) => void
   /** `null` : aucun profil, rien n'est grise. */
   isAccessible: SpellAccessCheck | null
-  /** Degats / JS / portee / forme, remplis en tache de fond. Absent tant que non charge. */
+  /** Degats, JS, portee, forme : remplis en arriere-plan. */
   summaries: Record<string, SpellSummary>
 }
 
-// Une seule langue par ligne, deduite du navigateur (BROWSER_LANGUAGE, partagee
-// avec le tri) : contrairement a SpellDetail, la liste n'a pas de toggle FR/EN
-// explicite.
 export function SpellList({ spells, onSelect, isAccessible, summaries }: SpellListProps) {
   return (
     <ul className="spell-list">
@@ -33,9 +30,7 @@ export function SpellList({ spells, onSelect, isAccessible, summaries }: SpellLi
               <span className="level">
                 {LANGUAGE === 'fr' ? 'Niv.' : 'Lvl'} {spell.level}
               </span>
-              {/* Espace de largeur nulle apres « / » : un nom double
-                  (Agrandissement/Rapetissement) se coupe sur la barre plutot
-                  qu'en plein mot dans une colonne etroite. */}
+              {/* Espace de largeur nulle apres « / » : coupure sur la barre. */}
               <span className="name">{name.replaceAll('/', '/​')}</span>
               <span className="extra">
                 {summary ? (

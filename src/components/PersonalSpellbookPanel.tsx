@@ -27,8 +27,7 @@ export function PersonalSpellbookPanel({
 
   return (
     <section className="personal-spellbook">
-      {/* La liste complete arrive de facon asynchrone : tant qu'elle est vide,
-          aucun nom ne peut etre resolu, donc on n'affiche pas les sorts. */}
+      {/* Noms resolus sur la liste complete : rien tant qu'elle n'est pas chargee. */}
       {spells.length > 0 && allSpells.length > 0 && (
         <ul>
           {spells.map((personal) => {
@@ -40,7 +39,6 @@ export function PersonalSpellbookPanel({
             const className = [isSelected && 'selected', outOfProfile && 'out-of-profile']
               .filter(Boolean)
               .join(' ')
-            // Une seule langue, comme SpellList.
             const name = spell ? spellDisplayName(spell) : personal.index
 
             return (

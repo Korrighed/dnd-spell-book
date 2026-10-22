@@ -1,9 +1,4 @@
-/**
- * Niveau de personnage auquel la sous-classe (specialisation) se debloque,
- * par classe. Regle fixe du PHB, aucun endpoint de l'API ne l'expose
- * directement. Verifie le 2026-09-21 via `/classes/{class}/levels/{1,2,3}` :
- * le niveau varie selon la classe, ce n'est pas uniformement 3.
- */
+/** Niveau de deblocage de la sous-classe, par classe (regle du PHB, absente de l'API). */
 export const SUBCLASS_UNLOCK_LEVEL: Record<string, number> = {
   cleric: 1,
   sorcerer: 1,

@@ -11,12 +11,7 @@ export function Bilingual({ mode, fr, en }: BilingualProps) {
   return <>{mode === 'fr' ? fr : en}</>
 }
 
-/**
- * Emphase Markdown des descriptions de l'API (memes marqueurs en en et fr-FR) :
- * `***Nom de l'option.***` en tete des variantes d'un sort (24 sorts, ex.
- * Amelioration de caracteristique) et `*terme*` (2 sorts). Rendus en gras et
- * en italique, sans les asterisques. Elements React, jamais de HTML injecte.
- */
+/** Emphase Markdown des descriptions de l'API : `***gras***` et `*italique*`. */
 const EMPHASIS = /(\*\*\*[^*]+\*\*\*|\*[^*\s][^*]*\*)/
 
 function renderEmphasis(text: string): ReactNode[] {

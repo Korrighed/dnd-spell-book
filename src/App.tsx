@@ -45,10 +45,8 @@ function App() {
   // Vue ouverte par un marque-page, une seule a la fois, `null` : aucune.
   const [openView, setOpenView] = useState<BookmarkId | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<string | null>(null)
-  // Mobile : page du livre visible (liste par defaut). Bascule automatique
-  // vers la fiche a la PREMIERE selection d'un sort seulement, pour montrer
-  // que l'autre page existe. Flag en memoire (pas sessionStorage) : un
-  // rechargement de la page rearme la bascule.
+  // Mobile : page visible (liste par defaut). Bascule auto vers la fiche a la
+  // premiere selection d'un sort seulement.
   const [mobilePage, setMobilePage] = useState<BookPage>('right')
   const hasAutoSwitchedPage = useRef(false)
   const handleSelectSpell = (index: string) => {
@@ -122,20 +120,13 @@ function App() {
     isAccessible,
   ])
 
-  // Tri applique APRES le filtrage, sur une copie : un tri ne retire aucun sort.
   const sortedSpells = useMemo(
     () => sortSpells(filteredSpells, sortMode),
     [filteredSpells, sortMode],
   )
 
-  // Remise a la premiere page a chaque changement du CONTENU ou de l'ORDRE de
-  // la liste (recherche, filtres, profil, tri) : une page 5 peut ne plus
-  // exister apres coup. Cle calculee sur la liste TRIEE : un tri change
-  // l'ordre des index sans changer leur ensemble. Comparaison sur les index,
-  // pas sur la reference du tableau : filteredSpells est recalcule des
-  // qu'isAccessible change, meme quand la liste affichee est identique.
-  // Comparaison pendant le rendu plutot que dans un effet (regle
-  // react-hooks/set-state-in-effect).
+  // Retour en page 1 quand le contenu ou l'ordre de la liste change. Cle sur
+  // les index, pas sur la reference du tableau (recalcule sans changer).
   const filteredKey = useMemo(
     () => sortedSpells.map((spell) => spell.index).join(','),
     [sortedSpells],
@@ -147,8 +138,7 @@ function App() {
   }
 
   const totalPages = Math.max(1, Math.ceil(sortedSpells.length / spellsPerPage))
-  // Le changement de gabarit d'ecran (spellsPerPage) peut rendre la page
-  // courante hors bornes (ex. page 4 avec 15/page, resize vers 8/page).
+  // Page hors bornes apres un changement de spellsPerPage (desktop / mobile).
   if (page >= totalPages) {
     setPage(totalPages - 1)
   }
@@ -163,8 +153,6 @@ function App() {
     !isAccessible(selectedSpell.mechanics.index, selectedSpell.mechanics.level)
 
   // Fermeture d'une vue : le focus revient au marque-page qui l'a ouverte.
-  // Fait ici et pas dans la vue : passer d'une vue a une autre ne doit pas
-  // rendre le focus a l'ancien marque-page.
   const closeView = useCallback(() => {
     if (openView === null) return
     setOpenView(null)
@@ -177,9 +165,7 @@ function App() {
     else setOpenView(id)
   }
 
-  // Choix d'un sort depuis le grimoire (D3) : la fiche serait cachee sous la
-  // vue, donc on la ferme. En mobile, bascule sur la fiche a chaque fois (pas
-  // seulement a la premiere selection) : l'utilisateur vient de demander ce sort.
+  // Choix d'un sort depuis le grimoire : ferme la vue et, en mobile, affiche la fiche.
   const handleSelectFromSpellbook = (index: string) => {
     handleSelectSpell(index)
     closeView()
@@ -192,8 +178,6 @@ function App() {
     <>
       <header className="site-header">
         <h1>{t('Grimoire de sorts', 'Spell grimoire')}</h1>
-        {/* Ouvre l'aide (guide + mentions legales). Meme mecanique que les
-            marque-pages : id pour le retour du focus, aria-controls. */}
         <button
           id={bookmarkButtonId('help')}
           type="button"
@@ -214,25 +198,13 @@ function App() {
         </button>
       </header>
 
-      {/* data-mobile-page : page du livre visible en mobile, lue par le CSS
-          (App.mobile.css) pour masquer les marque-pages pendant la lecture
-          d'une fiche. Sans effet en desktop. */}
+      {/* data-mobile-page : lu par App.mobile.css (barre masquee sur la fiche). */}
       <main id="grimoire" data-mobile-page={mobilePage}>
-        {/* Barre d'outils au-dessus du livre, alignee sur la colonne de la
-            liste et collee au bord haut du livre (App.css, .toolbar,
-            --book-edge-top). Ordre visuel de gauche a droite : case « hors
-            profil », recherche, marque-pages. Hors de BookSpread : dans la
-            page de droite, la recherche serait demontee pendant le tournage
-            de page et inerte en mobile. Hors du wrapper inert : les
-            marque-pages restent cliquables quand une vue est ouverte. */}
-        {/* Bouton oeil et recherche inertes pendant toute vue ouverte : ils agiraient sur la liste cachee sous la vue. */}
-        {/* inert pendant l'aide : la vue d'aide couvre aussi la barre. */}
+        {/* Barre d'outils hors de BookSpread : la recherche resterait sinon
+            demontee pendant le tournage de page. Recherche inerte sous une
+            vue ouverte, barre entiere inerte sous l'aide. */}
         <div className="toolbar" inert={openView === 'help'}>
           <div className="search-bar" inert={openView !== null}>
-            {/* Acces rapide : se bascule souvent pendant une recherche, donc
-                hors des vues. Icone oeil (Lucide) : oeil ouvert = sorts hors
-                profil visibles (grises), oeil barre = masques. Nom et
-                infobulle fixes, l'etat passe par aria-pressed. */}
             {profiles.length > 0 && (
               <button
                 type="button"
@@ -262,12 +234,9 @@ function App() {
           <Bookmarks openView={openView} onToggle={handleToggleView} />
         </div>
 
-        {/* Parent commun du livre et des vues (App.css). Les vues sont soeurs de
-            BookSpread, jamais dedans : dans une page elles seraient demontees
-            pendant le tournage, inertes en mobile, et prises par le swipe. */}
+        {/* Vues soeurs de BookSpread, jamais dedans (tournage de page, swipe). */}
         <div className="book-zone">
 
-          {/* Livre inerte sous une vue ouverte : ni focus clavier, ni swipe. */}
           <div inert={openView !== null}>
             <BookSpread
               mobilePage={mobilePage}
@@ -279,7 +248,6 @@ function App() {
                 <>
                   {selectedIndex && detailLoading && <p>{t('Chargement du détail du sort…', 'Loading spell details…')}</p>}
                   {detailError && <p role="alert">{detailError}</p>}
-                  {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
                   {selectedSpell && (
                     <SpellDetail
                       detail={selectedSpell}
@@ -294,16 +262,12 @@ function App() {
               }
               right={
                 <>
-                  {/* Sur la page elle-meme, pas dans une vue fermee : sinon un
-                      echec de l'API laisse une page vide sans explication. */}
                   {loading && (
                     <p>
                       {t('Chargement des sorts…', 'Loading spells…')}
                     </p>
                   )}
                   {error && <p role="alert">{error}</p>}
-                  {/* Sur la page et pas dans la vue Filtres (D4) : ces etats
-                      vident la liste, ils doivent rester visibles vue fermee. */}
                   {classSpellsLoading && (
                     <p>
                       {t('Chargement des sorts de la classe…', 'Loading class spells…')}
@@ -336,7 +300,6 @@ function App() {
             />
           </div>
 
-          {/* Toujours montees, masquees par `hidden` : voir BookmarkView. */}
           <FiltersView
             open={openView === 'filters'}
             onClose={closeView}
@@ -383,13 +346,9 @@ function App() {
           />
         </div>
 
-        {/* Aide (guide + mentions legales) : couvre tout #grimoire, barre
-            d'outils comprise, pas seulement le livre (App.css, .help-view). */}
         <HelpView open={openView === 'help'} onClose={closeView} />
       </main>
 
-      {/* Mention de la source (docs/SPECS.md, « Disclaimer ») : l'API est un
-          projet communautaire, pas une source officielle. */}
       <footer className="site-footer">
         <p>
           {t('Données : SRD 5e via ', 'Data: 5e SRD via ')}

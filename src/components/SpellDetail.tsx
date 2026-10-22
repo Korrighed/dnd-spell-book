@@ -12,14 +12,10 @@ interface SpellDetailProps {
   onLanguageChange: (mode: LanguageMode) => void
   inSpellbook: boolean
   onToggleSpellbook: (index: string) => void
-  /** Sort hors du profil du lanceur : fiche lisible, signalee et grisee. */
   outOfProfile: boolean
 }
 
-/**
- * Effet d'un jet de sauvegarde reussi (`dc.dc_success`) : jamais traduit par
- * l'API, meme sur le payload fr-FR.
- */
+/** `dc.dc_success`, jamais traduit par l'API. */
 const DC_SUCCESS_FR: Record<string, string> = {
   none: 'aucun effet',
   half: 'moitié des dégâts',
@@ -31,10 +27,7 @@ function firstDamageValue(atSlotLevel: Record<string, string> | null): string | 
   return Object.values(atSlotLevel)[0] ?? null
 }
 
-/**
- * L'API n'expose le nom du type de degats que dans le payload fr-FR.
- * Cote anglais on retombe donc sur l'index technique ("fire" -> "Fire").
- */
+/** Cote anglais, repli sur l'index du type de degats ("fire" -> "Fire"). */
 function damageTypeLabel(texts: SpellTexts, typeIndex: string): string {
   if (texts.damageTypeName) return texts.damageTypeName
   return typeIndex.charAt(0).toUpperCase() + typeIndex.slice(1)
@@ -50,8 +43,7 @@ export function SpellDetail({
 }: SpellDetailProps) {
   const { mechanics, en, fr } = detail
   const damageValue = mechanics.damage ? firstDamageValue(mechanics.damage.atSlotLevel) : null
-  // Toute la fiche, libelles compris, suit la bascule FR / EN (pas la langue
-  // du navigateur) : « Duration: Up to 1 hour », jamais « Durée : Up to 1 hour ».
+  // Toute la fiche, libelles compris, suit la bascule FR / EN.
   const label = (frText: string, enText: string) => (language === 'fr' ? frText : enText)
 
   return (
@@ -76,8 +68,6 @@ export function SpellDetail({
         <Bilingual mode={language} fr={fr.name} en={en.name} />
       </h2>
 
-      {/* En-tete en liste : une information par puce. Rituel et Concentration
-          n'apparaissent que si le sort les a. */}
       <ul className="spell-facts">
         <li>
           <strong>{label('Niveau :', 'Level:')}</strong> {mechanics.level} —{' '}

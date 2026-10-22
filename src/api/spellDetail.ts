@@ -14,12 +14,7 @@ interface RawDamage {
   damage_at_character_level?: Record<string, string>
 }
 
-/**
- * Forme brute d'un sort. `/spells/{index}` et `/spells/{index}?lang=fr-FR` renvoient
- * la meme structure, a une exception mesuree sur les 319 sorts du catalogue :
- * `damage` n'est renvoye que par la version fr-FR, et sous forme de tableau.
- * Aucun autre champ present en anglais ne manque en francais.
- */
+/** Sort brut de l'API. `damage` n'est renvoye que par la version fr-FR, en tableau. */
 interface RawSpell {
   index: string
   name: string
@@ -47,7 +42,7 @@ interface RawSpell {
   updated_at: string
 }
 
-/** Champs traduits. Meme forme quelle que soit la langue du payload d'origine. */
+/** Champs traduits. */
 export interface SpellTexts {
   name: string
   desc: string[]
@@ -58,12 +53,12 @@ export interface SpellTexts {
   castingTime: string
   school: string
   classes: string[]
-  /** Seul le payload fr-FR porte le nom du type de degats. `null` cote anglais. */
+  /** Fourni par le payload fr-FR seulement. */
   damageTypeName: string | null
   dcType: string | null
 }
 
-/** Champs identiques dans les deux langues. Lus une seule fois. */
+/** Champs identiques dans les deux langues. */
 export interface SpellMechanics {
   index: string
   level: number
@@ -89,14 +84,7 @@ export interface SpellDetail {
   fr: SpellTexts
 }
 
-/**
- * Conversion de jeu, pas de conversion physique : D&D compte 1 case = 5 ft = 1,50 m,
- * soit un ratio de 0,3. C'est celui qu'applique l'API dans ses traductions fr-FR
- * (30 ft -> 9 metres, 120 ft -> 36 metres). Utiliser 0,3048 afficherait 6,1 m
- * la ou le reste de la fiche francaise annonce 6 m.
- *
- * `area_of_effect.size` est en pieds dans les deux langues : il faut donc toujours convertir.
- */
+/** Ratio de jeu 0,3 (1 case = 5 ft = 1,50 m), celui de l'API, pas 0,3048. */
 function feetToMeters(feet: number): number {
   return Math.round(feet * 0.3 * 100) / 100
 }
@@ -146,12 +134,7 @@ function parseDamage(raw: RawSpell): SpellMechanics['damage'] {
   }
 }
 
-/**
- * La langue est toujours explicite, anglais compris : sans parametre `lang`, l'API
- * repond selon l'en-tete `Accept-Language`. Depuis un navigateur configure en francais,
- * l'endpoint nu renvoyait donc du francais des deux cotes, et le basculement FR/EN
- * affichait deux fois le meme texte.
- */
+/** Langue toujours explicite : sans `lang`, l'API suit l'en-tete `Accept-Language`. */
 async function fetchRaw(index: string, lang: 'en' | 'fr-FR'): Promise<RawSpell> {
   const res = await fetch(`${BASE_URL}/spells/${index}?lang=${lang}`)
 
@@ -166,7 +149,7 @@ export async function fetchSpellDetail(index: string): Promise<SpellDetail> {
   const [en, fr] = await Promise.all([fetchRaw(index, 'en'), fetchRaw(index, 'fr-FR')])
 
   return {
-    // Les degats ne sont exposes que par le payload fr-FR, d'ou cette seule lecture croisee.
+    // Degats lus sur le payload fr-FR, seul a les exposer.
     mechanics: { ...parseMechanics(en), damage: parseDamage(fr) },
     en: parseTexts(en),
     fr: parseTexts(fr),

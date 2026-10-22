@@ -7,11 +7,7 @@ interface HelpViewProps {
   onClose: () => void
 }
 
-/**
- * Aide : bref guide du grimoire + mentions legales (sorties du footer pour
- * l'alleger). Ouverte par le bouton « ? » du header. Couvre tout l'espace
- * entre header et footer, sur la texture du fond (App.css, .help-view).
- */
+/** Aide : guide du grimoire et mentions legales. */
 export function HelpView({ open, onClose }: HelpViewProps) {
   return (
     <BookmarkView
@@ -21,8 +17,6 @@ export function HelpView({ open, onClose }: HelpViewProps) {
       onClose={onClose}
       className="help-view"
     >
-      {/* Deux colonnes en desktop (guide | mentions legales) : tout tient
-          sans scroll. Une seule colonne en mobile (App.mobile.css). */}
       <div className="help-columns">
         <section>
           <h3>{t('Utiliser le grimoire', 'Using the spellbook')}</h3>
@@ -96,9 +90,7 @@ export function HelpView({ open, onClose }: HelpViewProps) {
         </section>
 
         <section>
-          {/* A completer : editeur et hebergeur du site (mentions obligatoires,
-              loi pour la confiance dans l'economie numerique). Informations a
-              fournir par l'auteur, non inventees ici. */}
+          {/* A completer : editeur et hebergeur (mentions obligatoires, LCEN). */}
           <h3>{t('Mentions légales', 'Legal notice')}</h3>
           <p>
             {t('Données des sorts : SRD 5e via ', 'Spell data: 5e SRD via ')}

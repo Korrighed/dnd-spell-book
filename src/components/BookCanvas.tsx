@@ -16,16 +16,11 @@ import { usePageTurnAnimation, type AnimationActions } from '../hooks/usePageTur
 const MODEL_PATH = '/assets/spellbook_lowpoly_v2.glb'
 
 /**
- * Cadrage du livre, fige a partir des valeurs reglees a l'oeil avec l'ancien
- * panneau Leva (retire). Deux jeux, desktop et mobile : le cadre du canvas
- * (--book-frame-*, voir BookSpread.css) change radicalement de forme entre les
- * deux, la meme marge/etirement ne convient jamais aux deux a la fois.
+ * Cadrage du livre, un jeu par format.
  * - rotation : orientation du modele, en degres.
- * - margin : marge de cadrage de Bounds (petit = livre plus gros). Changer
- *   cette valeur deplace le bord haut du livre dessine : reajuster alors
- *   --book-edge-top (App.css / App.mobile.css), qui y colle les marque-pages.
- * - scaleX / scaleY / offsetX : etirement et decalage du RENDU (CSS, voir
- *   BookSpread.css), independants de la boite du canvas.
+ * - margin : marge de cadrage de Bounds (petit = livre plus gros). La changer
+ *   impose de reajuster --book-edge-top (App.css, App.mobile.css).
+ * - scaleX / scaleY / offsetX : etirement et decalage du rendu (BookSpread.css).
  */
 interface BookFraming {
   rotation: { x: number; y: number; z: number }
@@ -51,19 +46,14 @@ const MOBILE_SETTINGS: BookFraming = {
   offsetX: 0,
 }
 
-/** Impose par le methode exposee a l'exterieur (voir BookCanvasHandle). */
+/** Tournage de page. Chaque methode retourne la duree de l'animation (s). */
 export interface BookCanvasHandle {
-  /** Joue l'animation de tournage de page vers l'avant. Retourne sa duree (s). */
   playNext: () => number
-  /** Joue l'animation de tournage de page vers l'arriere (meme clips, a l'envers). Retourne sa duree (s). */
   playPrevious: () => number
 }
 
 interface SpellbookModelProps {
   rotationDeg: { x: number; y: number; z: number }
-  /** Remonte les actions d'animation vers BookCanvas des qu'elles sont pretes
-      (le modele est charge en Suspense, donc pas disponible au premier rendu
-      de BookCanvas). */
   onActionsReady: (actions: AnimationActions) => void
 }
 
@@ -90,17 +80,12 @@ function SpellbookModel({ rotationDeg, onActionsReady }: SpellbookModelProps) {
   )
 }
 
-/** Images consecutives sans mouvement de camera pour considerer le livre deploye. */
 const SETTLED_FRAMES = 10
 
 /**
- * Signale la fin du deploiement du livre : apres le chargement du modele,
- * Bounds anime la camera vers lui (~1 s mesuree, maxDuration par defaut).
- * Son onFit part au DEBUT de l'animation, d'ou cette detection : camera
- * strictement immobile pendant SETTLED_FRAMES images. Pendant l'animation,
- * Bounds la deplace a chaque image ; a la fin, plus rien ne l'ecrit. Monte
- * dans le meme Suspense que le modele : ne compte qu'une fois le .glb charge.
- * Un seul appel, les recadrages suivants (redimensionnement) sont ignores.
+ * Signale la fin du deploiement du livre : camera immobile pendant
+ * SETTLED_FRAMES images apres l'animation de cadrage de Bounds (~1 s), dont
+ * le onFit part au debut et non a la fin. Un seul appel.
  */
 function SettledSignal({ onSettled }: { onSettled?: () => void }) {
   const last = useRef<{ position: THREE.Vector3; quaternion: THREE.Quaternion } | null>(null)
@@ -129,12 +114,7 @@ function SettledSignal({ onSettled }: { onSettled?: () => void }) {
   return null
 }
 
-/**
- * Force un recadrage de la camera quand le jeu de reglages change (passage
- * desktop/mobile). `Bounds` ne recadre sinon qu'au montage ou au
- * redimensionnement de la fenetre : une prop comme `margin` qui change seule
- * ne declenche rien.
- */
+/** Recadre au passage desktop / mobile : Bounds ignore un changement de `margin` seul. */
 function RefitOnChange({ trigger }: { trigger: unknown }) {
   const bounds = useBounds()
   useEffect(() => {
@@ -143,26 +123,15 @@ function RefitOnChange({ trigger }: { trigger: unknown }) {
   return null
 }
 
-/**
- * Fond 3D du grimoire. `Bounds` cadre automatiquement la camera sur le
- * modele (echelle/origine inconnues a l'export) : pas de position de camera
- * a deviner a la main. Consequence : ni la position ni l'echelle du modele
- * n'ont d'effet visible (Bounds recentre/rezoom dessus) - seules la rotation
- * et la marge de cadrage (`margin`, taille apparente du livre) comptent.
- *
- * Reglages dupliques desktop/mobile (DESKTOP_SETTINGS / MOBILE_SETTINGS) :
- * un seul jeu ecrasait systematiquement l'un des deux formats (constat :
- * livre ecrase en haut en mobile). Toujours le meme modele/scene/canvas,
- * seuls les nombres different selon la largeur d'ecran.
- *
- * Expose playNext/playPrevious (ref imperatif) : le pilotage des clips
- * d'animation (tournage de page) est dans le hook usePageTurnAnimation.
- */
 interface BookCanvasProps {
-  /** Appele une fois le livre deploye (modele charge, camera immobile) : BookSpread n'affiche les pages qu'a ce moment. */
+  /** Livre deploye : modele charge et camera immobile. */
   onReady?: () => void
 }
 
+/**
+ * Fond 3D du grimoire. Bounds cadre la camera sur le modele : seules la
+ * rotation et la marge de cadrage ont un effet visible.
+ */
 export const BookCanvas = forwardRef<BookCanvasHandle, BookCanvasProps>(function BookCanvas(
   { onReady },
   ref,
@@ -175,9 +144,7 @@ export const BookCanvas = forwardRef<BookCanvasHandle, BookCanvasProps>(function
     : DESKTOP_SETTINGS
   const { x, y, z } = rotation
 
-  // Tableau memoise : un nouveau tableau a chaque rendu relancerait le
-  // recadrage de la camera a chaque frappe dans la recherche (App re-rend
-  // BookCanvas). Ne change qu'au passage desktop/mobile.
+  // Memoise : un nouveau tableau a chaque rendu relancerait le recadrage.
   const refitTrigger = useMemo(
     () => [x, y, z, margin, isMobile],
     [x, y, z, margin, isMobile],

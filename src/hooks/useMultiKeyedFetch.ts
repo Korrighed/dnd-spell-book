@@ -6,21 +6,14 @@ interface UseMultiKeyedFetchResult<T> {
   error: string | null
 }
 
-/**
- * Variante de useKeyedFetch pour plusieurs clefs a la fois (dedoublonnees).
- * Necessaire pour le multiclasse : on ne peut pas appeler useKeyedFetch dans
- * une boucle dont la longueur varie (regle des hooks React).
- */
+/** useKeyedFetch pour une liste de clefs de longueur variable (multiclasse). */
 export function useMultiKeyedFetch<T>(
   keys: string[],
   fetcher: (key: string) => Promise<T>,
 ): UseMultiKeyedFetchResult<T> {
   const [cache, setCache] = useState<Record<string, T>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  // Suivi des clefs deja en vol : sans lui, la resolution d'UNE clef relance
-  // l'effet (deps `cache`/`errors`) qui relancerait un fetch pour toutes les
-  // autres clefs encore en attente, meme si leur premier appel n'a pas fini.
-  // Pour N clefs manquantes, ca degenere en O(N^2) requetes reseau.
+  // Clefs en vol : evite de relancer leur fetch a chaque resolution d'une autre.
   const inFlight = useRef<Set<string>>(new Set())
 
   const uniqueKeys = [...new Set(keys)]

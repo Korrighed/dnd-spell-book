@@ -6,12 +6,7 @@ interface MaskIconProps {
   className?: string
 }
 
-/**
- * Icone SVG de public/icons en masque CSS : prend la couleur du texte
- * (currentColor), comme les onglets et les boutons. Decorative (aria-hidden) :
- * le sens est porte par le texte ou l'aria-label voisin. Taille et masque :
- * App.css (.mask-icon).
- */
+/** Icone SVG decorative de public/icons, en masque CSS (couleur du texte). */
 export function MaskIcon({ file, className }: MaskIconProps) {
   return (
     <span

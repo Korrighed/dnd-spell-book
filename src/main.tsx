@@ -6,7 +6,6 @@ import { syncScreenScale } from './utils/screenScale'
 import { BROWSER_LANGUAGE, t } from './utils/browserLanguage'
 
 syncScreenScale()
-// Langue du document et titre d'onglet alignes sur l'interface (index.html : francais par defaut).
 document.documentElement.lang = BROWSER_LANGUAGE
 document.title = t('Grimoire de sorts', 'Spell grimoire')
 
