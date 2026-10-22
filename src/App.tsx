@@ -277,7 +277,7 @@ function App() {
               onPageChange={setPage}
               left={
                 <>
-                  {selectedIndex && detailLoading && <p>{t('Chargement du detail du sort...', 'Loading spell details...')}</p>}
+                  {selectedIndex && detailLoading && <p>{t('Chargement du détail du sort…', 'Loading spell details…')}</p>}
                   {detailError && <p role="alert">{detailError}</p>}
                   {/* La fiche reste toujours lisible, meme pour un sort hors profil ou masque de la liste. */}
                   {selectedSpell && (
@@ -298,7 +298,7 @@ function App() {
                       echec de l'API laisse une page vide sans explication. */}
                   {loading && (
                     <p>
-                      {t('Chargement des sorts...', 'Loading spells...')}
+                      {t('Chargement des sorts…', 'Loading spells…')}
                     </p>
                   )}
                   {error && <p role="alert">{error}</p>}
@@ -306,13 +306,13 @@ function App() {
                       vident la liste, ils doivent rester visibles vue fermee. */}
                   {classSpellsLoading && (
                     <p>
-                      {t('Chargement des sorts de la classe...', 'Loading class spells...')}
+                      {t('Chargement des sorts de la classe…', 'Loading class spells…')}
                     </p>
                   )}
                   {classSpellsError && <p role="alert">{classSpellsError}</p>}
                   {schoolSpellsLoading && (
                     <p>
-                      {t("Chargement des sorts de l'ecole...", 'Loading school spells...')}
+                      {t("Chargement des sorts de l'école…", 'Loading school spells…')}
                     </p>
                   )}
                   {schoolSpellsError && <p role="alert">{schoolSpellsError}</p>}

@@ -19,9 +19,9 @@ export interface SpellSummary {
  * Traduction manuelle : `area_of_effect.type` n'est jamais localise par l'API,
  * meme sur le payload fr-FR (verifie sur `fireball`).
  */
-const AOE_LABELS_FR: Record<string, string> = {
-  sphere: 'Sphere',
-  cone: 'Cone',
+export const AOE_LABELS_FR: Record<string, string> = {
+  sphere: 'Sphère',
+  cone: 'Cône',
   cylinder: 'Cylindre',
   line: 'Ligne',
   cube: 'Cube',

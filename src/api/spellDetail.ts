@@ -156,7 +156,7 @@ async function fetchRaw(index: string, lang: 'en' | 'fr-FR'): Promise<RawSpell> 
   const res = await fetch(`${BASE_URL}/spells/${index}?lang=${lang}`)
 
   if (!res.ok) {
-    throw new Error(t('Impossible de charger le detail du sort.', 'Unable to load the spell detail.'))
+    throw new Error(t('Impossible de charger le détail du sort.', 'Unable to load the spell detail.'))
   }
 
   return (await res.json()) as RawSpell

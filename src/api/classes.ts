@@ -92,7 +92,7 @@ export async function fetchSpellcastingClassIndices(
       const res = await fetch(`${BASE_URL}/classes/${classIndex}${EN}`)
       if (!res.ok) {
         throw new Error(
-          t('Impossible de determiner les classes de lanceurs de sorts.', 'Unable to load spellcasting classes.'),
+          t('Impossible de déterminer les classes de lanceurs de sorts.', 'Unable to load spellcasting classes.'),
         )
       }
       return (await res.json()) as RawClassDetail

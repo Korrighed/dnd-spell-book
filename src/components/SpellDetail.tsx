@@ -1,4 +1,5 @@
 import type { SpellDetail as SpellDetailData, SpellTexts } from '../api/spellDetail'
+import { AOE_LABELS_FR } from '../api/spellSummary'
 import type { LanguageMode } from '../types/language'
 import { Bilingual, BilingualParagraphs } from './Bilingual'
 import { LanguageToggle } from './LanguageToggle'
@@ -13,6 +14,16 @@ interface SpellDetailProps {
   onToggleSpellbook: (index: string) => void
   /** Sort hors du profil du lanceur : fiche lisible, signalee et grisee. */
   outOfProfile: boolean
+}
+
+/**
+ * Effet d'un jet de sauvegarde reussi (`dc.dc_success`) : jamais traduit par
+ * l'API, meme sur le payload fr-FR.
+ */
+const DC_SUCCESS_FR: Record<string, string> = {
+  none: 'aucun effet',
+  half: 'moitié des dégâts',
+  other: 'voir la description',
 }
 
 function firstDamageValue(atSlotLevel: Record<string, string> | null): string | null {
@@ -45,7 +56,7 @@ export function SpellDetail({
       {outOfProfile && (
         <p role="note">
           {t(
-            'Ce sort ne correspond pas a votre profil de lanceur.',
+            'Ce sort ne correspond pas à votre profil de lanceur.',
             'This spell is outside your spellcaster profile.',
           )}
         </p>
@@ -74,10 +85,10 @@ export function SpellDetail({
         <Bilingual mode={language} fr={fr.castingTime} en={en.castingTime} />
       </p>
       <p>
-        {t('Portee :', 'Range:')} <Bilingual mode={language} fr={fr.range} en={en.range} />
+        {t('Portée :', 'Range:')} <Bilingual mode={language} fr={fr.range} en={en.range} />
       </p>
       <p>
-        {t('Duree :', 'Duration:')} <Bilingual mode={language} fr={fr.duration} en={en.duration} />
+        {t('Durée :', 'Duration:')} <Bilingual mode={language} fr={fr.duration} en={en.duration} />
       </p>
       <p>
         {t('Composants :', 'Components:')} {mechanics.components.join(', ')}
@@ -96,7 +107,7 @@ export function SpellDetail({
 
       {mechanics.damage && (
         <p>
-          {t('Degats :', 'Damage:')} {damageValue}
+          {t('Dégâts :', 'Damage:')} {damageValue}
           {mechanics.damage.typeIndex && (
             <>
               {' '}
@@ -113,14 +124,30 @@ export function SpellDetail({
       {en.dcType && (
         <p>
           {t('Jet de sauvegarde :', 'Saving throw:')}{' '}
-          <Bilingual mode={language} fr={fr.dcType ?? en.dcType} en={en.dcType} /> (
-          {mechanics.dcSuccess})
+          <Bilingual mode={language} fr={fr.dcType ?? en.dcType} en={en.dcType} />
+          {mechanics.dcSuccess && (
+            <>
+              {' '}(
+              <Bilingual
+                mode={language}
+                fr={DC_SUCCESS_FR[mechanics.dcSuccess] ?? mechanics.dcSuccess}
+                en={mechanics.dcSuccess}
+              />
+              )
+            </>
+          )}
         </p>
       )}
 
       {mechanics.areaOfEffect && (
         <p>
-          {t("Zone d'effet :", 'Area of effect:')} {mechanics.areaOfEffect.type}, {mechanics.areaOfEffect.sizeMeters} m (
+          {t("Zone d'effet :", 'Area of effect:')}{' '}
+          <Bilingual
+            mode={language}
+            fr={(AOE_LABELS_FR[mechanics.areaOfEffect.type] ?? mechanics.areaOfEffect.type).toLowerCase()}
+            en={mechanics.areaOfEffect.type}
+          />
+          , {mechanics.areaOfEffect.sizeMeters} m (
           {mechanics.areaOfEffect.sizeFeet} ft)
         </p>
       )}
@@ -132,14 +159,14 @@ export function SpellDetail({
 
       {en.higherLevel.length > 0 && (
         <div>
-          <h3>{t('Aux niveaux superieurs', 'At higher levels')}</h3>
+          <h3>{t('Aux niveaux supérieurs', 'At higher levels')}</h3>
           <BilingualParagraphs mode={language} fr={fr.higherLevel} en={en.higherLevel} />
         </div>
       )}
 
       <p>
         <small>
-          {t('Mis a jour le', 'Updated on')}{' '}
+          {t('Mis à jour le', 'Updated on')}{' '}
           {new Date(mechanics.updatedAt).toLocaleDateString(BROWSER_LANGUAGE === 'fr' ? 'fr-FR' : 'en-US')}
         </small>
       </p>
