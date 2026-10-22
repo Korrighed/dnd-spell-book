@@ -9,6 +9,7 @@ import {
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery'
 import { bookmarkViewId, type BookmarkId } from '../utils/bookmarks'
 import { t } from '../utils/browserLanguage'
+import { getScreenScale } from '../utils/screenScale'
 
 interface BookmarkViewProps {
   id: BookmarkId
@@ -82,13 +83,15 @@ export function BookmarkView({
 
   // Panneau mobile : du dessous des onglets jusqu'au bas de l'ecran. Le bas
   // du livre ne tombe pas pile sur le bas de l'ecran : hauteur calculee a
-  // l'ouverture (et au redimensionnement), lue par App.mobile.css.
+  // l'ouverture (et au redimensionnement), lue par App.mobile.css. Mesures a
+  // l'ecran divisees par le zoom de #root : la hauteur s'applique en px internes.
   useLayoutEffect(() => {
     const section = sectionRef.current
     if (!open || !canSwipe || !section) return
     const fit = () => {
       const top = section.getBoundingClientRect().top
-      section.style.setProperty('--sheet-height', `${Math.max(0, window.innerHeight - top)}px`)
+      const height = Math.max(0, window.innerHeight - top) / getScreenScale()
+      section.style.setProperty('--sheet-height', `${height}px`)
     }
     fit()
     window.addEventListener('resize', fit)
@@ -114,7 +117,8 @@ export function BookmarkView({
     const current = drag.current
     const section = sectionRef.current
     if (!current || !section || current.pointerId !== event.pointerId) return
-    current.dy = Math.max(0, event.clientY - current.startY)
+    // Distance a l'ecran ramenee en px internes (zoom de #root) : la vue suit le doigt.
+    current.dy = Math.max(0, event.clientY - current.startY) / getScreenScale()
     section.style.transform = `translateY(${current.dy}px)`
   }
 

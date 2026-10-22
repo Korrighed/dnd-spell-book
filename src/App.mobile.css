@@ -74,11 +74,12 @@
   /* Toutes les vues (onglets et aide) : panneau bord a bord, sur toute la
      largeur de l'ecran. Du dessous des onglets jusqu'au bas de l'ecran
      (--sheet-height, calcule par BookmarkView.tsx a l'ouverture ; repli :
-     bas du livre). 50vw : la vue sort de son ancre, plus etroite que
+     bas du livre). 50vw / --screen-scale (zoom de #root, index.css) : la
+     vue sort de son ancre, plus etroite que
      l'ecran. On le ferme en tirant la poignee ou le titre vers le bas. */
   #grimoire .bookmark-view {
-    left: calc(50% - 50vw);
-    right: calc(50% - 50vw);
+    left: calc(50% - 50vw / var(--screen-scale, 1));
+    right: calc(50% - 50vw / var(--screen-scale, 1));
     bottom: auto;
     height: var(--sheet-height, calc(100% - var(--book-edge-top)));
     padding: 0 16px 16px;

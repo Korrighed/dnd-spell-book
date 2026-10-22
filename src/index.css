@@ -110,6 +110,21 @@
   }
 }
 
+/* Meme principe en mobile, cale sur un telephone de 390px : le canvas 3D et
+   les pages sont en px fixes, la bande qui glisse d'une page a l'autre en %
+   de l'ecran (BookSpread.mobile.css). Sans facteur, les deux se decalaient
+   des que la largeur differait de 390px. Largeur interne fixe (95vw de 390
+   = 370.5px). --screen-scale = largeur / 390, plafonne a 1.3 sur tablette
+   (utils/screenScale.ts) : au-dela, colonne centree. */
+@media (max-width: 899px) {
+  #root {
+    zoom: var(--screen-scale, 1);
+    width: 370.5px;
+    max-width: none;
+    min-height: calc(100svh / var(--screen-scale, 1));
+  }
+}
+
 /* Hauteur FIXE de la page en desktop, quand l'ecran est assez haut pour tout
    contenir (header + barre + livre + footer + debordement du canvas, ~731px
    internes sans l'espace de centrage de #grimoire::after, voir App.css).

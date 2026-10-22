@@ -150,5 +150,5 @@ gantt
 | 27/09 – 02/10 | Sprint 3 — rendu 3D | Livre Three.js (react-three-fiber) avec les pages HTML superposées. Pagination. Mobile : une moitié du livre à la fois, glissement entre les pages. Animation de tournage de page. |
 | 12/10 – 14/10 | Sprint 4 — interface | Recherche toujours visible, marque-pages et vues, tri. Interface dans la langue du navigateur. Charte appliquée (textures, polices). Header, footer et aide. |
 | 15/10 – 16/10 | Finitions | Contrastes AA, icônes 100 % Lucide, focus clavier dans les vues. Nouvelle vue Personnage (pastilles, cartes de classe, niveau total ≤ 20). Indicateur de page. Vues mobiles en panneau. Publication Netlify, version 1. |
-| 22/10 | Relecture finale | Mise à l'échelle desktop sur toutes les largeurs. Libellés français. Nettoyage du code et des documents. |
+| 22/10 | Relecture finale | Mise à l'échelle sur toutes les largeurs, desktop et mobile. Libellés français. Nettoyage du code et des documents. |
 | 23/10 | Rendu | Envoi des liens GitHub et Netlify. |
