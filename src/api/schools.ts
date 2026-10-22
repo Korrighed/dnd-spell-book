@@ -31,7 +31,7 @@ export async function fetchSchoolList(): Promise<SchoolListItem[]> {
 
   if (!enRes.ok || !frRes.ok) {
     throw new Error(
-      t('Impossible de charger la liste des ecoles depuis l\'API.', 'Unable to load the school list from the API.'),
+      t('Impossible de charger la liste des écoles depuis l\'API.', 'Unable to load the school list from the API.'),
     )
   }
 
@@ -67,7 +67,7 @@ export async function fetchSchoolSpellIndices(schoolIndex: string): Promise<Set<
 
   if (!res.ok) {
     throw new Error(
-      t('Impossible de charger les sorts de cette ecole.', 'Unable to load spells for this school.'),
+      t('Impossible de charger les sorts de cette école.', 'Unable to load spells for this school.'),
     )
   }
 

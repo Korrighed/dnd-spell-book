@@ -1,1 +1,1 @@
-export type LanguageMode = 'fr' | 'en' | 'both'
+export type LanguageMode = 'fr' | 'en'

@@ -1,8 +1,8 @@
-# App flow — Grimoire de sorts, vue Personnage et pagination
+# App flow — arborescence et parcours du grimoire
 
-Statut : brouillon
-Couvre : US-01 … US-05 (définies ci-dessous, pas de PRD pour ce lot)
-Design : [DESIGN-BRIEF.md](DESIGN-BRIEF.md). Règles métier existantes : [SPECS.md](SPECS.md).
+Statut : validé, conforme à la version 1 (2026-10-22)
+Couvre : arborescence des écrans (§1), parcours US-01 … US-05 (définis ci-dessous)
+Charte : [DESIGN.md](DESIGN.md). Règles métier : [SPECS.md](SPECS.md).
 
 | ID | User story |
 |---|---|
@@ -33,7 +33,11 @@ Fermeture d'une vue : son onglet (ou le bouton ?) touché de nouveau, ou Échap.
 |---|---|---|
 | Livre | Fiche (page gauche), liste paginée (page droite) | Arrivée |
 | Vue Personnage | Choix, création, renommage, suppression du personnage, gestion de ses classes | Onglet Personnage |
-| Vue Filtres, vue Grimoire, Aide | Contenu inchangé dans ce lot. Comportement clavier commun (US-05), présentation mobile en panneau (§4) | Onglets, bouton ? |
+| Vue Filtres | Niveau, classe, école de magie, tri (alphabétique ou par niveau) | Onglet Filtres |
+| Vue Grimoire | Sorts sauvegardés du personnage actif : ouvrir une fiche, retirer un sort | Onglet Grimoire |
+| Aide | Guide d'utilisation et mentions légales | Bouton ? du header |
+
+Toutes les vues partagent le même comportement clavier (US-05) et la même présentation mobile en panneau (§4).
 
 ## 2. Parcours utilisateur
 
@@ -58,7 +62,7 @@ flowchart LR
 | 3 | Échap ou `Annuler` | Formulaire fermé, saisie perdue, focus sur la pastille « + ». **La vue reste ouverte.** | — |
 | 4 | Clic sur une autre pastille | `setActiveCharacterId(id)` : pastille sélectionnée, nom et classes du personnage affichés. | — |
 
-Doublons de nom : refusés à la création et au renommage (D-08). Les doublons déjà enregistrés restent tels quels.
+Doublons de nom : refusés à la création et au renommage, pour que les pastilles restent toujours distinctes. Les doublons déjà enregistrés restent tels quels.
 
 ### Parcours US-02 : renommer, supprimer
 
@@ -79,7 +83,7 @@ flowchart LR
 | 1 | Clic sur le crayon | Le nom devient un champ prérempli, texte sélectionné, avec `Valider` et `Annuler`. | — |
 | 2 | Entrée ou `Valider` | `renameCharacter` appelé **une seule fois**. Retour à l'affichage du nom, focus sur le crayon. | Nom vide ou pris par un autre personnage : `Valider` désactivé, message si pris. Nom identique : pas d'appel, retour à l'affichage. |
 | 3 | Échap ou `Annuler` | Ancien nom conservé, focus sur le crayon. La vue reste ouverte. | — |
-| 4 | Clic sur la corbeille | La rangée d'actions devient `Supprimer « Gandalf », ses classes et ses sorts ? [Supprimer] [Annuler]`, focus sur `Annuler` (D-05). | Un seul personnage : corbeille désactivée, et texte visible « Il faut garder au moins un personnage. » sous les boutons. |
+| 4 | Clic sur la corbeille | La rangée d'actions devient `Supprimer « Gandalf », ses classes et ses sorts ? [Supprimer] [Annuler]`, focus sur `Annuler`. Confirmation intégrée à la vue plutôt que `window.confirm`, qui n'est pas stylable. | Un seul personnage : corbeille désactivée, et texte visible « Il faut garder au moins un personnage. » sous les boutons. |
 | 5 | `Supprimer` | `removeCharacter` : le premier personnage restant devient actif, focus sur sa pastille. | — |
 | 6 | `Annuler` ou Échap | Retour à l'affichage, focus sur la corbeille. La vue reste ouverte. | — |
 
@@ -105,7 +109,7 @@ flowchart TD
 | 4 | Option « Niveau non précisé (tous les sorts) » | Texte « Sorts accessibles : tous les niveaux (niveau non précisé) ». | — |
 | 5 | `Retirer` sur une carte | `removeProfileById` : carte supprimée, focus sur la carte suivante ou sur la carte d'ajout. Les autres cartes gardent leur état (clé `profile.id`). | — |
 
-Plafond de niveau total (D-04) :
+Plafond de niveau total (règle D&D du multiclasse) :
 
 - La section Classes affiche `Niveau total : N / 20`. N = somme des niveaux **précisés**. « Niveau non précisé » ne compte pas.
 - Une carte propose les niveaux 1 à `20 − (somme des niveaux précisés des autres cartes)`, plus « Niveau non précisé (tous les sorts) ». Si ce maximum vaut 0, seule l'option « non précisé » reste.
@@ -174,8 +178,8 @@ Le contenu du panneau garde son défilement normal : seuls la poignée et le tit
   - ailleurs dans la vue : ferme la vue, focus rendu à l'onglet (existant).
 - Mobile : le glisser vers le bas a toujours une alternative en un seul appui (onglet ou bouton ?), et Échap au clavier. La poignée est décorative (`aria-hidden`).
 - Pastilles : `<button aria-pressed>` dans un groupe nommé « Personnages ».
-- Après choix d'un sort depuis le grimoire en mobile : focus sur le titre de la fiche, pas sur l'onglet masqué (B7, mineur, hors lot sauf avis contraire).
+- Limite connue : après le choix d'un sort depuis le grimoire en mobile, le focus vise l'onglet, masqué pendant la lecture de la fiche : il se perd au lieu d'aller sur le titre de la fiche.
 
 ## 6. Questions ouvertes
 
-Aucune. Décisions D-01 à D-08 dans [DESIGN-BRIEF.md](DESIGN-BRIEF.md).
+Aucune.

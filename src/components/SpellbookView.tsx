@@ -13,7 +13,6 @@ function frenchOf(name: string): string {
 interface SpellbookViewProps {
   open: boolean
   onClose: () => void
-  /** Nom du personnage actif, affiche dans le titre. */
   characterName: string
   spells: PersonalSpell[]
   allSpells: SpellListItem[]
@@ -24,7 +23,7 @@ interface SpellbookViewProps {
   isAccessible: SpellAccessCheck | null
 }
 
-/** Liste du grimoire du personnage actif. Titre : nom du personnage et compteur (D-07). */
+/** Grimoire du personnage actif. */
 export function SpellbookView({
   open,
   onClose,
@@ -36,8 +35,6 @@ export function SpellbookView({
   onRemoveSpell,
   isAccessible,
 }: SpellbookViewProps) {
-  // Repli si aucun nom (ne devrait pas arriver : un personnage par defaut
-  // existe toujours et un nom vide est refuse).
   const heading = characterName
     ? t(`Grimoire ${frenchOf(characterName)}`, `${characterName}'s spellbook`)
     : t('Grimoire personnel', 'Personal spellbook')

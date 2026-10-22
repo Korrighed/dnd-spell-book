@@ -5,7 +5,7 @@ import { isSpellAccessibleForProfile, type SpellAccessCheck } from '../utils/spe
 import type { SpellcasterProfile } from './usePersonalSpellbook'
 import { useMultiKeyedFetch } from './useMultiKeyedFetch'
 
-/** Donnees d'un seul bloc, derivees du meme fetch partage : aucun appel reseau supplementaire. */
+/** Donnees d'un seul profil, derivees du fetch partage. */
 export interface ProfileSpellcastingInfo {
   /** `null` sans niveau precise ou pendant le chargement. */
   maxSpellLevel: number | null
@@ -20,15 +20,11 @@ interface UseMultiSpellAccessResult {
   isAccessible: SpellAccessCheck | null
   loading: boolean
   error: string | null
-  /** Une entree par profil, meme ordre que l'entree : pour l'affichage propre a chaque bloc. */
+  /** Une entree par profil, meme ordre. */
   perProfile: ProfileSpellcastingInfo[]
 }
 
-/**
- * Union de plusieurs profils (multiclasse) : un sort est accessible s'il
- * l'est pour au moins un des blocs classe/niveau/sous-classe, sans agreger
- * les niveaux entre classes (chaque bloc reste autonome).
- */
+/** Multiclasse : un sort est accessible s'il l'est pour au moins un profil. */
 export function useMultiSpellAccess(profiles: SpellcasterProfile[]): UseMultiSpellAccessResult {
   const classIndices = profiles.map((profile) => profile.classIndex)
   const slotKeys = profiles

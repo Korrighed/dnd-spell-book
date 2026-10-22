@@ -1,23 +1,10 @@
 .book-spread {
   position: relative;
-  /* height (pas min-height) : .spell-detail-panel et .spell-list-panel
-     utilisent une hauteur en pourcentage (ex. 84%), qui ne se calcule QUE si
-     le parent a une hauteur explicite. Avec seulement min-height, le
-     pourcentage est ignore et la boite se dimensionne sur son contenu -
-     c'est ce qui causait le decalage avec un gros sort. */
-  /* 628 - 50.22 : la bande vide de 50.22px au-dessus du canvas a ete
-     retiree (--book-frame-top 50.22 -> 0). Les deux pages remontent de la
-     meme valeur (SpellDetailPanel.css, SpellListPanel.css) : livre 3D et
-     pages HTML restent alignes. */
+  /* height et non min-height : les pages ont une hauteur en %, qui exige un
+     parent de hauteur explicite. */
   height: 577.78px;
-  /* Declarees UNE SEULE FOIS ici : .book-spread-canvas en herite par simple
-     var(--book-frame-*), sans valeur de repli dupliquee ailleurs (source du
-     desalignement precedent : changer le repli d'une seule des deux regles
-     les desynchronisait).
-     Branche de test : px fixe (calibre a window.innerHeight = 785), au lieu
-     de vh, pour qu'un passage en plein ecran ne recalcule plus rien ici.
-     Contrepartie : ne s'adapte plus a un autre ecran/fenetre (voir
-     docs/SPRINT-3-RENDU-3D-RESPONSIVE.md, etape 15, pour le compromis). */
+  /* Cadre du canvas, declare une seule fois : .book-spread-canvas en herite.
+     Px fixes, adaptes a l'ecran par le zoom de #root (index.css). */
   --book-frame-top: 0px;
   --book-frame-left: 0px;
   --book-frame-width: 1415px;
@@ -35,53 +22,51 @@
 
 .book-spread-canvas canvas {
   display: block;
-  /* !important : react-three-fiber ecrit la taille MESUREE en px dans le
-     style inline du canvas. Sous le `zoom` grand ecran (index.css), cette
-     mesure est deja zoomee et le zoom la multiplierait une seconde fois
-     (livre 1.56x trop grand). 100 % du conteneur reste juste dans tous les
-     cas ; le buffer de dessin garde la taille mesuree, donc le rendu reste net. */
+  /* !important : react-three-fiber ecrit en inline la taille mesuree, deja
+     zoomee ; le zoom de #root la multiplierait une seconde fois. */
   width: 100% !important;
   height: 100% !important;
-  /* Etirement + decalage du RENDU 3D lui-meme, independant de la boite
-     ci-dessus (largeur/hauteur de la boite vs. echelle/position du dessin
-     dedans) : regle dans BookCanvas.tsx (DESKTOP_SETTINGS /
-     MOBILE_SETTINGS). 1 = pas d'etirement, 0 = pas de decalage. translateX AVANT les scaleX/scaleY : le decalage reste un
-     nombre de px fixe, pas multiplie par l'etirement (ordre des fonctions
-     transform : la plus a gauche s'applique en dernier, dans l'espace deja
-     mis a l'echelle). */
+  /* Etirement et decalage du rendu 3D (BookCanvas.tsx). translateX en premier :
+     le decalage n'est pas multiplie par l'etirement. */
   transform: translateX(var(--book-canvas-offset-x, 0px))
     scaleX(var(--book-canvas-scale-x, 1)) scaleY(var(--book-canvas-scale-y, 1));
   transform-origin: center;
 }
 
+/* Non positionne : les pages se placent par rapport a .book-spread-strip
+   (SpellDetailPanel.css, SpellListPanel.css), pas au cadre du canvas. */
 .book-spread-pages {
-  /* Pas positionne : les deux pages ne doivent rien heriter du cadre du
-     livre (--book-frame-*). Elles se placent a la main, dans
-     SpellDetailPanel.css / SpellListPanel.css, par rapport a
-     .book-spread-strip directement. */
   position: static;
   z-index: 1;
 }
 
 .book-page {
   min-width: 0;
-  /* Noir par heritage pour tout ce qui n'a pas de color explicite (compteur
-     de sorts, "Page X / Y", messages de chargement/erreur). Les elements qui
-     fixent deja leur color (li, .spell-detail...) sont forces a part dans
-     SpellListPanel.css / SpellDetailPanel.css. */
   color: #000;
-  /* Pas de marge interne : le texte se place directement par rapport aux
-     bords (et au plafond max-*) de .spell-detail-panel / .spell-list-panel. */
   padding: 0;
-  /* Le contenu scrolle DANS la page plutot que de pousser sa hauteur : sans
-     ca, SpellDetail (contenu variable) sort du cadre pense pour le canvas. */
+  /* Le contenu defile dans la page au lieu de l'agrandir. */
   overflow-y: auto;
 }
 
-/* Desktop : bande neutre, meme boite que .book-spread (le canvas et les
-   pages s'y placent exactement comme avant). Mobile : voir
-   BookSpread.mobile.css (largeur/transform de la bande glissante). */
+/* Desktop : bande neutre. Mobile : bande glissante (BookSpread.mobile.css). */
 .book-spread-strip {
   position: relative;
   height: 100%;
+}
+
+/* Pages masquees tant que le livre 3D n'est pas deploye (data-book-ready),
+   puis fondu. */
+.book-spread-pages {
+  transition: opacity 300ms ease-out;
+}
+
+.book-spread[data-book-ready='false'] .book-spread-pages {
+  visibility: hidden;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-spread-pages {
+    transition: none;
+  }
 }

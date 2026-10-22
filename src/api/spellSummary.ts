@@ -1,27 +1,22 @@
 import { fetchSpellDetail, type SpellDetail } from './spellDetail'
 
 export interface SpellSummary {
-  /** "8d6 Feu", ou `null` si le sort n'inflige pas de degats chiffres. */
+  /** "8d6 Feu", ou `null` sans degats chiffres. */
   damageFr: string | null
-  /** "8d6 Fire", ou `null` si le sort n'inflige pas de degats chiffres. */
   damageEn: string | null
-  /** Abreviation de la caracteristique du jet de sauvegarde ("DEX"), ou `null`. */
+  /** "DEX", ou `null`. */
   saveAbility: string | null
   rangeFr: string
   rangeEn: string
-  /** Forme de zone (FR) : "Sphere", "Cone"... ou "Cible unique" / "Personnel" a defaut d'aire d'effet. */
+  /** Forme de zone, ou "Cible unique" / "Personnel" sans aire d'effet. */
   shapeFr: string
-  /** Forme de zone (EN) : "Sphere", "Cone"... ou "Single target" / "Self" a defaut d'aire d'effet. */
   shapeEn: string
 }
 
-/**
- * Traduction manuelle : `area_of_effect.type` n'est jamais localise par l'API,
- * meme sur le payload fr-FR (verifie sur `fireball`).
- */
-const AOE_LABELS_FR: Record<string, string> = {
-  sphere: 'Sphere',
-  cone: 'Cone',
+/** `area_of_effect.type` n'est jamais traduit par l'API. */
+export const AOE_LABELS_FR: Record<string, string> = {
+  sphere: 'Sphère',
+  cone: 'Cône',
   cylinder: 'Cylindre',
   line: 'Ligne',
   cube: 'Cube',
@@ -36,10 +31,7 @@ function firstDamageValue(atSlotLevel: Record<string, string> | null): string | 
   return Object.values(atSlotLevel)[0] ?? null
 }
 
-/**
- * Sans aire d'effet, le sort cible normalement une seule creature/objet. Exception
- * courante : les sorts sur soi ("Self" / "Personnelle"), distingues via la portee.
- */
+/** Sans aire d'effet : cible unique, ou personnel si la portee est "Self". */
 function shapeLabels(detail: SpellDetail): { fr: string; en: string } {
   const { areaOfEffect } = detail.mechanics
   if (areaOfEffect) {
@@ -57,8 +49,7 @@ function shapeLabels(detail: SpellDetail): { fr: string; en: string } {
 export function summarizeSpell(detail: SpellDetail): SpellSummary {
   const { mechanics, fr, en } = detail
   const damageValue = mechanics.damage ? firstDamageValue(mechanics.damage.atSlotLevel) : null
-  // L'API n'expose le nom du type de degats qu'en fr-FR : cote anglais, repli
-  // sur l'index technique capitalise ("fire" -> "Fire"), comme SpellDetail.
+  // Cote anglais, repli sur l'index du type de degats ("fire" -> "Fire").
   const damageTypeEn =
     en.damageTypeName ??
     (mechanics.damage?.typeIndex ? capitalize(mechanics.damage.typeIndex) : null)

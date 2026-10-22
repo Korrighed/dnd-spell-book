@@ -15,29 +15,22 @@ import { SpellcasterProfileForm } from './SpellcasterProfileForm'
 interface CharacterViewProps {
   open: boolean
   onClose: () => void
-  /** Forme renvoyee par usePersonalSpellbook (id + nom seulement), pas `Character`. */
   characters: { id: string; name: string }[]
   activeCharacterId: string
   onSelectCharacter: (id: string) => void
   onAddCharacter: (name: string) => void
   onRemoveCharacter: (id: string) => void
   onRenameCharacter: (id: string, name: string) => void
-  /** Classes lanceuses de sorts, et echec de leur chargement. */
   spellcastingClasses: ClassListItem[]
   spellcastingClassesError: string | null
   profiles: SpellcasterProfile[]
-  /** Une entree par profil, meme ordre que `profiles`. */
   perProfile: ProfileSpellcastingInfo[]
   onSetProfile: (id: string, profile: SpellcasterProfile) => void
   onAddProfile: (profile: SpellcasterProfile) => void
   onRemoveProfile: (id: string) => void
 }
 
-/**
- * Section Personnages (CharacterSelector) puis section Classes : niveau total
- * plafonne a 20 (D-04), une carte par classe (key = profile.id : l'etat local
- * d'une carte ne glisse pas sur sa voisine apres un retrait), puis la carte d'ajout.
- */
+/** Vue Personnage : personnages, puis leurs classes (niveau total plafonne a 20). */
 export function CharacterView({
   open,
   onClose,
@@ -58,8 +51,7 @@ export function CharacterView({
   const totalLevel = totalSpecifiedLevel(profiles)
   const overCap = totalLevel > MAX_TOTAL_CHARACTER_LEVEL
   const classesRef = useRef<HTMLElement>(null)
-  // Index de la carte retiree : apres le rendu, le focus va sur la carte
-  // qui prend sa place (ou la carte d'ajout), sinon il tomberait sur <body>.
+  // Apres un retrait, le focus va sur la carte qui prend sa place.
   const focusCardIndex = useRef<number | null>(null)
   useEffect(() => {
     const index = focusCardIndex.current
@@ -68,8 +60,7 @@ export function CharacterView({
     const cards = classesRef.current ? Array.from(classesRef.current.querySelectorAll('fieldset')) : []
     if (cards.length === 0) return
     const card = cards[Math.min(index, cards.length - 1)]
-    // Liste « Classe » d'abord, jamais le bouton Retirer : deux Entree
-    // retireraient deux classes d'affilee.
+    // Liste « Classe » et non le bouton Retirer : deux Entree retireraient deux classes.
     card.querySelector<HTMLSelectElement>('select')?.focus()
   })
 

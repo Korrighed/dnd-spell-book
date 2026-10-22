@@ -2,15 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchSpellSummary, type SpellSummary } from '../api/spellSummary'
 import type { SpellListItem } from '../api/spells'
 
-// v2 : ajout de damageEn / shapeEn (damage renomme damageFr). Les entrees v1
-// n'ont pas ces champs : nouvelle cle plutot que de les relire.
 const STORAGE_KEY = 'dnd-spell-book:spell-summaries:v2'
 const LEGACY_STORAGE_KEY = 'dnd-spell-book:spell-summaries:v1'
-/**
- * `fetchSpellSummary` fait 2 requetes (en + fr) par sort. Un catalogue complet
- * (~319 sorts) au premier chargement, meme en tache de fond, ne doit pas saturer
- * l'API tierce : le remplissage reste progressif, quelques sorts a la fois.
- */
+/** Requetes simultanees au plus, pour ne pas saturer l'API (2 requetes par sort). */
 const CONCURRENCY = 4
 
 function loadCache(): Record<string, SpellSummary> {
@@ -23,11 +17,7 @@ function loadCache(): Record<string, SpellSummary> {
   }
 }
 
-/**
- * Cache persistant (localStorage) rempli progressivement en arriere-plan : la liste
- * affiche les sorts deja connus instantanement d'une session a l'autre, et rattrape
- * les nouveaux au fil des requetes plutot que de tout charger d'un coup.
- */
+/** Resumes des sorts de la liste, en cache localStorage, completes en arriere-plan. */
 export function useSpellSummaries(spells: SpellListItem[]): Record<string, SpellSummary> {
   const [summaries, setSummaries] = useState<Record<string, SpellSummary>>(loadCache)
   const cacheRef = useRef(summaries)
@@ -59,12 +49,12 @@ export function useSpellSummaries(spells: SpellListItem[]): Record<string, Spell
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
             } catch {
-              // Quota localStorage depasse : le cache reste valide en memoire pour la session.
+              // Quota depasse : cache en memoire seulement.
             }
             return next
           })
         } catch {
-          // Sort ignore : reessaie au prochain montage plutot que de bloquer la file.
+          // Sort ignore, retente au prochain chargement.
         }
       }
     }

@@ -11,22 +11,17 @@ export interface SpellAccessData {
 
 export type SpellAccessCheck = (index: string, level: number) => boolean
 
-/**
- * Regle d'accessibilite d'un sort pour UN profil (une classe). Utilisee par
- * useMultiSpellAccess (union sur plusieurs blocs, multiclasse) pour ne jamais
- * dupliquer la regle.
- */
+/** Accessibilite d'un sort pour un profil (une classe). */
 export function isSpellAccessibleForProfile(
   profile: SpellcasterProfile,
   data: SpellAccessData,
   spellIndex: string,
   spellLevel: number,
 ): boolean {
-  // Donnees pas encore chargees : l'appelant decide de la permissivite via `ready`.
   if (!data.classSpellIndices) return true
 
   const inClassList = data.classSpellIndices.has(spellIndex)
-  // Sans niveau precise, le profil est au niveau max : rien n'est ecarte par minLevel.
+  // Sans niveau precise : niveau max.
   const effectiveLevel = profile.characterLevel ?? Infinity
   const subclassUnlocked = effectiveLevel >= getSubclassUnlockLevel(profile.classIndex)
   const grantedBySubclass = (data.subclassGrants ?? []).some(
@@ -34,16 +29,14 @@ export function isSpellAccessibleForProfile(
       subclassUnlocked &&
       grant.spellIndex === spellIndex &&
       grant.minLevel <= effectiveLevel &&
-      // Sous-choix non precise (ex. terrain non choisi) : on n'ecarte rien,
-      // meme regle de permissivite que le niveau facultatif.
+      // Sous-choix non precise : rien n'est ecarte.
       (!grant.feature ||
         !profile.subclassFeatureIndex ||
         grant.feature.index === profile.subclassFeatureIndex),
   )
 
   if (!inClassList && !grantedBySubclass) return false
-  // Sort connu uniquement via la sous-classe : accorde d'office, pas de limite
-  // par emplacement de sort de la classe.
+  // Sort de sous-classe : accorde d'office, sans limite d'emplacement.
   if (grantedBySubclass && !inClassList) return true
   if (!data.slots) return true
   if (spellLevel === 0) return data.slots.cantripsKnown > 0

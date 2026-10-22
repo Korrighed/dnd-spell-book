@@ -7,11 +7,9 @@ export const DEFAULT_SORT_MODE: SortMode = 'alpha'
 
 type SortableSpell = Pick<SpellListItem, 'index' | 'name' | 'nameFr' | 'level'>
 
-// Collator cree une fois : comparaison dans la langue du navigateur (accents :
-// "Eau" avant "Eclair" en francais).
+// Comparaison dans la langue du navigateur, accents compris.
 const collator = new Intl.Collator(BROWSER_LANGUAGE)
 
-/** Nom affiche, puis index en dernier recours : ordre toujours deterministe. */
 function compareByName(a: SortableSpell, b: SortableSpell): number {
   return (
     collator.compare(spellDisplayName(a), spellDisplayName(b)) ||
@@ -19,10 +17,7 @@ function compareByName(a: SortableSpell, b: SortableSpell): number {
   )
 }
 
-/**
- * Renvoie une COPIE triee, le tableau d'entree n'est jamais modifie.
- * Niveau : tours de magie (0) en tete, a niveau egal ordre alphabetique.
- */
+/** Copie triee. Par niveau : a niveau egal, ordre alphabetique. */
 export function sortSpells<T extends SortableSpell>(spells: readonly T[], mode: SortMode): T[] {
   const compare =
     mode === 'level' ? (a: T, b: T) => a.level - b.level || compareByName(a, b) : compareByName
