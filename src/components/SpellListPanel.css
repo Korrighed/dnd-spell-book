@@ -4,7 +4,7 @@
    passe pas par specificite d'ancetre, seulement par heritage, donc il faut
    viser directement l'element qui a deja un color explicite).
    :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
-   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md). */
+   profil doit rester (regle du grimoire, voir docs/SPECS.md). */
 #grimoire .spell-list li:not(.out-of-profile),
 #grimoire .spell-list .extra {
   color: #000;

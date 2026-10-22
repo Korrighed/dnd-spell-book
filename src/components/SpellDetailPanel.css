@@ -5,7 +5,7 @@
    heritage - inutile de le poser sur .book-page, il faut viser directement
    les elements qui ont deja un color explicite).
    :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
-   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md).
+   profil doit rester (regle du grimoire, voir docs/SPECS.md).
    .spellbook-toggle n'est plus vise ici : il a ses propres couleurs de charte
    (App.css), le noir le rendait illisible sur son fond Caput Mortuum. */
 #grimoire .spell-detail:not(.out-of-profile),

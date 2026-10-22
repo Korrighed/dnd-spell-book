@@ -35,7 +35,7 @@
   /* Papier clair des vues, derive du Tan (meme teinte, plus lumineux) : le
      Tan pur donnerait un contraste trop faible au texte grise hors profil. */
   --paper: #f3ead9;
-  /* Nuances derivees (docs/DESIGN.md, docs/DESIGN-BRIEF.md) :
+  /* Nuances derivees (docs/DESIGN.md) :
      --slate-gray-text : Slate Gray assombri pour le TEXTE hors profil
      (4.59:1 sur --paper ; Slate Gray pur : 3.82:1, sous le seuil AA).
      --caput-mortuum-hover : survol des boutons Caput Mortuum pleins.

@@ -14,10 +14,10 @@
      var(--book-frame-*), sans valeur de repli dupliquee ailleurs (source du
      desalignement precedent : changer le repli d'une seule des deux regles
      les desynchronisait).
-     Branche de test : px fixe (calibre a window.innerHeight = 785), au lieu
+     Choix : px fixe (calibre a window.innerHeight = 785), au lieu
      de vh, pour qu'un passage en plein ecran ne recalcule plus rien ici.
-     Contrepartie : ne s'adapte plus a un autre ecran/fenetre (voir
-     docs/SPRINT-3-RENDU-3D-RESPONSIVE.md, etape 15, pour le compromis). */
+     Adaptation aux autres largeurs d'ecran : zoom de #root (index.css),
+     meme facteur pour le livre 3D et les pages HTML. */
   --book-frame-top: 0px;
   --book-frame-left: 0px;
   --book-frame-width: 1415px;

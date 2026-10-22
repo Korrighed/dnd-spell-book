@@ -4,7 +4,7 @@
 
 Remplace la palette précédente (trop proche de l'identité visuelle D&D officielle). Source : [docs/Dadnd.jpg](Dadnd.jpg).
 
-| Couleur | Hex | RGB | Rôle suggéré |
+| Couleur | Hex | RGB | Rôle |
 |---|---|---|---|
 | Space Cadet | `#25344F` | 37, 52, 79 | Fond sombre / header |
 | Slate Gray | `#617891` | 97, 120, 145 | Texte secondaire / sorts grisés hors filtre |
@@ -12,17 +12,15 @@ Remplace la palette précédente (trop proche de l'identité visuelle D&D offici
 | Coffee | `#6F4D38` | 111, 77, 56 | Reliure du grimoire / éléments bois-cuir |
 | Caput Mortuum | `#632024` | 99, 32, 36 | Accent / action / élément interactif (marque-page, boutons) |
 
-Rôles à confirmer une fois le wireframe posé — notés ici seulement à titre indicatif pour ne pas partir d'une page blanche.
-
-Nuances dérivées, en variables dans `src/index.css` (détail et contrastes : [DESIGN-BRIEF.md](DESIGN-BRIEF.md#couleurs)) :
+Nuances dérivées, en variables dans `src/index.css`. Contrastes vérifiés au seuil WCAG AA (texte 4,5:1, bordures 3:1) :
 
 | Variable | Hex | Dérivée de | Rôle |
 |---|---|---|---|
 | `--paper` | `#F3EAD9` | Tan éclairci | Papier des vues |
 | `--paper-light` | `#FFFAF0` | Tan très éclairci | Fond des champs et cartes |
 | `--ink` | `#2E2019` | Coffee assombri | Texte courant sur la texture |
-| `--slate-gray-text` | `#576B82` | Slate Gray assombri | **Texte** hors profil : Slate Gray pur fait 3,82:1 sur `--paper`, sous le seuil AA de 4,5:1 (décision D-01, 2026-10-15) |
-| `--caput-mortuum-hover` | `#7A2A2F` | Caput Mortuum éclairci | Survol des boutons pleins |
+| `--slate-gray-text` | `#576B82` | Slate Gray assombri | **Texte** hors profil : Slate Gray pur fait 3,82:1 sur `--paper`, sous le seuil AA de 4,5:1 (décision du 2026-10-15). `#576B82` : 4,59:1 sur `--paper` |
+| `--caput-mortuum-hover` | `#7A2A2F` | Caput Mortuum éclairci | Survol des boutons pleins : texte Tan à 5,05:1 |
 
 ## Typographie
 
@@ -44,6 +42,8 @@ Librairie unique pour toutes les icônes d'interface : [Lucide](https://lucide.d
 - Ne pas mélanger avec d'autres sets d'icônes (Font Awesome, Heroicons, etc.) pour rester cohérent.
 
 ## Prompt logo SVG
+
+Logo généré à partir de ce prompt, finalement non utilisé dans l'application. Favicon retenu : icône Lucide `book-heart` (`public/favicon.svg`), cohérente avec l'onglet Grimoire.
 
 Prompt pour générateur d'image (à utiliser tel quel, en anglais — meilleure fidélité terminologique) :
 

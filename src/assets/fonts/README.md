@@ -18,4 +18,4 @@
 
 - [x] Télécharger les deux polices.
 - [x] Déposer les fichiers dans ce dossier.
-- [ ] Déclarer les `@font-face` dans `src/index.css`.
+- [x] Déclarer les `@font-face` dans `src/index.css`.

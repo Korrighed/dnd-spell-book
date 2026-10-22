@@ -1,7 +1,6 @@
 /* Mobile (< 900px) : .book-spread devient une fenetre sur une bande plus
    large que l'ecran. La bande glisse d'une moitie du livre a l'autre
-   (translateX), le canvas n'est jamais recadre. Voir
-   docs/SPRINT-3-RENDU-3D-RESPONSIVE.md.
+   (translateX), le canvas n'est jamais recadre.
    Largeur de bande DERIVEE du peek (part d'ecran occupee par le bord de
    l'autre page) : bande = 200 - 2 x peek, en % de la fenetre. Ex. peek 10
    -> bande 180 %, la page active occupe 90 % de l'ecran.

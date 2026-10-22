@@ -2,7 +2,7 @@
 
 ## Grimoire et filtrage
 
-Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par classe, pas de livre séparé par classe. Depuis le Sprint 2 (voir `SPRINT-2-FILTRE-PERSONNAGE.md`), un grimoire personnel équivaut à un personnage (`id`, nom, sorts, profils de classe) ; plusieurs personnages peuvent être enregistrés, chacun avec son propre grimoire. Les pré-filtres (niveau, classe, sous-classe) sont portés par les profils du personnage actif.
+Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par classe, pas de livre séparé par classe. Un grimoire personnel équivaut à un personnage (`id`, nom, sorts, profils de classe) ; plusieurs personnages peuvent être enregistrés, chacun avec son propre grimoire. Les pré-filtres (niveau, classe, sous-classe) sont portés par les profils du personnage actif.
 
 ### Pré-tri par niveau et classe
 
@@ -15,10 +15,12 @@ Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par cl
 ### Grimoire personnel
 
 - Bouton "Ajouter au grimoire personnel" sur chaque fiche de sort.
-- Stockage local navigateur (JSON simple, `localStorage` ou `IndexedDB`) — structure de données choisie pour faciliter un bundling PWA facile plus tard (service worker, manifest), sans construire la coquille PWA dès maintenant.
-- **Sort filtré après coup, jamais supprimé** : si un sort déjà enregistré dans le grimoire personnel sort du pré-filtre (changement de niveau/classe appliqué après l'ajout du sort), il n'est jamais retiré du grimoire. Sa page reste consultable et son contenu lisible, avec un aplat grisé et une mention « hors profil ». Décision du Sprint 2 (contraire à l'intention d'origine ci-dessus) : les fonctions interactives de la fiche restent actives (ex. bouton grimoire), aucune n'est désactivée pour l'instant — à revoir si un futur sélecteur de niveau d'incantation ou lancer de dés est ajouté.
+- Stockage local navigateur en JSON simple (`localStorage`), structure choisie pour faciliter un futur bundling PWA (service worker, manifest). Format détaillé : [PREPARATION.md](PREPARATION.md#stockage-local).
+- **Sort filtré après coup, jamais supprimé** : si un sort déjà enregistré dans le grimoire personnel sort du pré-filtre (changement de niveau/classe appliqué après l'ajout du sort), il n'est jamais retiré du grimoire. Sa page reste consultable et son contenu lisible, avec un aplat grisé et une mention « hors profil ». Décision du 2026-09-21 (contraire à l'intention d'origine) : les fonctions interactives de la fiche restent actives (ex. bouton grimoire), aucune n'est désactivée pour l'instant — à revoir si un futur sélecteur de niveau d'incantation ou lancer de dés est ajouté.
 
-## Sélection du niveau d'incantation (indicatif)
+## Sélection du niveau d'incantation (non réalisé en version 1)
+
+La fiche affiche le texte `higher_level` tel quel, sans sélecteur. Spécification conservée pour une version ultérieure :
 
 - Sur la fiche d'un sort disposant d'un champ `higher_level` non vide : sélecteur de niveau d'incantation, borné entre `level` et 9.
 - Affiche le texte d'effet correspondant de `higher_level` selon le niveau choisi. Purement indicatif pour l'instant — pas de calcul réel de dés.
@@ -34,12 +36,12 @@ Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par cl
 
 ### Panneau de filtres
 
-- Recherche par nom (FR et EN), toujours visible au-dessus du livre, sur tous les formats. Case « Masquer les sorts hors profil » juste dessous, visible dès qu'un profil existe.
-- Quatre marque-pages (boutons avec icône SVG), identiques en desktop et mobile. Chacun ouvre une vue par-dessus le livre. Une seule vue ouverte à la fois, refermable par son bouton Fermer, par Escape ou par le marque-page actif :
-  - Filtres : niveau, classe, école.
-  - Tri : alphabétique (par défaut) ou par niveau, sur le nom affiché selon la langue du navigateur. Un tri ne retire aucun sort.
+- Recherche par nom (FR et EN), toujours visible au-dessus du livre, sur tous les formats. Bouton œil « Masquer les sorts hors profil » à sa gauche, visible dès qu'un profil existe.
+- Trois marque-pages (boutons avec icône SVG), identiques en desktop et mobile, plus un bouton d'aide « ? » dans le header. Chacun ouvre une vue par-dessus le livre. Une seule vue ouverte à la fois, refermable par son bouton Fermer, par Escape ou par le marque-page actif :
+  - Filtres et tri : niveau, classe, école ; tri alphabétique (par défaut) ou par niveau, sur le nom affiché selon la langue du navigateur. Un tri ne retire aucun sort.
   - Personnage : sélection, ajout, renommage et suppression de personnage, profils de classe.
   - Grimoire personnel : sorts sauvegardés, dans l'ordre d'ajout, un seul nom par sort.
+  - Aide (bouton « ? ») : guide d'utilisation et mentions légales.
 - Idée V2+ (non planifiée) : remplacer les marque-pages HTML par un marque-page 3D qui dépasse du livre dans la scène Three.js, cliquable directement dans la scène.
 
 ### Langue
@@ -48,6 +50,8 @@ Un seul grimoire par personnage pour tous ses sorts. Pas de sous-grimoire par cl
 - Le mode FR+EN nécessite un layout empilé ou côte-à-côte pour chaque champ texte concerné (`name`, `desc`, `higher_level`, etc.).
 
 ## Ordre de développement
+
+Étapes 1 à 5 réalisées en version 1. Étape 6 non réalisée : seul un cache local des résumés de sorts (dégâts, portée, forme) existe.
 
 1. Grimoire brut — tous les sorts affichés, sans filtre.
 2. Recherche par nom (FR et EN).
@@ -108,3 +112,4 @@ Vérifié sur `acid-arrow` et `fireball` en `fr-FR` :
 ---
 Dernière vérification de ces specs contre l'API : 2026-09-04.
 Dernière mise à jour des décisions produit (grimoire/filtrage/roadmap) : 2026-08-28.
+Dernière relecture contre le code (version 1) : 2026-10-22.

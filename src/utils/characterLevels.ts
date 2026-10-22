@@ -6,7 +6,7 @@ export const MAX_TOTAL_CHARACTER_LEVEL = 20
 /**
  * Somme des niveaux PRECISES des profils. Un niveau `null` (« non precise »)
  * ne compte pas : il signifie « tous les sorts de la classe », pas un niveau
- * reel (decision D-04, docs/DESIGN-BRIEF.md).
+ * reel (regle du multiclasse, docs/APP-FLOW.md).
  */
 export function totalSpecifiedLevel(profiles: SpellcasterProfile[]): number {
   return profiles.reduce((sum, profile) => sum + (profile.characterLevel ?? 0), 0)
