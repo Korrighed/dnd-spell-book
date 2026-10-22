@@ -2,6 +2,7 @@
 
 Grimoire des sorts de Donjons & Dragons (5e édition, SRD 2014) présenté comme un livre 3D que l'on feuillette. Le projet répond à la consigne [Exploration interactive 3D de données](docs/CONSIGNE.md) : une application front-end qui combine React, Three.js et une API publique pour filtrer, survoler et cliquer sur des données.
 
+- Site en ligne : [dnd-spell-book.netlify.app](https://dnd-spell-book.netlify.app/)
 - Code : [github.com/Korrighed/dnd-spell-book](https://github.com/Korrighed/dnd-spell-book)
 
 ## Fonctionnalités
