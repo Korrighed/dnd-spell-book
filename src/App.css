@@ -7,11 +7,12 @@
    le bleu moyen de la texture seul donne un contraste trop faible au texte
    (~2.5:1 pour le Caput Mortuum) ; voile + texte papier clair = lisible.
    Pleine largeur d'ecran : #root ne fait que 95vw, la marge negative etend
-   le bandeau jusqu'aux bords. */
+   le bandeau jusqu'aux bords. 50vw divise par --screen-scale : sous le zoom
+   desktop de #root (index.css), la demi-largeur d'ecran en px internes. */
 .site-header,
 .site-footer {
-  margin-inline: calc(50% - 50vw);
-  padding-inline: calc(50vw - 50% + 24px);
+  margin-inline: calc(50% - 50vw / var(--screen-scale, 1));
+  padding-inline: calc(50vw / var(--screen-scale, 1) - 50% + 24px);
   background:
     linear-gradient(rgba(37, 52, 79, 0.55), rgba(37, 52, 79, 0.55)),
     var(--space-cadet) url('/assets/fondfooterheader.webp') center / cover;

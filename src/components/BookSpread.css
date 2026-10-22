@@ -36,7 +36,7 @@
 .book-spread-canvas canvas {
   display: block;
   /* !important : react-three-fiber ecrit la taille MESUREE en px dans le
-     style inline du canvas. Sous le `zoom` grand ecran (index.css), cette
+     style inline du canvas. Sous le `zoom` desktop (index.css), cette
      mesure est deja zoomee et le zoom la multiplierait une seconde fois
      (livre 1.56x trop grand). 100 % du conteneur reste juste dans tous les
      cas ; le buffer de dessin garde la taille mesuree, donc le rendu reste net. */

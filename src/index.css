@@ -74,7 +74,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 899px) {
     font-size: 13.6px;
   }
 }
@@ -90,40 +90,37 @@
   box-sizing: border-box;
 }
 
-/* Grand ecran (21" a 100 %, ~1920px CSS de large). Toutes les dimensions en
-   px sont calees sur le 15" (~1536px CSS) : sans ca, tout parait 1.25x plus
-   petit et il faut zoomer le navigateur a 125 %. Un seul facteur d'echelle
-   plutot qu'un second jeu de valeurs : une seule source de verite, le livre
-   3D et les pages HTML grandissent ensemble (pas de desynchronisation, voir
-   docs/SPRINT-3-RENDU-3D-RESPONSIVE.md). Largeur et hauteur divisees par le
-   facteur : zoom les multiplie ensuite, la largeur INTERNE reste celle du 15"
-   (95vw de 1536 = 1459px). Seuil entre les deux largeurs CSS (1536 / 1920). */
-@media (min-width: 1728px) {
+/* Mise a l'echelle desktop. Toutes les dimensions en px sont calees sur le
+   15" (1536px CSS de large) : sans facteur, la fiche et la liste se
+   chevauchent sous ~1490px (portables 1280-1440px), et la liste glisse a
+   droite du livre au-dela de 1536px (elle est ancree a droite, le canvas a
+   gauche). Un seul facteur d'echelle plutot qu'un second jeu de valeurs :
+   une seule source de verite, le livre 3D et les pages HTML changent de
+   taille ensemble (pas de desynchronisation, voir BookSpread.css).
+   --screen-scale = largeur d'ecran / 1536, pose sur <html> par
+   utils/screenScale.ts (aucune unite CSS ne divise une largeur par une
+   autre). Largeur INTERNE fixe, celle du 15" (95vw de 1536 = 1459.2px) :
+   zoom la ramene a 95vw a l'ecran, quelle que soit la largeur. */
+@media (min-width: 900px) {
   #root {
-    --screen-scale: 1.25;
-    zoom: var(--screen-scale);
-    width: calc(95vw / var(--screen-scale));
+    zoom: var(--screen-scale, 1);
+    width: 1459.2px;
     max-width: none;
-    min-height: calc(100svh / var(--screen-scale));
+    min-height: calc(100svh / var(--screen-scale, 1));
   }
 }
 
 /* Hauteur FIXE de la page en desktop, quand l'ecran est assez haut pour tout
    contenir (header + barre + livre + footer + debordement du canvas, ~731px
-   sans l'espace de centrage de #grimoire::after, voir App.css). #root ne grandit plus avec son contenu :
-   l'espace de centrage se comprime au lieu de provoquer un scroll. Plus bas
-   que le seuil, le contenu ne tient de toute facon pas : hauteur minimale et
-   scroll normal, comme avant. Seuil x1.25 (914px) sous le zoom grand ecran,
-   les media queries lisant la hauteur d'ecran reelle. */
-@media (min-width: 900px) and (max-width: 1727px) and (min-height: 731px) {
+   internes sans l'espace de centrage de #grimoire::after, voir App.css).
+   #root ne grandit plus avec son contenu : l'espace de centrage se comprime
+   au lieu de provoquer un scroll. Plus bas que le seuil, le contenu ne tient
+   de toute facon pas : hauteur minimale et scroll normal. Hauteur interne =
+   hauteur d'ecran / (largeur / 1536) >= 731 <=> largeur / hauteur <=
+   1536 / 731 : un simple rapport d'aspect. */
+@media (min-width: 900px) and (max-aspect-ratio: 1536 / 731) {
   #root {
-    height: 100svh;
-  }
-}
-
-@media (min-width: 1728px) and (min-height: 914px) {
-  #root {
-    height: calc(100svh / var(--screen-scale));
+    height: calc(100svh / var(--screen-scale, 1));
   }
 }
 
@@ -160,7 +157,7 @@ h1 {
   font-size: 56px;
   letter-spacing: -1.68px;
   margin: 32px 0;
-  @media (max-width: 1024px) {
+  @media (max-width: 899px) {
     font-size: 36px;
     margin: 20px 0;
   }
@@ -170,7 +167,7 @@ h2 {
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
-  @media (max-width: 1024px) {
+  @media (max-width: 899px) {
     font-size: 20px;
   }
 }
