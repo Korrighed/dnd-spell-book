@@ -21,11 +21,7 @@ interface RawSubclassListResponse {
   results: RawSubclassListResult[]
 }
 
-/**
- * Sous-classes d'une classe. Le SRD 5.1 n'en expose qu'une par classe pour
- * l'instant (contrainte de licence), mais l'endpoint est prevu pour en
- * accepter plusieurs : rien ici ne suppose qu'il y en a une seule.
- */
+/** Sous-classes d'une classe (une seule par classe dans le SRD 5.1). */
 export async function fetchClassSubclasses(classIndex: string): Promise<SubclassListItem[]> {
   const [enRes, frRes] = await Promise.all([
     fetch(`${BASE_URL}/classes/${classIndex}/subclasses${EN}`),
@@ -52,11 +48,7 @@ export async function fetchClassSubclasses(classIndex: string): Promise<Subclass
   }))
 }
 
-/**
- * Sous-choix a l'interieur d'une sous-classe, expose par l'API comme un
- * prerequis de type `feature`. Seul cas connu dans le SRD : le terrain du
- * Cercle de la Terre du Druide (Arctique, Cotier, Desert...).
- */
+/** Sous-choix d'une sous-classe (prerequis `feature`), ex. terrain du Cercle de la Terre. */
 export interface SubclassFeatureOption {
   index: string
   name: string
@@ -109,11 +101,7 @@ function parseMinLevel(prerequisites: RawPrerequisite[]): number {
   return Number.isFinite(level) ? level : 1
 }
 
-/**
- * Sorts accordes par une sous-classe, en plus de la liste de base de la classe.
- * Vide pour la plupart des sous-classes du SRD : seules Vie, Fielon, Devotion
- * et Terre en accordent (verifie le 2026-09-21).
- */
+/** Sorts accordes par une sous-classe, en plus de la liste de base de la classe. */
 export async function fetchSubclassSpells(subclassIndex: string): Promise<SubclassSpellGrant[]> {
   const [en, fr] = await Promise.all([
     fetchRawSubclassDetail(subclassIndex, 'en'),

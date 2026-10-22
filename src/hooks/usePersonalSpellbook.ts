@@ -5,24 +5,18 @@ export interface PersonalSpell {
   addedAt: string
 }
 
-/** Personnage de reference : sert a deduire les sorts accessibles. */
+/** Classe d'un personnage : sert a deduire les sorts accessibles. */
 export interface SpellcasterProfile {
-  /** Identite stable du bloc, independante de sa position dans le tableau. */
   id: string
   classIndex: string
-  /** `null` : niveau non precise, equivalent au niveau max (tous les sorts de la classe). */
+  /** `null` : niveau non precise, tous les sorts de la classe. */
   characterLevel: number | null
-  /** `null` : sous-classe non precisee, ou pas encore debloquee au niveau actuel. */
+  /** `null` : non precisee, ou pas encore debloquee a ce niveau. */
   subclassIndex: string | null
-  /**
-   * Sous-choix a l'interieur de la sous-classe (ex. terrain du Cercle de la
-   * Terre). `null` : sans effet pour les sous-classes qui n'en ont pas, ou
-   * pas encore choisi.
-   */
+  /** Sous-choix de la sous-classe (ex. terrain du Cercle de la Terre). */
   subclassFeatureIndex: string | null
 }
 
-/** Un grimoire personnel = un personnage : ses sorts et ses classes (multiclasse) lui sont propres. */
 export interface Character {
   id: string
   name: string
@@ -43,14 +37,7 @@ const STORAGE_KEY = 'dnd-personal-spellbook'
 const STORAGE_VERSION = 4
 const DEFAULT_CHARACTER_NAME = 'Personnage 1'
 
-/**
- * Le personnage actif est propre A CET ONGLET : sessionStorage n'est jamais
- * partage entre onglets/fenetres (contrairement a localStorage), ce qui
- * permet d'ouvrir un personnage different dans chaque fenetre pour comparer.
- * Les DONNEES des personnages (`characters`), elles, restent dans le
- * localStorage partage : une modification faite dans un onglet doit se
- * retrouver dans l'autre si on y regarde le meme personnage.
- */
+/** Personnage actif propre a chaque onglet (sessionStorage). Les donnees restent partagees (localStorage). */
 const ACTIVE_TAB_KEY = 'dnd-personal-spellbook:active-tab'
 
 function readActiveCharacterIdForThisTab(characters: Character[], fallback: string): string {
@@ -58,7 +45,7 @@ function readActiveCharacterIdForThisTab(characters: Character[], fallback: stri
     const stored = sessionStorage.getItem(ACTIVE_TAB_KEY)
     if (stored && characters.some((character) => character.id === stored)) return stored
   } catch {
-    // sessionStorage indisponible (navigation privee stricte, etc.) : on retombe sur le defaut.
+    // sessionStorage indisponible : personnage par defaut.
   }
   return characters.some((character) => character.id === fallback) ? fallback : characters[0].id
 }
@@ -67,20 +54,14 @@ function writeActiveCharacterIdForThisTab(id: string) {
   try {
     sessionStorage.setItem(ACTIVE_TAB_KEY, id)
   } catch {
-    // Rien de grave : la selection ne survivra juste pas a un rechargement de cet onglet.
+    // Sans stockage, la selection ne survit pas au rechargement.
   }
 }
 
 export const MIN_CHARACTER_LEVEL = 1
 export const MAX_CHARACTER_LEVEL = 20
 
-/**
- * `crypto.randomUUID` n'existe pas hors contexte securise (HTTPS/localhost)
- * ni sur les tres vieux navigateurs. Sans repli, l'exception remontait non
- * rattrapee jusqu'a l'initialiseur de useState (le catch de readSpellbook
- * rappelle createDefaultState, qui relance le meme throw hors du try) et
- * l'app entiere restait en ecran blanc.
- */
+/** `crypto.randomUUID` est absent hors contexte securise (HTTP) : repli manuel. */
 function generateId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID()
@@ -103,11 +84,7 @@ function isPersonalSpell(value: unknown): value is PersonalSpell {
   return typeof candidate.index === 'string' && typeof candidate.addedAt === 'string'
 }
 
-/**
- * Forme tolerante : `subclassIndex`/`subclassFeatureIndex` absents sur les
- * profils v2 anterieurs, `id` absent sur tous les profils avant l'ajout de
- * l'identite stable (voir SpellcasterProfile).
- */
+/** Profil stocke : champs optionnels absents des anciens formats. */
 interface StoredProfileShape {
   id?: unknown
   classIndex: string
@@ -195,7 +172,7 @@ function readSpellbook(): RootState {
 
     const parsed: unknown = JSON.parse(stored)
 
-    // Format v0 : tableau brut de sorts, ecrit par les premieres versions du hook.
+    // v0 : tableau brut de sorts.
     if (Array.isArray(parsed)) {
       const character = createCharacter(DEFAULT_CHARACTER_NAME)
       character.spells = parseSpells(parsed)
@@ -255,14 +232,8 @@ function initState(): RootState {
 export function usePersonalSpellbook() {
   const [state, setState] = useState<RootState>(initState)
   const hydrated = useRef(false)
-  /**
-   * Quand cet onglet reagit a un event `storage` venu d'un AUTRE onglet, il ne
-   * doit rien reecrire : sinon chaque onglet reimpose son propre
-   * `activeCharacterId` dans l'enveloppe partagee en reponse a l'ecriture de
-   * l'autre, ce qui redeclenche un nouvel event `storage` en retour, et ainsi
-   * de suite indefiniment des que deux onglets ont des personnages actifs
-   * differents (exactement le cas d'usage vise par l'isolation par onglet).
-   */
+  // Etat recu d'un autre onglet : ne pas le reecrire, sinon les onglets se
+  // renvoient l'evenement `storage` en boucle.
   const skipNextPersist = useRef(false)
 
   const activeCharacter =
@@ -273,13 +244,11 @@ export function usePersonalSpellbook() {
   const indices = useMemo(() => new Set(spells.map((spell) => spell.index)), [spells])
 
   useEffect(() => {
-    // Pas d'ecriture au montage : on ne reecrit le stockage que sur un vrai changement.
+    // Pas d'ecriture au montage.
     if (!hydrated.current) {
       hydrated.current = true
       return
     }
-    // Etat recu d'un autre onglet via `storage` : deja coherent avec ce qui est
-    // stocke, ne rien reecrire (voir le commentaire sur skipNextPersist).
     if (skipNextPersist.current) {
       skipNextPersist.current = false
       return
@@ -289,13 +258,8 @@ export function usePersonalSpellbook() {
   }, [state])
 
   useEffect(() => {
-    // L'evenement `storage` n'est emis que dans les AUTRES onglets, jamais dans celui
-    // qui ecrit : recevoir cet event ne peut donc pas boucler avec l'ecriture de CET
-    // onglet. Mais la mise a jour d'etat qu'il declenche ici peut, elle, redeclencher
-    // l'effet d'ecriture ci-dessus si on ne la neutralise pas (skipNextPersist).
-    // Seules les DONNEES des personnages sont reprises : le personnage actif reste
-    // propre a cet onglet, sinon deux fenetres ouvertes sur deux personnages
-    // differents se forceraient mutuellement a afficher le meme.
+    // Synchronisation entre onglets : seules les donnees sont reprises, le
+    // personnage actif reste propre a cet onglet.
     function handleStorage(event: StorageEvent) {
       if (event.key !== null && event.key !== STORAGE_KEY) return
       const fresh = readSpellbook()
@@ -314,7 +278,6 @@ export function usePersonalSpellbook() {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  /** Applique une mise a jour au personnage actif uniquement, jamais aux autres. */
   const updateActiveCharacter = useCallback((updater: (character: Character) => Character) => {
     setState((prev) => ({
       ...prev,
@@ -373,9 +336,6 @@ export function usePersonalSpellbook() {
   )
 
   const addProfile = useCallback(
-    // L'id est assigne ici, pas par l'appelant : un evenement `storage` peut
-    // remplacer le tableau `profiles` entre-temps, adresser par position
-    // (l'ancien `setProfileAt`/`removeProfileAt`) ecrivait alors sur le mauvais bloc.
     (profile: SpellcasterProfile) => {
       updateActiveCharacter((character) => ({
         ...character,
@@ -415,7 +375,7 @@ export function usePersonalSpellbook() {
   const removeCharacter = useCallback((id: string) => {
     setState((prev) => {
       const remaining = prev.characters.filter((character) => character.id !== id)
-      // Toujours au moins un personnage : en retirer le dernier en recree un vide.
+      // Toujours au moins un personnage.
       if (remaining.length === 0) {
         return createDefaultState()
       }

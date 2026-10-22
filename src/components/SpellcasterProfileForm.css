@@ -1,4 +1,4 @@
-/* Carte de classe (docs/DESIGN-BRIEF.md). <fieldset> + <legend> masquee
+/* Carte de classe (docs/APP-FLOW.md, US-03). <fieldset> + <legend> masquee
    pour le nom accessible ; titre visible dans l'en-tete. */
 .spellcaster-profile {
   display: flex;

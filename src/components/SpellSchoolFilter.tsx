@@ -10,14 +10,14 @@ interface SpellSchoolFilterProps {
 export function SpellSchoolFilter({ schools, value, onChange }: SpellSchoolFilterProps) {
   return (
     <select
-      aria-label={t('Ecole de magie', 'School of magic')}
+      aria-label={t('École de magie', 'School of magic')}
       value={value ?? 'all'}
       onChange={(event) => {
         const raw = event.target.value
         onChange(raw === 'all' ? null : raw)
       }}
     >
-      <option value="all">{t('Toutes les ecoles', 'All schools')}</option>
+      <option value="all">{t('Toutes les écoles', 'All schools')}</option>
       {schools.map((school) => (
         <option key={school.index} value={school.index}>
           {t(school.nameFr, school.name)}

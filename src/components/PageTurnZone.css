@@ -1,11 +1,5 @@
-/* Bouton icone dans un coin du livre, declenche la pagination + l'animation
-   de tournage de page (voir BookSpread.tsx). Position absolue : s'ancre sur
-   .spell-detail-panel / .spell-list-panel (deja position: absolute), pas
-   besoin de conteneur intermediaire. Icone : public/icons/circle-arrow-*.svg. */
-/* Reglages de position/taille : variables --page-turn-*, meme convention que
-   --spell-list-* : le repli ici = valeur desktop, le mobile les redefinit sur
-   .book-spread (BookSpread.mobile.css). Decalages gauche/droite separes,
-   cales a l'oeil sur le rendu desktop (10px / 5px). */
+/* Bouton de pagination dans un coin de la page. Replis = valeurs desktop,
+   le mobile redefinit --page-turn-* (BookSpread.mobile.css). */
 .page-turn-zone {
   position: absolute;
   bottom: var(--page-turn-bottom, 2px);

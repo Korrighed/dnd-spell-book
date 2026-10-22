@@ -20,7 +20,6 @@ interface FiltersViewProps {
   onSchoolChange: (value: string | null) => void
   sortMode: SortMode
   onSortChange: (value: SortMode) => void
-  /** Echecs de chargement des listes deroulantes classes / ecoles. */
   classListError: string | null
   schoolListError: string | null
 }
@@ -30,11 +29,7 @@ const SORT_OPTIONS: { mode: SortMode; label: string }[] = [
   { mode: 'level', label: t('Par niveau', 'By level') },
 ]
 
-/**
- * Filtres (niveau, classe, ecole de magie) et tri de la liste, dans une seule
- * vue : les deux reglent la meme liste. Un seul tri actif a la fois ; un tri
- * ne retire aucun sort, contrairement au filtre niveau.
- */
+/** Filtres (niveau, classe, ecole) et tri de la liste. */
 export function FiltersView({
   open,
   onClose,
@@ -58,7 +53,6 @@ export function FiltersView({
       title={t('Filtres et tri', 'Filters and sort')}
       onClose={onClose}
     >
-      {/* className conserve : App.css cible #grimoire .filters. */}
       <div className="filters">
         <SpellLevelFilter value={levelFilter} onChange={onLevelChange} />
         <SpellClassFilter classes={classes} value={classFilter} onChange={onClassChange} />

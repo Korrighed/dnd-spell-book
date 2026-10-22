@@ -14,17 +14,14 @@ import './SpellcasterProfileForm.css'
 interface SpellcasterProfileFormProps {
   classes: ClassListItem[]
   profile: SpellcasterProfile | null
-  /** Derive de useMultiSpellAccess cote App : evite un second fetch par bloc. */
+  /** Calcule par useMultiSpellAccess dans App. */
   maxSpellLevel: number | null
   subclassSpellGrants: SubclassSpellGrant[] | null
   loading: boolean
   error: string | null
-  /** `null` : retire ce bloc (classe deselectionnee ou bouton Effacer). */
+  /** `null` : retire ce bloc. */
   onChange: (profile: SpellcasterProfile | null) => void
-  /**
-   * Plus haut niveau proposable : plafond de niveau total deduit en amont
-   * (src/utils/characterLevels.ts). Defaut : MAX_CHARACTER_LEVEL.
-   */
+  /** Plus haut niveau proposable (plafond de niveau total, utils/characterLevels.ts). */
   maxSelectableLevel?: number
 }
 
@@ -34,12 +31,8 @@ const CHARACTER_LEVELS = Array.from(
 )
 
 /**
- * Un bloc classe/niveau/sous-classe/terrain. App.tsx en affiche un par entree
- * de `profiles`, plus un bloc vide pour ajouter une classe (multiclasse).
- * Charge lui-meme sa liste de sous-classes (donnee propre a ce bloc, non
- * partagee), mais recoit l'accessibilite calculee en amont : useMultiSpellAccess
- * fetche deja ces memes donnees pour le filtrage global, un second appel ici
- * dupliquerait les requetes et pourrait diverger en cas d'echec partiel.
+ * Carte de classe : classe, niveau, sous-classe, terrain. Une par profil, plus
+ * une carte vide pour ajouter une classe.
  */
 export function SpellcasterProfileForm({
   classes,
@@ -68,17 +61,15 @@ export function SpellcasterProfileForm({
 
   const hasLevel = profile !== null && profile.characterLevel !== null
   const subclassUnlockLevel = profile ? getSubclassUnlockLevel(profile.classIndex) : MAX_CHARACTER_LEVEL
-  // Sans niveau precise, le profil est au niveau max : la sous-classe est forcement debloquee.
+  // Sans niveau precise : niveau max, sous-classe debloquee.
   const effectiveLevel = profile?.characterLevel ?? MAX_CHARACTER_LEVEL
   const subclassUnlocked = profile !== null && effectiveLevel >= subclassUnlockLevel
 
-  // Distingue les boutons (aria-label) d'un bloc a l'autre en multiclasse : sans
-  // ca, un lecteur d'ecran rencontre plusieurs boutons au meme intitule.
+  // Distingue les aria-label d'une carte a l'autre en multiclasse.
   const blockClass = classes.find((cls) => cls.index === profile?.classIndex)
   const blockLabel = blockClass ? t(blockClass.nameFr, blockClass.name) : t('nouvelle classe', 'new class')
 
-  // Le niveau actuel reste toujours proposable, meme au-dela du plafond
-  // (donnees anciennes) : sinon la liste afficherait une valeur absente.
+  // Le niveau actuel reste proposable meme au-dela du plafond (donnees anciennes).
   const levelOptions = CHARACTER_LEVELS.filter(
     (level) => level <= maxSelectableLevel || level === profile?.characterLevel,
   )
@@ -108,9 +99,7 @@ export function SpellcasterProfileForm({
 
   return (
     <fieldset className={profile ? 'spellcaster-profile' : 'spellcaster-profile spellcaster-profile--add'}>
-      {/* Legende pour le nom accessible du groupe ; titre visible dans
-          l'en-tete, a cote du bouton Retirer (une legende ne se place pas
-          de facon fiable dans une grille ou un flex). */}
+      {/* Legende masquee pour le nom accessible ; titre visible dans l'en-tete. */}
       <legend className="visually-hidden">{title}</legend>
       <div className="spellcaster-profile-header">
         <p className="spellcaster-profile-title" aria-hidden="true">
@@ -135,10 +124,8 @@ export function SpellcasterProfileForm({
             value={profile?.classIndex ?? ''}
             onChange={(event) => {
               const classIndex = event.target.value
-              // Changer de classe conserve le niveau, mais efface la sous-classe :
-              // elle est propre a l'ancienne classe. Retirer la classe retire ce bloc.
-              // `id` : conserve celui du bloc existant ; pour un nouveau bloc (profile
-              // null), la valeur est ignoree, addProfile assigne le vrai id.
+              // Changer de classe garde le niveau et efface la sous-classe.
+              // Nouveau bloc : l'id est assigne par addProfile.
               onChange(
                 classIndex
                   ? {
@@ -170,8 +157,7 @@ export function SpellcasterProfileForm({
                 if (!profile) return
                 const raw = event.target.value
                 const characterLevel = raw ? Number(raw) : null
-                // Repasser sous le seuil de deblocage retire la sous-classe :
-                // le personnage ne l'a pas encore a ce niveau.
+                // Sous le seuil de deblocage, la sous-classe est retiree.
                 const stillUnlocked = characterLevel === null || characterLevel >= subclassUnlockLevel
                 onChange({
                   ...profile,
@@ -191,10 +177,8 @@ export function SpellcasterProfileForm({
           </label>
         )}
 
-        {/* Le bloc reste visible tant que le profil a deja une sous-classe
-            choisie, meme si la liste fraiche echoue ou charge encore : sinon
-            les sorts qu'elle accorde resteraient appliques sans moyen de la
-            voir ni de la retirer. */}
+        {/* Visible si une sous-classe est deja choisie, meme si la liste
+            echoue : sinon impossible de la retirer. */}
         {subclassUnlocked && (subclasses.length > 0 || profile?.subclassIndex) && (
           <label>
             {t('Sous-classe', 'Subclass')}

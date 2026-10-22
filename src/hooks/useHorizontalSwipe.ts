@@ -2,20 +2,15 @@ import { useRef, type PointerEvent, type RefObject } from 'react'
 
 export type BookPage = 'left' | 'right'
 
-/** Distance horizontale minimale (px) pour qu'un geste compte comme un swipe. */
+/** Distance horizontale minimale d'un swipe (px). */
 const SWIPE_MIN_DISTANCE = 50
-/** Un tap bouge moins que ca (px) : au-dela, ce n'est ni un tap ni un swipe. */
+/** Deplacement maximal d'un tap (px). */
 const TAP_MAX_DISTANCE = 10
 
 /**
- * Navigation mobile entre les deux pages du livre, par pointer events.
- * - Swipe horizontal : vers la gauche -> page droite, vers la droite -> page
- *   gauche. Les gestes surtout verticaux sont ignores (scroll des pages).
- * - Tap de l'autre cote de la reliure (sur le bord visible de l'autre page) :
- *   bascule vers cette page. La reliure = milieu de `stripRef`, transform
- *   compris : aucune valeur de peek a dupliquer ici.
- * Le scroll vertical natif reste possible grace a `touch-action: pan-y`
- * (BookSpread.css) : le navigateur annule alors le geste (pointercancel).
+ * Navigation mobile entre les deux pages : swipe horizontal, ou tap sur le
+ * bord visible de l'autre page. Le scroll vertical reste au navigateur
+ * (`touch-action: pan-y`).
  */
 export function useHorizontalSwipe(
   enabled: boolean,

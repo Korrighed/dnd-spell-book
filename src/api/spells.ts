@@ -1,12 +1,7 @@
 import { t } from '../utils/browserLanguage'
 const BASE_URL = 'https://www.dnd5eapi.co/api/2014'
 
-/**
- * L'API repond dans la langue de l'en-tete `Accept-Language` quand aucun `lang`
- * n'est passe. Depuis un navigateur configure en francais, l'endpoint nu renvoie
- * donc du francais et la colonne anglaise se retrouve dupliquee. La langue doit
- * toujours etre explicite, anglais compris.
- */
+/** Langue explicite obligatoire : sans `lang`, l'API suit l'en-tete `Accept-Language`. */
 const EN = '?lang=en'
 const FR = '?lang=fr-FR'
 

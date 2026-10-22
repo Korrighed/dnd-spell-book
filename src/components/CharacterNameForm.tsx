@@ -3,13 +3,10 @@ import { cleanCharacterName, MAX_CHARACTER_NAME_LENGTH } from '../utils/characte
 import { t } from '../utils/browserLanguage'
 
 interface CharacterNameFormProps {
-  /** Libelle visible du champ. */
   label: string
-  /** Valeur de depart : '' a la creation, nom actuel au renommage. */
   initialName: string
-  /** Libelle du bouton de validation (« Creer », « Valider »). */
   submitLabel: string
-  /** Vrai si ce nom (deja nettoye) est pris par un AUTRE personnage. */
+  /** Vrai si ce nom (deja nettoye) est pris par un autre personnage. */
   isTaken: (name: string) => boolean
   /** Recoit le nom nettoye, jamais vide ni pris. */
   onSubmit: (name: string) => void
@@ -17,9 +14,8 @@ interface CharacterNameFormProps {
 }
 
 /**
- * Champ de nom + Valider / Annuler, pour la creation et le renommage d'un
- * personnage. Entree valide (vrai <form>). Echap annule ce formulaire
- * seulement : la propagation est arretee, sinon BookmarkView fermerait la vue.
+ * Champ de nom pour la creation et le renommage d'un personnage. Echap annule
+ * ce formulaire seulement (propagation arretee, la vue reste ouverte).
  */
 export function CharacterNameForm({
   label,
@@ -37,7 +33,6 @@ export function CharacterNameForm({
   const taken = cleaned !== '' && isTaken(cleaned)
   const canSubmit = cleaned !== '' && !taken
 
-  // Focus et selection a l'ouverture : on tape directement le nouveau nom.
   useEffect(() => {
     inputRef.current?.focus()
     inputRef.current?.select()

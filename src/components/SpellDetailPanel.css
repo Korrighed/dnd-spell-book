@@ -1,41 +1,31 @@
-/* Texte noir force : .spell-detail (index.css) fixe color: var(--text-h),
-   qui vire quasi blanc en dark mode - invisible sur les pages blanches du
-   modele 3D. #grimoire donne la specificite necessaire pour gagner sur cette
-   regle (color ne s'applique pas par specificite d'ancetre, seulement par
-   heritage - inutile de le poser sur .book-page, il faut viser directement
-   les elements qui ont deja un color explicite).
-   :not(.out-of-profile) exclu expres : le gris (Slate Gray) des sorts hors
-   profil doit rester (regle du grimoire, voir docs/TRAVAIL-EN-COURS.md).
-   .spellbook-toggle n'est plus vise ici : il a ses propres couleurs de charte
-   (App.css), le noir le rendait illisible sur son fond Caput Mortuum. */
+/* Texte noir force sur le papier du modele 3D. Les sorts hors profil gardent
+   leur gris. */
 #grimoire .spell-detail:not(.out-of-profile),
 #grimoire .spell-detail:not(.out-of-profile) h2 {
   color: #000;
 }
 
-/* Nom de sort long en OLDWEST (capitales larges) : passe a la ligne au lieu
-   de deborder de la page, surtout en mobile. */
 #grimoire .spell-detail h2 {
   overflow-wrap: anywhere;
 }
 
-/* Position et taille de la page de gauche (fiche de sort), independantes de
-   .book-spread-pages et de .spell-list-panel : les changer ici ne bouge
-   jamais la liste, ni le canvas du livre (voir BookSpread.css). */
+/* Page de gauche. Voir SpellListPanel.css : les deux pages ne doivent pas
+   se chevaucher. */
 .spell-detail-panel {
   position: absolute;
-  /* 90 - 50.22 : suit le retrait de la bande vide au-dessus du canvas
-     (BookSpread.css, --book-frame-top). */
   top: var(--spell-detail-top, 39.78px);
   left: var(--spell-detail-left, 90px);
-  /* Largeur derivee des marges pour eviter tout chevauchement avec
-     .spell-list-panel : left + width + width(liste) + right doit toujours
-     faire 100%. Ne jamais changer une largeur ou une marge ici sans
-     reajuster l'autre page en consequence. */
   width: var(--spell-detail-width, 605px);
   height: var(--spell-detail-height, 555px);
-  /* Plafond fixe : le contenu de la fiche ne peut jamais l'agrandir
-     au-dela, quelle que soit sa longueur. */
-  /* max-width: var(--spell-detail-max-width, 635px); */
-  /* max-height: var(--spell-detail-max-height, 580px); */
+}
+
+/* En-tete de la fiche en liste a puces. */
+#grimoire .spell-facts {
+  margin: 0 0 8px;
+  padding-left: 1.2em;
+  text-align: left;
+}
+
+#grimoire .spell-facts li + li {
+  margin-top: 2px;
 }

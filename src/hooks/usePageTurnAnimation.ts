@@ -3,13 +3,7 @@ import * as THREE from 'three'
 
 export type AnimationActions = Record<string, THREE.AnimationAction | null>
 
-/**
- * Vitesse du tournage de page en 3 phases, decoupees sur le temps DU CLIP
- * lui-meme (pas le temps reel) : 30% rapide, 40% a vitesse normale, 30% lent.
- * Donne un effet d'acceleration/decceleration (plutot qu'une vitesse plate)
- * sans reecrire le fichier .glb. Multiplicateurs ajustables a l'oeil.
- * Note : c'est un ease-out (rapide -> lent), pas un ease-in-out symetrique.
- */
+/** Vitesse du tournage en 3 phases, en part du clip : rapide, normale, lente. */
 const PAGE_TURN_PHASES = [
   { clipFraction: 0.3, speed: 8 },
   { clipFraction: 0.4, speed: 4 },
@@ -17,28 +11,19 @@ const PAGE_TURN_PHASES = [
 ]
 
 export interface PageTurnAnimation {
-  /** A appeler des que useAnimations() fournit les actions (voir BookCanvas). */
   setActions: (actions: AnimationActions) => void
-  /** Joue le tournage vers l'avant. Retourne la duree totale (s). */
+  /** Retourne la duree totale (s). */
   playNext: () => number
-  /** Joue le tournage vers l'arriere (memes clips, a l'envers). Retourne la duree totale (s). */
+  /** Memes clips, a l'envers. Retourne la duree totale (s). */
   playPrevious: () => number
 }
 
-/**
- * Pilote les clips d'animation du modele (ArmatureAction.001, PlaneAction,
- * CubeAction, PlaneAction.001 - voir docs du modele) pour simuler le
- * tournage d'une page, dans un sens ou l'autre, en 3 phases de vitesse.
- * Isole de BookCanvas.tsx : pas de dependance a react-three-fiber ici, juste
- * des THREE.AnimationAction deja resolues par useAnimations (drei).
- */
+/** Pilote les clips d'animation du modele pour tourner une page, dans un sens ou l'autre. */
 export function usePageTurnAnimation(): PageTurnAnimation {
   const actionsRef = useRef<AnimationActions>({})
-  // setTimeout des changements de phase (vitesse) en cours : annules si un
-  // nouveau tournage de page demarre avant la fin du precedent (clic rapide).
+  // Changements de phase en attente, annules si un tournage en remplace un autre.
   const pendingPhaseTimeoutsRef = useRef<number[]>([])
 
-  // Annule les changements de phase encore en attente au demontage.
   useEffect(() => {
     const pendingPhaseTimeouts = pendingPhaseTimeoutsRef
     return () => {
@@ -60,9 +45,7 @@ export function usePageTurnAnimation(): PageTurnAnimation {
     )
     if (entries.length === 0) return 0
 
-    // Reference commune (le plus long clip) : les 3 phases sont decoupees
-    // dessus pour que tous les clips changent de vitesse en meme temps et
-    // restent synchronises, meme si leurs propres durees different.
+    // Phases decoupees sur le plus long clip : tous changent de vitesse ensemble.
     const refDuration = Math.max(...entries.map((action) => action.getClip().duration))
     const sign = reverse ? -1 : 1
     let wallElapsed = 0
@@ -77,9 +60,7 @@ export function usePageTurnAnimation(): PageTurnAnimation {
       action.play()
     })
 
-    // Phase 0 deja lancee ci-dessus. Programme les phases 1 et 2 (vitesse
-    // normale puis lente) a l'instant ou la phase precedente, a sa vitesse,
-    // aurait fini de parcourir sa part du clip de reference.
+    // Phase 0 lancee ci-dessus ; programme les suivantes.
     PAGE_TURN_PHASES.forEach((phase, index) => {
       const wallPhaseDuration = (phase.clipFraction * refDuration) / phase.speed
       if (index > 0) {

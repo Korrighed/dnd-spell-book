@@ -11,7 +11,7 @@ interface CharacterListItem {
 }
 
 interface CharacterSelectorProps {
-  /** Vue Personnage visible. Fermee : tout formulaire en cours est abandonne. */
+  /** Fermee : tout formulaire en cours est abandonne. */
   open: boolean
   characters: CharacterListItem[]
   activeCharacterId: string
@@ -28,12 +28,7 @@ function chipDomId(id: string): string {
   return `character-chip-${id}`
 }
 
-/**
- * Personnages en pastilles (le personnage actif est enfonce), creation,
- * renommage et suppression en place. Un seul mode a la fois
- * (docs/APP-FLOW.md, §3). Plus de window.confirm : confirmation dans la vue
- * (D-05).
- */
+/** Personnages en pastilles : selection, creation, renommage et suppression en place. */
 export function CharacterSelector({
   open,
   characters,
@@ -44,8 +39,7 @@ export function CharacterSelector({
   onRename,
 }: CharacterSelectorProps) {
   const [mode, setMode] = useState<Mode>('view')
-  // Vue fermee : abandon du formulaire en cours. Ajustement pendant le rendu
-  // (pas un effet), meme motif que les autres composants du projet.
+  // Vue fermee : abandon du formulaire en cours.
   if (!open && mode !== 'view') {
     setMode('view')
   }
@@ -54,8 +48,7 @@ export function CharacterSelector({
   const pencilRef = useRef<HTMLButtonElement>(null)
   const trashRef = useRef<HTMLButtonElement>(null)
   const cancelDeleteRef = useRef<HTMLButtonElement>(null)
-  // Cible du focus apres un changement de mode, appliquee apres le rendu :
-  // l'element vise (nouvelle pastille, crayon...) n'existe qu'a ce moment-la.
+  // Cible du focus apres un changement de mode, appliquee apres le rendu.
   const pendingFocus = useRef<FocusTarget | null>(null)
   useEffect(() => {
     const target = pendingFocus.current
