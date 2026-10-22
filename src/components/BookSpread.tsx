@@ -53,9 +53,9 @@ export function BookSpread({
   // page) : `right` est recalcule des le `onPageChange`, avant meme la fin
   // de l'animation.
   const [isTurning, setIsTurning] = useState(false)
-  // Pages invisibles tant que le modele 3D n'est pas charge : le texte et la
-  // liste HTML arrivaient avant le livre et flottaient sur le fond. Les
-  // donnees (App) se chargent pendant ce temps.
+  // Pages invisibles tant que le livre 3D n'est pas deploye (modele charge
+  // puis cadrage de la camera termine, ~1 s) : le texte et la liste HTML
+  // arrivaient avant le livre. Les donnees (App) se chargent pendant ce temps.
   const [bookReady, setBookReady] = useState(false)
   const handleBookReady = useCallback(() => setBookReady(true), [])
 

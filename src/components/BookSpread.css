@@ -86,7 +86,7 @@
   height: 100%;
 }
 
-/* Pages HTML masquees tant que le livre 3D n'est pas charge (BookSpread,
+/* Pages HTML masquees tant que le livre 3D n'est pas deploye (BookSpread,
    data-book-ready), puis fondu court. visibility : rien de focusable ni de
    lu par les lecteurs d'ecran pendant l'attente. */
 .book-spread-pages {

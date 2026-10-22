@@ -7,7 +7,7 @@ import {
   useRef,
   type CSSProperties,
 } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Bounds, Center, useAnimations, useBounds, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { MOBILE_QUERY, useMediaQuery } from '../hooks/useMediaQuery'
@@ -65,11 +65,9 @@ interface SpellbookModelProps {
       (le modele est charge en Suspense, donc pas disponible au premier rendu
       de BookCanvas). */
   onActionsReady: (actions: AnimationActions) => void
-  /** Modele charge et monte dans la scene (voir BookCanvasProps.onReady). */
-  onReady?: () => void
 }
 
-function SpellbookModel({ rotationDeg, onActionsReady, onReady }: SpellbookModelProps) {
+function SpellbookModel({ rotationDeg, onActionsReady }: SpellbookModelProps) {
   const groupRef = useRef<THREE.Group>(null)
   const { scene, animations } = useGLTF(MODEL_PATH)
   const { actions } = useAnimations(animations, groupRef)
@@ -83,11 +81,6 @@ function SpellbookModel({ rotationDeg, onActionsReady, onReady }: SpellbookModel
     onActionsReady(actions)
   }, [actions, onActionsReady])
 
-  // Monte seulement une fois useGLTF resolu (Suspense) : le livre est la.
-  useEffect(() => {
-    onReady?.()
-  }, [onReady])
-
   return (
     <group ref={groupRef} rotation={rotation}>
       <Center>
@@ -95,6 +88,45 @@ function SpellbookModel({ rotationDeg, onActionsReady, onReady }: SpellbookModel
       </Center>
     </group>
   )
+}
+
+/** Images consecutives sans mouvement de camera pour considerer le livre deploye. */
+const SETTLED_FRAMES = 10
+
+/**
+ * Signale la fin du deploiement du livre : apres le chargement du modele,
+ * Bounds anime la camera vers lui (~1 s mesuree, maxDuration par defaut).
+ * Son onFit part au DEBUT de l'animation, d'ou cette detection : camera
+ * strictement immobile pendant SETTLED_FRAMES images. Pendant l'animation,
+ * Bounds la deplace a chaque image ; a la fin, plus rien ne l'ecrit. Monte
+ * dans le meme Suspense que le modele : ne compte qu'une fois le .glb charge.
+ * Un seul appel, les recadrages suivants (redimensionnement) sont ignores.
+ */
+function SettledSignal({ onSettled }: { onSettled?: () => void }) {
+  const last = useRef<{ position: THREE.Vector3; quaternion: THREE.Quaternion } | null>(null)
+  const stillFrames = useRef(0)
+  const done = useRef(false)
+
+  useFrame(({ camera }) => {
+    if (done.current) return
+    const previous = last.current
+    if (
+      previous &&
+      previous.position.equals(camera.position) &&
+      previous.quaternion.equals(camera.quaternion)
+    ) {
+      stillFrames.current += 1
+    } else {
+      stillFrames.current = 0
+    }
+    last.current = { position: camera.position.clone(), quaternion: camera.quaternion.clone() }
+    if (stillFrames.current >= SETTLED_FRAMES) {
+      done.current = true
+      onSettled?.()
+    }
+  })
+
+  return null
 }
 
 /**
@@ -127,7 +159,7 @@ function RefitOnChange({ trigger }: { trigger: unknown }) {
  * d'animation (tournage de page) est dans le hook usePageTurnAnimation.
  */
 interface BookCanvasProps {
-  /** Appele une fois le modele 3D charge : BookSpread n'affiche les pages qu'a ce moment. */
+  /** Appele une fois le livre deploye (modele charge, camera immobile) : BookSpread n'affiche les pages qu'a ce moment. */
   onReady?: () => void
 }
 
@@ -179,8 +211,8 @@ export const BookCanvas = forwardRef<BookCanvasHandle, BookCanvasProps>(function
             <SpellbookModel
               rotationDeg={{ x, y, z }}
               onActionsReady={pageTurn.setActions}
-              onReady={onReady}
             />
+            <SettledSignal onSettled={onReady} />
           </Bounds>
         </Suspense>
       </Canvas>
