@@ -4,7 +4,6 @@ import type { LanguageMode } from '../types/language'
 import { Bilingual, BilingualParagraphs } from './Bilingual'
 import { LanguageToggle } from './LanguageToggle'
 import { SpellbookToggle } from './SpellbookToggle'
-import { BROWSER_LANGUAGE, t } from '../utils/browserLanguage'
 import { formatFeet, formatRange } from '../utils/distance'
 
 interface SpellDetailProps {
@@ -51,12 +50,15 @@ export function SpellDetail({
 }: SpellDetailProps) {
   const { mechanics, en, fr } = detail
   const damageValue = mechanics.damage ? firstDamageValue(mechanics.damage.atSlotLevel) : null
+  // Toute la fiche, libelles compris, suit la bascule FR / EN (pas la langue
+  // du navigateur) : « Duration: Up to 1 hour », jamais « Durée : Up to 1 hour ».
+  const label = (frText: string, enText: string) => (language === 'fr' ? frText : enText)
 
   return (
     <section className={outOfProfile ? 'spell-detail out-of-profile' : 'spell-detail'}>
       {outOfProfile && (
         <p role="note">
-          {t(
+          {label(
             'Ce sort ne correspond pas à votre profil de lanceur.',
             'This spell is outside your spellcaster profile.',
           )}
@@ -78,26 +80,26 @@ export function SpellDetail({
           n'apparaissent que si le sort les a. */}
       <ul className="spell-facts">
         <li>
-          <strong>{t('Niveau :', 'Level:')}</strong> {mechanics.level} —{' '}
+          <strong>{label('Niveau :', 'Level:')}</strong> {mechanics.level} —{' '}
           <Bilingual mode={language} fr={fr.school} en={en.school} />
         </li>
         <li>
-          <strong>{t('Classes :', 'Classes:')}</strong>{' '}
+          <strong>{label('Classes :', 'Classes:')}</strong>{' '}
           <Bilingual mode={language} fr={fr.classes.join(', ')} en={en.classes.join(', ')} />
         </li>
         <li>
-          <strong>{t("Temps d'incantation :", 'Casting time:')}</strong>{' '}
+          <strong>{label("Temps d'incantation :", 'Casting time:')}</strong>{' '}
           <Bilingual mode={language} fr={fr.castingTime} en={en.castingTime} />
         </li>
         <li>
-          <strong>{t('Portée :', 'Range:')}</strong> {formatRange(en.range, fr.range, language)}
+          <strong>{label('Portée :', 'Range:')}</strong> {formatRange(en.range, fr.range, language)}
         </li>
         <li>
-          <strong>{t('Durée :', 'Duration:')}</strong>{' '}
+          <strong>{label('Durée :', 'Duration:')}</strong>{' '}
           <Bilingual mode={language} fr={fr.duration} en={en.duration} />
         </li>
         <li>
-          <strong>{t('Composants :', 'Components:')}</strong> {mechanics.components.join(', ')}
+          <strong>{label('Composants :', 'Components:')}</strong> {mechanics.components.join(', ')}
           {en.material && (
             <>
               {' '}
@@ -107,17 +109,17 @@ export function SpellDetail({
         </li>
         {mechanics.ritual && (
           <li>
-            <strong>{t('Rituel', 'Ritual')}</strong>
+            <strong>{label('Rituel', 'Ritual')}</strong>
           </li>
         )}
         {mechanics.concentration && (
           <li>
-            <strong>{t('Concentration', 'Concentration')}</strong>
+            <strong>{label('Concentration', 'Concentration')}</strong>
           </li>
         )}
         {mechanics.damage && (
           <li>
-            <strong>{t('Dégâts :', 'Damage:')}</strong> {damageValue}
+            <strong>{label('Dégâts :', 'Damage:')}</strong> {damageValue}
             {mechanics.damage.typeIndex && (
               <>
                 {' '}
@@ -132,7 +134,7 @@ export function SpellDetail({
         )}
         {en.dcType && (
           <li>
-            <strong>{t('Jet de sauvegarde :', 'Saving throw:')}</strong>{' '}
+            <strong>{label('Jet de sauvegarde :', 'Saving throw:')}</strong>{' '}
             <Bilingual mode={language} fr={fr.dcType ?? en.dcType} en={en.dcType} />
             {mechanics.dcSuccess && (
               <>
@@ -149,7 +151,7 @@ export function SpellDetail({
         )}
         {mechanics.areaOfEffect && (
           <li>
-            <strong>{t("Zone d'effet :", 'Area of effect:')}</strong>{' '}
+            <strong>{label("Zone d'effet :", 'Area of effect:')}</strong>{' '}
             <Bilingual
               mode={language}
               fr={(AOE_LABELS_FR[mechanics.areaOfEffect.type] ?? mechanics.areaOfEffect.type).toLowerCase()}
@@ -161,21 +163,21 @@ export function SpellDetail({
       </ul>
 
       <div>
-        <h3>{t('Description', 'Description')}</h3>
+        <h3>{label('Description', 'Description')}</h3>
         <BilingualParagraphs mode={language} fr={fr.desc} en={en.desc} />
       </div>
 
       {en.higherLevel.length > 0 && (
         <div>
-          <h3>{t('Aux niveaux supérieurs', 'At higher levels')}</h3>
+          <h3>{label('Aux niveaux supérieurs', 'At higher levels')}</h3>
           <BilingualParagraphs mode={language} fr={fr.higherLevel} en={en.higherLevel} />
         </div>
       )}
 
       <p>
         <small>
-          {t('Mis à jour le', 'Updated on')}{' '}
-          {new Date(mechanics.updatedAt).toLocaleDateString(BROWSER_LANGUAGE === 'fr' ? 'fr-FR' : 'en-US')}
+          {label('Mis à jour le', 'Updated on')}{' '}
+          {new Date(mechanics.updatedAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US')}
         </small>
       </p>
     </section>
